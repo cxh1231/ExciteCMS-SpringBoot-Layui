@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--  此处修改，继承自父模块 -->
+    <parent>
+        <groupId>com.zxdmy.excite</groupId>
+        <artifactId>excitecms</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <artifactId>excite-common</artifactId>
+    <version>2.0.0</version>
+    <!-- 以下两项可选 -->
+    <name>excite-common</name>
+    <description>
+        此模块主要继承公共的工具类。
+    </description>
+
+    <!-- 此模块中，用到的特殊的依赖项 -->
+    <dependencies>
+
+        <!-- hutool工具类 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.12</version>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+
+        </plugins>
+    </build>
+
+</project>

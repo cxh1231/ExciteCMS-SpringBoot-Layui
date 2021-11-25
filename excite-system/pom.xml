@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.zxdmy.excite</groupId>
+        <artifactId>excitecms</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <artifactId>excite-system</artifactId>
+    <version>2.0.0</version>
+    <name>excite-system</name>
+    <description>
+        【系统】模块，主要实现与system前缀表的数据库交互Dao和服务类Service。
+    </description>
+
+    <!-- 依赖信息 -->
+    <dependencies>
+        <!-- 这里不仅可以添加官网mvn仓库的依赖，还可以添加其他几项的依赖 -->
+        <dependency>
+            <groupId>com.zxdmy.excite</groupId>
+            <artifactId>excite-common</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

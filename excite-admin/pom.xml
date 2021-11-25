@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <!-- 继承的父类信息 -->
+    <parent>
+        <groupId>com.zxdmy.excite</groupId>
+        <artifactId>excitecms</artifactId>
+        <version>2.0.0</version>
+    </parent>
+
+    <artifactId>excite-admin</artifactId>
+    <version>2.0.0</version>
+    <name>excite-admin</name>
+    <description>
+        这里是本模块的描述.
+    </description>
+
+    <!-- 添加依赖项 -->
+    <dependencies>
+        <!-- 这里不仅可以添加官网mvn仓库的依赖，还可以添加其他几项的依赖 -->
+        <dependency>
+            <groupId>com.zxdmy.excite</groupId>
+            <artifactId>excite-framework</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- Spring Boot Test -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

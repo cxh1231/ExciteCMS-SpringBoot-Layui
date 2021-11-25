@@ -1,0 +1,133 @@
+# 项目服务配置
+server:
+  port: 8181  # 端口号
+  servlet:
+    context-path: / #项目访问路径
+
+# 自定义的配置信息
+excite:
+  name: ExciteCMS # 项目名
+  allow-redis: true # 开启redis缓存
+
+# Spring相关配置
+spring:
+  # 数据库链接配置
+  datasource:
+    druid:
+      # 链接地址，这里需要修改自己的数据库IP和数据库名
+      url: jdbc:mysql://127.0.0.1:3306/db_excite?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+      username: chen # 数据库用户名
+      password: 123456 # 数据库密码
+      initial-size: 1
+      min-idle: 1
+      max-active: 20
+      test-on-borrow: true
+      # 连接驱动类名
+      # MySQL 8.x: com.mysql.cj.jdbc.Driver
+      # MySQL 5.x: com.mysql.jdbc.Driver
+      driver-class-name: com.mysql.cj.jdbc.Driver
+  redis:
+    # Redis服务器地址
+    host: localhost
+    # password:
+    # Redis服务器连接端口
+    port: 6379
+    # 连接超时时间（记得添加单位，Duration）
+    timeout: 100000ms
+    # Redis默认情况下有16个分片，这里配置具体使用的分片
+    database: 0
+    # 自定义属性：开启自定义前缀
+    allow-prefix: true
+    # 自定义属性：key的前缀，只在注解@Cacheable、@CachePut等时生效。
+    prefix: "com:zxdmy:excite:"
+    lettuce:
+      pool:
+        # 连接池最大连接数（使用负值表示没有限制） 默认 8
+        max-active: 100
+        # 连接池最大阻塞等待时间（使用负值表示没有限制） 默认 -1
+        max-wait: -1ms
+        # 连接池中的最大空闲连接 默认 8
+        max-idle: 8
+        # 连接池中的最小空闲连接 默认 0
+        min-idle: 0
+
+
+
+# Mybatis Plus 相关配置
+mybatis-plus:
+  # 配置Mapper映射文件
+  mapper-locations: classpath*:/mapper/**/**Mapper.xml
+  # 实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.zxdmy.excite.system.entity;
+  configuration:
+    # 自动驼峰命名
+    map-underscore-to-camel-case: true
+    auto-mapping-behavior: full
+    cache-enabled: false
+    # 打印SQL
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      # 主键类型  0:"数据库ID自增", 1:"用户输入ID", 2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID";
+      id-type: auto
+      # 驼峰下划线转换
+      table-underline: true
+      # 逻辑删除
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# OpenApi 接口文档信息配置
+springdoc:
+  api-docs:
+    # 开启或关闭swagger，关闭后，无法访问和查看接口文档
+    enabled: true
+  swagger-ui:
+    # 打开swagger的地址。当前：http://localhost:8181/swagger
+    path: /swagger
+    csrf:
+      enabled: true # 开启跨域访问
+  # 包扫描路径，多个package用英文逗号分隔。如果配置了分组，可以不用设置此项。
+  # packages-to-scan: com.zxdmy.excite.system.controller,com.zxdmy.excite.system.entity
+  # 分组配置，
+  group-configs:
+    # 分组名
+    - group: system
+      # 匹配方式1：按路径匹配
+      pathsToMatch: /system/**
+#    # 分组名
+#    - group: system
+#      # 匹配方式2：按包路径匹配；多个package用英文逗号分隔
+#      packagesToScan: com.zxdmy.excite.system
+
+# Sa-Token配置（权限配置使用）
+sa-token:
+  # token名称 (同时也是cookie名称)
+  token-name: excitecms
+  # token有效期，单位s 默认30天, -1代表永不过期
+  timeout: 2592000
+  # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒
+  activity-timeout: -1
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  is-share: false
+  # token风格
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: true
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
