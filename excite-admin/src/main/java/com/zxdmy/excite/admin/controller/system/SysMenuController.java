@@ -6,11 +6,11 @@ import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.service.ISysMenuService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 系统菜单/权限表 前端控制器
@@ -25,6 +25,32 @@ public class SysMenuController extends BaseController {
 
     private ISysMenuService menuService;
 
+    @RequestMapping("index")
+    public String index() {
+        return "system/menu/index";
+    }
+
+    @RequestMapping("goAdd")
+    public String goAdd() {
+        return "system/menu/add";
+    }
+
+    @RequestMapping("goEdit/{id}")
+    public String goEdit(@PathVariable String id, ModelMap map) {
+        try {
+            SysMenu menu = menuService.getMenu(Integer.parseInt(id));
+            if (null != menu) {
+                if ("".equals(menu.getIcon()) && null != menu.getIcon()) {
+                    menu.setIcon(menu.getIcon().substring(3));
+                }
+                map.put("menu", menu);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return "system/menu/edit";
+    }
+
     /**
      * 添加一个菜单
      *
@@ -34,6 +60,17 @@ public class SysMenuController extends BaseController {
     @PostMapping("/add")
     @ResponseBody
     public BaseResult addMenu(@Validated SysMenu menu) {
+        System.out.println(menu);
+        // 如果是顶级菜单，则将其上级菜单设置为-1
+        if ("N".equals(menu.getType())) {
+            menu.setParentId(-1);
+            menu.setPath("");
+        }
+        // 如果是目录，则将其请求路径设置为空字符串（非NULL）
+        else if ("C".equals(menu.getType())) {
+            menu.setPath("");
+        }
+        menu.setIcon("fa " + menu.getIcon());
         if (menuService.addMenu(menu, "list") > 0) {
             return success("菜单添加成功");
         }
@@ -58,6 +95,33 @@ public class SysMenuController extends BaseController {
         } catch (Exception e) {
             return error(400, "error：" + e.getMessage());
         }
+    }
+
+    /**
+     * 获取菜单列表
+     *
+     * @return 菜单/权限列表
+     */
+    @GetMapping("/indexList")
+    @ResponseBody
+    public BaseResult getMenuListIndex() {
+
+        List<SysMenu> menus = menuService.getMenuList(false);
+        if (null != menus) {
+            // 如果是【tree】，则需要将菜单初始化成树状结构
+            menus = this.initMenu(menus);
+            HashMap<String, String> map = new HashMap<>();
+            map.put("title", "首页");
+            map.put("href", "/system/welcome");
+            HashMap<String, String> map2 = new HashMap<>();
+            map2.put("title", "ExciteCMS");
+            map2.put("image", "/images/logo.png");
+            map2.put("href", "/system/welcome");
+            // 转换成相应的格式
+            return success("获取菜单成功").put("homeInfo", map).put("logoInfo", map2).put("menuInfo", menus);
+
+        }
+        return error(400, "获取菜单失败");
     }
 
     /**
@@ -122,6 +186,16 @@ public class SysMenuController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public BaseResult updateMenu(@Validated SysMenu menu) {
+        // 如果是顶级菜单，则将其上级菜单设置为-1
+        if ("N".equals(menu.getType())) {
+            menu.setParentId(-1);
+            menu.setPath("");
+        }
+        // 如果是目录，则将其请求路径设置为空字符串（非NULL）
+        else if ("C".equals(menu.getType())) {
+            menu.setPath("");
+        }
+        menu.setIcon("fa " + menu.getIcon());
         if (menuService.updateMenu(menu, "list") > 0) {
             return success("更新菜单成功");
         }

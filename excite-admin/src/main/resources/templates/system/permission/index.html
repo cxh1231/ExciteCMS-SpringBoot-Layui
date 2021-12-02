@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>权限管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <div>
+            <table id="table-system-permission" class="layui-table" lay-filter="table-system-permission"></table>
+        </div>
+
+    </div>
+</div>
+
+<!--工具栏模板：-->
+<script type="text/html" id="toolbar-table-permission">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="btn-permission-add" lay-event="btn-permission-add">
+            <i class="layui-icon"></i>
+            添加
+        </button>
+        <a>　</a>
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-sm" id="btn-permission-expand"><i class="layui-icon">&#xe668;</i>全部展开
+            </button>
+            <button class="layui-btn layui-btn-sm" id="btn-permission-fold"><i class="layui-icon">&#xe66b;</i>全部折叠
+            </button>
+        </div>
+    </div>
+</script>
+
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'treeTable'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var treeTable = layui.treeTable;
+
+        // 渲染表格
+        var table_permission = treeTable.render({
+            elem: '#table-system-permission',     // 表单绑定的table标签
+            method: 'GET',                  // 加载数据的请求方式
+            url: '/system/permission/get',       //数据接口
+            even: true,                     // 开启隔行背景
+            parseData: function (d) {
+                if (d.code === 200) {
+                    return {
+                        "code": 0, //解析接口状态
+                        "msg": d.msg, //解析提示文本
+                        "count": d.count, //解析数据长度
+                        "data": d.data //解析数据列表
+                    };
+                }
+                else
+                    return d;
+            },
+            tree: {
+                iconIndex: 2, // 折叠图标显示在第几列
+                isPidData: true,
+                idName: 'id',
+                pidName: 'parentId',
+                arrowType: 'arrow2',   // 自定义箭头风格
+                getIcon: function (d) {  // 自定义图标
+                    // 是目录
+                    if (d.href === null || d.href === "") {
+                        return '<i class="ew-tree-icon ew-tree-icon-folder"></i>';
+                    }
+                    // 是菜单
+                    else {
+                        return '<i class="ew-tree-icon ew-tree-icon-file"></i>';
+                    }
+                }
+            },
+            toolbar: '#toolbar-table-permission',
+            defaultToolbar: ['filter'],
+            cols: [
+                [
+                    {type: 'numbers', title: '序'}, // 序号
+                    {field: 'id', width: 80, title: 'ID', align: 'center'},
+                    {field: 'name', minWidth: 100, title: '权限名称'},
+                    {field: 'href', title: '权限标识'},
+                    {field: 'createTime', title: '创建时间', align: 'center'},
+                    {field: 'updateTime', title: '更新时间', align: 'center'},
+                    {
+                        field: 'action', title: '操作', width: 140, align: 'center', templet: function (d) {
+                            var returnStr = "";
+                            returnStr += '<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a> ';
+                            returnStr += '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a> ';
+                            return returnStr;
+                        }
+                    }
+                ]
+            ],
+            done: function () {
+                // 加载完成后，默认选择全部展开
+                table_permission.expandAll();
+            }
+        });
+
+        // 【添加菜单】按钮响应事件
+        $('#btn-permission-add').click(function () {
+            var permission_add_index = layer.open({
+                title: '添加权限',
+                type: 2,
+                shade: 0.2,
+                maxmin: false,
+                shadeClose: false,
+                area: ['600px', '600px'],
+                content: '/system/permission/pageAdd',
+                end: function () {
+                    table_permission.refresh();
+                }
+            });
+            parent.layer.iframeAuto(permission_add_index);
+        });
+
+        // 菜单的【全部展开】和【全部折叠】
+        $('#btn-permission-expand').click(function () {
+            table_permission.expandAll();
+        });
+        $('#btn-permission-fold').click(function () {
+            table_permission.foldAll();
+        });
+
+        // 监听操作工具条
+        treeTable.on('tool(table-system-permission)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+
+            // 响应【删除】事件
+            if (layEvent === 'del') {
+                // 询问是否删除
+                layer.confirm('确定要删除权限【' + data.name + '】吗？', {
+                    btn: ['确认', '取消']
+                }, function () {
+                    $.post("/system/permission/remove", {id: data.id}, function (data) {
+                        if (data.code === 200) {
+                            layer.msg(data.msg, {icon: 1});
+                            table_permission.refresh();
+                        }
+                        else {
+                            layer.msg(data.msg, {icon: 2});
+                        }
+                    });
+                }, function () {
+                    layer.msg('操作已取消');
+                });
+            }
+            // 响应【编辑】事件
+            else if (layEvent === 'edit') {
+                if (data.editable === 0) {
+                    layer.msg('禁止编辑' + data.id)
+                } else {
+                    layer.msg('可以进行编辑操作' + data.id)
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

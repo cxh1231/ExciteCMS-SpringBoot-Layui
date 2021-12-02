@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>角色管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+
+</head>
+<body>
+
+<table class="layui-hide" id="tableRole" lay-filter="tableRole"></table>
+
+<!--表格头部工具类（左侧）-->
+<script type="text/html" id="toolbarTableRole">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
+        <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+    </div>
+</script>
+<!--表格每行末尾的操作按钮-->
+<script type="text/html" id="barTableRole">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table'], function () {
+        var table = layui.table;
+
+        table.render({
+            elem: '#tableRole',
+            url: '/system/role/get',
+            response: {
+                statusCode: 200
+            },
+            toolbar: '#toolbarTableRole', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
+                title: '提示', layEvent: 'LAYTABLE_TIPS', icon: 'layui-icon-tips'
+            }],
+            title: '用户数据表',
+            cols: [
+                [
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'name', title: '角色名称', width: 150},
+                    {field: 'type', title: '角色类别', width: 150},
+                    {field: 'createTime', title: '创建时间'},
+                    {field: 'updateTime', title: '更新时间'},
+                    {fixed: 'right', title: '操作', toolbar: '#barTableRole'}
+                ]
+            ],
+            page: true
+        });
+
+
+    });
+</script>
+</body>
+</html>

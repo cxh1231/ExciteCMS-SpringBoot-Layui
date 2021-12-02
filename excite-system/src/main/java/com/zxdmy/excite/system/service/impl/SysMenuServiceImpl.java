@@ -59,6 +59,15 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         if (null == menu.getParentId()) {
             menu.setParentId(-1);
         }
+        if (null == menu.getEditable()) {
+            menu.setEditable(1);
+        }
+        if (null == menu.getRemovable()) {
+            menu.setRemovable(1);
+        }
+        if (null == menu.getStatus()) {
+            menu.setStatus(0);
+        }
 //        // 执行插入操作
 //        menuMapper.insert(menu);
 //        // 获取当前插入的记录的ID，并返回（需要在执行menuMapper.insert 之后才能拿到）

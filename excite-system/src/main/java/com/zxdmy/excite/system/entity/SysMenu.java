@@ -3,9 +3,7 @@ package com.zxdmy.excite.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
@@ -14,6 +12,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,6 +43,7 @@ public class SysMenu implements Serializable {
      * 菜单/权限名称
      */
     @NotBlank(message = "菜单名称不能为空")
+    @JsonProperty("title")
     private String name;
 
     /**
@@ -54,13 +54,13 @@ public class SysMenu implements Serializable {
     /**
      * 菜单/权限路由：对于后台控制类定义，示例：system/user/get/{id}
      */
-    @NotBlank(message = "菜单/权限路由不能为空")
+    @JsonProperty("href")
     private String path;
 
     /**
      * 权限标识符：对于后台控制类定义。示例：system:user:list
      */
-    @NotBlank(message = "权限标识符不能为空")
+    @NotBlank(message = "权限标识不能为空")
     private String permission;
 
     /**
@@ -74,14 +74,15 @@ public class SysMenu implements Serializable {
     private Integer parentId;
 
     /**
-     * 菜单类型：C - 目录 | M - 菜单 | B - 按钮
+     * 菜单类型：N - 顶部菜单 | C - 目录 | M - 菜单 | B - 按钮
      */
-    @NotBlank(message = "类型不能为空")
+    @NotBlank(message = "菜单类型不能为空")
     private String type;
 
     /**
      * 排序：数值越大越靠前
      */
+    @NotNull(message = "菜单显示顺序不能为空")
     private Integer sort;
 
     /**
@@ -108,7 +109,7 @@ public class SysMenu implements Serializable {
     /**
      * 创建时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss", timezone = "GMT+8")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createTime;
@@ -116,7 +117,7 @@ public class SysMenu implements Serializable {
     /**
      * 更新时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss", timezone = "GMT+8")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime updateTime;
@@ -124,7 +125,7 @@ public class SysMenu implements Serializable {
     /**
      * 删除时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @JsonFormat(pattern = "yyyy年MM月dd日 HH:mm:ss", timezone = "GMT+8")
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime deleteTime;

@@ -15,7 +15,7 @@ spring:
   datasource:
     druid:
       # 链接地址，这里需要修改自己的数据库IP和数据库名
-      url: jdbc:mysql://127.0.0.1:3306/db_excite?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+      url: jdbc:mysql://127.0.0.1:3306/db_excite_cms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
       username: chen # 数据库用户名
       password: 123456 # 数据库密码
       initial-size: 1
@@ -50,7 +50,20 @@ spring:
         max-idle: 8
         # 连接池中的最小空闲连接 默认 0
         min-idle: 0
+  thymeleaf:
+    cache: false  #开发时关闭缓存，不然没法实时看到页面
+    mode: LEGACYHTML5  #用非严格的HTML（标签不必严格遵守W3C标准）
+    encoding: UTF-8 # 编码格式
+    servlet:
+      content-type: text/html #内容类型为HTML
+    prefix: classpath:/templates/
+    suffix: .html
 
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
 
 
 # Mybatis Plus 相关配置

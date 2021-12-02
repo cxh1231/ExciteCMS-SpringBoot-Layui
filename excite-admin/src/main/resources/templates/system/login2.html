@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>if (window !== top) top.location.replace(location.href);</script>
+    <meta charset="UTF-8">
+    <title>ExciteCMS - 用户登录</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="" rel="icon">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/login2/login2.css" media="all">
+    <link rel="stylesheet" href="/css/login2/admin.css?v=318">
+</head>
+<body>
+<div class="login-wrapper layui-anim layui-anim-scale layui-hide">
+    <form class="layui-form">
+        <h2>用户登录</h2>
+        <div class="layui-form-item layui-input-icon-group">
+            <i class="layui-icon layui-icon-username"></i>
+            <input class="layui-input" name="username" placeholder="请输入登录账号" autocomplete="off"
+                   lay-verType="tips" lay-verify="required" required/>
+        </div>
+        <div class="layui-form-item layui-input-icon-group">
+            <i class="layui-icon layui-icon-password"></i>
+            <input class="layui-input" name="password" placeholder="请输入登录密码" type="password"
+                   lay-verType="tips" lay-verify="required" required/>
+        </div>
+        <div class="layui-form-item layui-input-icon-group login-captcha-group">
+            <i class="layui-icon layui-icon-auz"></i>
+            <input class="layui-input" name="code" placeholder="请输入验证码" autocomplete="off"
+                   lay-verType="tips" lay-verify="required" required/>
+            <img class="login-captcha" alt=""/>
+        </div>
+        <div class="layui-form-item">
+            <input type="checkbox" name="remember" title="记住密码" lay-skin="primary" checked>
+            <a href="reg.html" class="layui-link pull-right">注册账号</a>
+        </div>
+        <div class="layui-form-item">
+            <button class="layui-btn layui-btn-fluid" lay-filter="loginSubmit" lay-submit>登录</button>
+        </div>
+        <div class="layui-form-item login-oauth-group text-center">
+            <a href="javascript:;"><i class="layui-icon layui-icon-login-qq" style="color:#3492ed;"></i></a>&emsp;
+            <a href="javascript:;"><i class="layui-icon layui-icon-login-wechat" style="color:#4daf29;"></i></a>&emsp;
+            <a href="javascript:;"><i class="layui-icon layui-icon-login-weibo" style="color:#CF1900;"></i></a>
+        </div>
+    </form>
+</div>
+<div class="login-copyright">copyright © 2020 easyweb.vip all rights reserved.</div>
+
+<script src="/lib/layui-v2.6.3/layui.js" charSet="utf-8"></script>
+<script>
+    layui.use(['form', 'jquery'], function () {
+        var $ = layui.jquery,
+            form = layui.form,
+            layer = layui.layer;
+
+        // 登录过期的时候，跳出ifram框架
+        if (top.location !== self.location) top.location = self.location;
+
+        $('.bind-password').on('click', function () {
+            if ($(this).hasClass('icon-5')) {
+                $(this).removeClass('icon-5');
+                $("input[name='password']").attr('type', 'password');
+            } else {
+                $(this).addClass('icon-5');
+                $("input[name='password']").attr('type', 'text');
+            }
+        });
+
+        $('.icon-nocheck').on('click', function () {
+            if ($(this).hasClass('icon-check')) {
+                $(this).removeClass('icon-check');
+            } else {
+                $(this).addClass('icon-check');
+            }
+        });
+
+        // 进行登录操作
+        form.on('submit(login)', function (data) {
+            data = data.field;
+            if (data.username === '') {
+                layer.msg('用户名不能为空');
+                return false;
+            }
+            if (data.password === '') {
+                layer.msg('密码不能为空');
+                return false;
+            }
+            if (data.captcha === '') {
+                layer.msg('验证码不能为空');
+                return false;
+            }
+            console.log(data);
+            $.post("/system/user/login", data, function (data) {
+                if (data.code === 200) {
+                    layer.msg('登录成功', function () {
+                        window.location = '/system/index';
+                    });
+                } else {
+                    layer.msg(data.msg);
+                }
+            });
+            return false;
+        });
+    });
+</script>
+<script>
+    layui.use(['layer', 'form'], function () {
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var form = layui.form;
+        $('.login-wrapper').removeClass('layui-hide');
+
+        /* 表单提交 */
+        form.on('submit(loginSubmit)', function (obj) {
+// console.log(obj.field);
+            layer.msg('登录成功', {icon: 1, time: 1500}, function () {
+                location.replace('../../../');
+            });
+            /*var loadIndex = layer.load(2);
+            $.post('login', obj.field, function (res) {
+            layer.close(loadIndex);
+            if (res.code === 0) {
+            layer.msg('登录成功', {icon: 1, time: 1500}, function () {
+            location.replace('../../../');
+            });
+            } else {
+            layer.msg(res.msg, {icon: 2, anim: 6});
+            }
+            }, 'json');*/
+            return false;
+        });
+
+        /* 图形验证码 */
+        let captchaUrl = '/tool/captcha/get/image';
+        $('img.login-captcha').click(function () {
+            this.src = captchaUrl;
+        }).trigger('click');
+
+    });
+</script>
+</body>
+</html>

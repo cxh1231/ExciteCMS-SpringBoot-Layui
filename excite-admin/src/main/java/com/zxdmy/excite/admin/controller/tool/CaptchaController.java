@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.imageio.ImageIO;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Random;
@@ -79,7 +80,10 @@ public class CaptchaController extends BaseController {
         } else {
             captchaDomain = captchaService.createHutoolCaptcha(160, 60);
         }
-
+        // 将验证码保存至session
+        HttpSession session = request.getSession();
+        session.setAttribute("captcha",captchaDomain.getCode());
+        // 输出图片
         try {
             response.setContentType("image/jpeg");
             out = response.getOutputStream();

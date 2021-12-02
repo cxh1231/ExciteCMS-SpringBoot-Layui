@@ -1,6 +1,16 @@
 ## 基于Spring Boot+Layui的Excite内容管理系统
 
-## 模块划分：
+## 1、主要技术栈
+
+**后端：**
+
++ Spring Boot
+
+**前端：**
+
++ miniLayui
+
+## 2、模块划分：
 
 > 有的项目按MVC架构划分模块，如controller、service、domain，分别为一个模块；
 > 
@@ -20,3 +30,8 @@
 common → system → framework → admin
 
 > 如果再有其他模块，则与 `system` 并列。
+
+
+参考资料：
+
++ https://demo.easyweb.vip/iframe/

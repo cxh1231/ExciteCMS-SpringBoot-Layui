@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>菜单管理</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<!--子页面容器-->
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div>
+            <!-- 表格 -->
+            <table id="table-system-menu" class="layui-table" lay-filter="table-system-menu"></table>
+        </div>
+    </div>
+</div>
+
+<!--工具栏模板：-->
+<script type="text/html" id="toolbar-table-menu">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-normal layui-btn-sm" id="btn-menu-add" lay-event="btn-menu-add">
+            <i class="layui-icon"></i> 添加
+        </button>
+        <a>　</a>
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-sm" id="btn-menu-expand"><i class="layui-icon">&#xe668;</i> 全部展开</button>
+            <button class="layui-btn layui-btn-sm" id="btn-menu-fold"><i class="layui-icon">&#xe66b;</i> 全部折叠</button>
+            <button class="layui-btn layui-btn-sm" id="btn-menu-fold-diy"><i class="layui-icon">&#xe623;</i> 折叠菜单</button>
+        </div>
+    </div>
+</script>
+
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js" charset="utf-8"></script>
+<script>
+    layui.use(['table', 'treeTable'], function () {
+        let $ = layui.jquery;
+        let table = layui.table;
+        let treeTable = layui.treeTable;
+
+        // 记录所有的菜单，方便折叠菜单
+        let menus = [];
+        // 渲染表格
+        let table_menu = treeTable.render({
+            elem: '#table-system-menu',     // 表单绑定的table标签
+            method: 'GET',                  // 加载数据的请求方式
+            url: '/system/menu/list/all',   //数据接口
+            even: true,                     // 开启隔行背景
+            parseData: function (d) {
+                if (d.code === 200) {
+                    return {
+                        "code": 0,          //解析接口状态
+                        "msg": d.msg,       //解析提示文本
+                        "count": d.count,   //解析数据长度
+                        "data": d.data      //解析数据列表
+                    };
+                } else
+                    return d;
+            },
+            tree: {
+                iconIndex: 3,           // 折叠图标显示在第几列
+                isPidData: true,
+                idName: 'id',
+                pidName: 'parentId',
+                arrowType: 'arrow2',   // 自定义箭头风格
+                getIcon: function (d) {  // 自定义图标
+                    // 是目录或菜单，使用其自定义的图标
+                    if (d.type !== "B") {
+                        return '<i class="' + d.icon + '"></i>  ';
+                    }
+                    // 是按钮，使用默认的
+                    else {
+                        return '<i class="layui-icon layui-icon-file"></i>';
+                    }
+                }
+            },
+            toolbar: '#toolbar-table-menu',
+            defaultToolbar: ['filter'],
+            cols: [
+                [
+                    {type: 'numbers', title: '序'}, // 序号
+                    {field: 'id', width: 40, title: 'ID', align: 'center'},
+                    {field: 'sort', width: 60, align: 'center', title: '排序'},
+                    {field: 'title', minWidth: 120, title: '菜单名称'},
+                    {field: 'href', title: '菜单链接'},
+                    {field: 'permission', title: '权限标识'},
+                    {field: 'updateTime', title: '更新时间', align: 'center'},
+                    {
+                        field: 'type', title: '类型', width: 100, align: 'center', templet: function (d) {
+                            if (d.type === "N") {
+                                return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-orange">顶级菜单</a>';
+                            } else if (d.type === "C") {
+                                return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-green">目录</a>';
+                            } else if (d.type === "M") {
+                                // 记录菜单的ID，方便折叠
+                                // menus.push(d.id)
+                                return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-blue">菜单</a>';
+                            } else {
+                                return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-black">按钮</a>';
+                            }
+                        }
+                    },
+                    {
+                        field: 'action', title: '操作', width: 140, align: 'center', templet: function (d) {
+                            let returnStr = "";
+                            if (d.editable === 0) {
+                                returnStr += '<a class="layui-btn layui-btn-disabled layui-btn-xs" lay-event="edit">编辑</a> ';
+                            } else {
+                                returnStr += '<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="edit">编辑</a> ';
+                            }
+                            if (d.removable === 0) {
+                                returnStr += '<a class="layui-btn layui-btn-disabled layui-btn-xs" lay-event="del">删除</a> ';
+                            } else {
+                                returnStr += '<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a> ';
+                            }
+                            return returnStr;
+                        }
+                    }
+                ]
+            ],
+            done: function () {
+                // 加载完成后，默认选择全部展开
+                table_menu.expandAll();
+                // 然后把菜单折叠起来
+                // for (let i = 0; i < menus.length; i++) {
+                //     table_menu.fold(menus[i]);
+                // }
+            }
+        });
+
+        // 菜单的【全部展开】
+        $('#btn-menu-expand').click(function () {
+            table_menu.expandAll();
+        });
+        // 菜单的【全部折叠】
+        $('#btn-menu-fold').click(function () {
+            table_menu.foldAll();
+        });
+        // 菜单的【折叠菜单】
+        $('#btn-menu-fold-diy').click(function () {
+            for (let i = 0; i < menus.length; i++) {
+                table_menu.fold(menus[i]);
+            }
+        });
+
+        // 监听操作工具条
+        treeTable.on('tool(table-system-menu)', function (obj) {
+            let data = obj.data;
+            let layEvent = obj.event;
+            // 响应【删除】事件
+            if (layEvent === 'del') {
+                if (data.removable === 1) {
+                    // TODO 执行删除的POST操作
+
+                    // layer.msg('禁止删除' + data.id)
+                } else {
+                    layer.msg('禁止删除')
+                }
+            }
+            // 响应【编辑】事件
+            else if (layEvent === 'edit') {
+                if (data.editable === 1) {
+                    // 弹出编辑窗口
+                    const menu_edit_index = layer.open({
+                        title: '编辑菜单',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: false,
+                        shadeClose: false,
+                        area: ['800px', '500px'],
+                        content: '/system/menu/goEdit/' + data.id,
+                        end: function () {
+                            table_menu.refresh();
+                        }
+                    });
+                    parent.layer.iframeAuto(menu_edit_index);
+                } else {
+                    layer.msg('此菜单不允许编辑')
+                }
+            }
+        });
+
+        // 【添加菜单】按钮响应事件
+        $('#btn-menu-add').click(function () {
+            let menu_add_index = layer.open({
+                title: '添加菜单',
+                type: 2,
+                shade: 0.2,
+                maxmin: true,
+                shadeClose: false,
+                area: ['800px', '500px'],
+                content: '/system/menu/goAdd',
+                end: function () {
+                    table_menu.refresh();
+                }
+            });
+            parent.layer.iframeAuto(menu_add_index);
+        });
+
+    });
+</script>
+</body>
+</html>

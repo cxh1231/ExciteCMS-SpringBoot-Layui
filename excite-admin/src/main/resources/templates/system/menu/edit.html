@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑菜单</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <!-- 引入 dtree 相关资源 -->
+    <link rel="stylesheet" href="/js/lay-module/dtree/dtree.css">
+    <link rel="stylesheet" href="/js/lay-module/dtree/font/dtreefont.css">
+    <!-- 引入 font-aswsome 相关资源 -->
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <form class="layui-form layui-form-pane" action="">
+            <input hidden name="id" th:value="${menu.id}"/>
+            <!-- 【菜单类型】 -->
+            <div class="layui-form-item" pane="" style="width: 558px">
+                <label class="layui-form-label">菜单类型<span style="color:red"> *</span></label>
+                <div class="layui-input-block">
+                    <input type="radio" name="type" value="N" title="顶部导航" th:checked="${menu.parentId} eq -1" lay-filter="menuTypeFilter" id="menuType_Nav">
+                    <input type="radio" name="type" value="C" title="目录" th:checked="${menu.parentId} != -1 and ${menu.type} == 'C'" lay-filter="menuTypeFilter">
+                    <input type="radio" name="type" value="M" title="菜单" th:checked="${menu.type} == 'M'" lay-filter="menuTypeFilter">
+                    <input type="radio" name="type" value="B" title="按钮" th:checked="${menu.type} == 'B'" lay-filter="menuTypeFilter">
+                </div>
+            </div>
+
+            <!-- 【菜单名称】和【顺序】 -->
+            <div class="layui-form-item">
+                <!-- 【菜单名称】 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label">菜单名称<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline" style="width: 250px">
+                        <input type="text" name="name" th:value="${menu.name}" lay-verify="menuTitleVerify" placeholder="请输入菜单名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <!--【菜单排序】-->
+                <div class="layui-inline">
+                    <label class="layui-form-label">显示排序<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline" style="width: 70px">
+                        <input type="text" name="sort" th:value="${menu.sort}" lay-verify="menuSortVerify" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">数值越大越靠前</div>
+                </div>
+            </div>
+
+            <!-- 【上级菜单】和【菜单图标】 -->
+            <div class="layui-form-item">
+                <!-- 上级菜单 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label" id="parent_menu_text">上级菜单</label>
+                    <div class="layui-input-inline" style="width: 250px">
+                        <!-- 如果需要指定初始值，添加：data-value="" -->
+                        <ul id="menuTree" class="dtree" data-id="-1"></ul>
+                    </div>
+                </div>
+                <!-- 菜单图标 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label">菜单图标</label>
+                    <div class="layui-input-block" style="width: 230px">
+                        <input type="text" id="iconPicker" name="icon" th:value="${menu.icon}" lay-filter="iconPicker" lay-verify="iconPickerVerify" class="hide">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 【请求链接】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单链接<span style="color:red"> *</span></label>
+                <div class="layui-input-inline" style="width: 350px">
+                    <input type="text" name="path" th:value="${menu.path}" id="menuPathId" lay-verify="menuPathVerify" placeholder="请输入菜单或按钮Controller类的请求链接" autocomplete="off"
+                           class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">如：/system/menu/list</div>
+            </div>
+
+            <!-- 【权限标识】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">权限标识<span style="color:red"> *</span></label>
+                <div class="layui-input-inline" style="width: 350px">
+                    <input type="text" name="permission" th:value="${menu.permission}" id="menuPermissionId" lay-verify="menuPermissionVerify" placeholder="控制器中定义的权限标识"
+                           autocomplete="off" class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <button class="layui-btn layui-btn-primary layui-btn-xs" id="menuPermissionRefreshButton">
+                        <i class="layui-icon layui-icon-refresh"></i>
+                    </button>
+                    如：system:menu:list
+                </div>
+            </div>
+
+            <!--【菜单操作设置】-->
+            <div class="layui-form-item" pane="">
+                <label class="layui-form-label">操作设置<span style="color:red"> *</span></label>
+                <div class="layui-input-block">
+                    <!-- 几个默认值 -->
+                    <input type="checkbox" name="editable" value="0" th:checked="${menu.editable} eq 0" th:disabled="${menu.editable == 0}" lay-skin="switch" lay-text="不可编辑|允许编辑">
+                    <input type="checkbox" name="removable" value="0" th:checked="${menu.removable} eq 0" th:disabled="${menu.removable == 0}" lay-skin="switch"
+                           lay-text="不可删除|允许删除">
+                    <input type="checkbox" name="status" value="1" th:checked="${menu.status} eq 1" th:disabled="${menu.status == 1}" lay-skin="switch" lay-text="禁　　用|状态正常">
+                    <span style="color:red;font-size: 12px">注：此操作设置点亮后不可逆！</span>
+                </div>
+                sss
+            </div>
+            <div class="layui-form-item">
+                <button class="layui-btn" lay-submit="#" lay-filter="form-menu-edit">保存修改</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'dtree', 'iconPickerFa'], function () {
+        let $ = layui.jquery;
+        let form = layui.form,
+            layer = layui.layer,
+            dtree = layui.dtree,
+            iconPickerFa = layui.iconPickerFa;
+
+        window.form = layui.form;
+        // 树状菜单选择器
+        let menuTree = dtree.render({
+            elem: "#menuTree",              // 绑定的菜单
+            width: "100%",                  // 宽度百分百
+            select: true,                   // 指定下拉树模式
+            url: "/system/menu/list/all",   // 请求的URL
+            none: "请选择菜单类型",
+            method: "GET",                  // 请求方式
+            dataStyle: "layuiStyle",        // 使用layui风格的数据格式
+            dataFormat: "list",             // 配置data的风格为list
+            response: {message: "msg", statusCode: 200},  //修改response中返回数据的定义，消息主键为msg，成功代码为200
+            initLevel: 8,                   // 初始化层级，一般到不了这么高
+            selectCardHeight: "250",        // 卡片高度
+            line: true,                     // 开启连接线
+            ficon: ["1", "-1"],             // 修改一级图标样式（展开与否的按钮，最后一级不显示）
+            icon: "7",                      // 修改二级图标样式
+            highlightCurrent: true,         // 是否高亮当前选中节点，默认值是 false。
+            accordion: true,                // 开启手风琴
+            selectInputName: {              // 给隐藏的表单输入框指定名称
+                nodeId: "parentId",         // 上级菜单的input的name
+                context: "parentName"
+            },
+            selectInitVal: "[[${menu.parentId}]]", // 你可以在这里指定默认值
+            done: function (result, $ul, first) {
+                menuTree.setHideNodes("[[${menu.id}]]")
+            }
+        });
+
+        // 图标选择器
+        iconPickerFa.render({
+            // 选择器，推荐使用input
+            elem: '#iconPicker',
+            // fa 图标接口
+            url: "/lib/font-awesome-4.7.0/less/variables.less",
+            // 是否开启搜索：true/false，默认true
+            search: true,
+            // 是否开启分页：true/false，默认true
+            page: true,
+            // 每页显示数量，默认12
+            limit: 12,
+            // 每个图标格子的宽度：'43px'或'20%'
+            cellWidth: '20%',
+            // 点击回调
+            click: function (data) {
+                // console.log(data);
+            },
+            // 渲染成功后的回调
+            success: function (d) {
+                // console.log(d);
+            }
+        });
+
+        // 同步[菜单链接]至[权限]输入框
+        $("#menuPathId").on("input propertychange", function () {
+            $("#menuPermissionRefreshButton").click();
+        });
+        // 点击[权限]输入框旁的更新权限标识按钮
+        $("#menuPermissionRefreshButton").on("click", function (e) {
+            e.preventDefault();
+            console.log("点击权限更新按钮")
+            let $perms = $("#menuPermissionId");
+            let url = $("#menuPathId").val().substr(1);
+            let perms = url.replace(new RegExp('/', "g"), ':');
+            $perms.val(perms);
+        })
+
+        //自定义验证规则
+        form.verify({
+            //菜单标题
+            menuTitleVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入菜单名称！';
+                }
+            },
+            // 菜单显示排序
+            menuSortVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入菜单排序！';
+                }
+            },
+            // 菜单请求链接
+            menuPathVerify: function (value) {
+                let typeValue = $("input[name='type']:checked").val();
+                console.log(typeValue)
+                if (typeValue !== 'N' && typeValue !== 'C' && value.length <= 0) {
+                    return '请输入菜单/按钮请求URL！';
+                }
+            },
+            // 菜单权限标识
+            menuPermissionVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入权限标识！';
+                }
+            }
+        });
+
+        //监听指定开关
+        form.on('radio(menuTypeFilter)', function (data) {
+            // console.log(data.value);
+            // 是导航栏菜单
+            if (data.value === 'N') {
+                layer.tips('顶部导航无需选择上级菜单(选了亦无妨)', '#parent_menu_text', {
+                    tips: [1, '#78BA32']
+                });
+            }
+            // 是目录（非菜单）
+            else if (data.value === 'C') {
+                layer.tips('目录无需填写菜单链接(填了亦无妨)', '#menuPathId', {
+                    tips: [1, '#78BA32']
+                });
+            }
+        });
+
+        //监听提交
+        form.on('submit(form-menu-edit)', function (data) {
+            console.log(data.field);
+            $.post("/system/menu/update", data.field, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
+                        // 关闭弹窗
+                        layer.close();
+                        // 先得到当前iframe层的索引
+                        let index22 = parent.layer.getFrameIndex(window.name);
+                        // 关闭当前弹窗
+                        parent.layer.close(index22);
+                    });
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>

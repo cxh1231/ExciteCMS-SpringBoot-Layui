@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 /**
@@ -41,27 +42,29 @@ public class SysUserController extends BaseController {
     /**
      * 用户登录接口
      *
-     * @param username     用户名
-     * @param password     密码
-     * @param captcha      验证码
-     * @param captchaToken 验证码Token
-     * @param remember     是否记住密码 1-记住 | 0-不记住（仅在非前后端分离模式下生效）
+     * @param username 用户名
+     * @param password 密码
+     * @param captcha  验证码
+     * @param remember 是否记住密码 1-记住 | 0-不记住（仅在非前后端分离模式下生效）
      * @return 登录结果
      */
     @PostMapping(value = "/login")
     @ResponseBody
-    public BaseResult login(String username, String password, String captcha, String captchaToken, String remember) {
+    public BaseResult login(String username, String password, String captcha, String remember) {
         // 如果提交的信息有空信息
-        if (StrUtil.hasBlank(username, password, captcha, captchaToken)) {
+        if (StrUtil.hasBlank(username, password, captcha)) {
             return error(400, "用户名、密码或验证码为空");
         }
-        // 验证码正确
-        if (null != redisUtils.get(captchaToken) && redisUtils.get(captchaToken).toString().equals(captcha)) {
+        // 前后端同域，就用session
+        HttpSession session = request.getSession();
+        if (null != session.getAttribute("captcha") && session.getAttribute("captcha").toString().equals(captcha)) {
             // 使用用户名和密码登录
             SysUser user = userService.login(username, password);
             // 如果用户不为空，则登录成功
             if (null != user) {
-                StpUtil.login(user.getId());
+                // 保持登录与否
+                StpUtil.login(user.getId(), "1".equals(remember));
+                // 获取Token等信息
                 SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
                 return success("登录成功！", tokenInfo);
             }
@@ -75,37 +78,6 @@ public class SysUserController extends BaseController {
             return error(400, "验证码已失效或验证码错误，请重试");
         }
 
-    }
-
-
-    /**
-     * 保存用户信息
-     *
-     * @param user 用户信息实体
-     * @return 保存成功后的用户信息
-     */
-    @Operation(summary = "保存用户信息",
-            description = "新增用户信息接口",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "保存成功信息",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(
-                                            description = "保存成功的用户信息实体",
-                                            implementation = SysUser.class, required = true)
-                            )),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "保存至数据库失败信息",
-                            content = @Content(mediaType = "application/json"))},
-            security = @SecurityRequirement(name = "需要认证"))
-    @GetMapping(value = "/save")
-    @ResponseBody
-    public SysUser save(@Parameter(description = "用户信息实体") SysUser user) {
-        System.out.println(user);
-        return user;
     }
 
     /**

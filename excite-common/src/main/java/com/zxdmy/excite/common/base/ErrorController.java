@@ -1,7 +1,6 @@
-package com.zxdmy.excite.base;
+package com.zxdmy.excite.common.base;
 
-import com.zxdmy.excite.common.base.BaseController;
-import com.zxdmy.excite.common.base.BaseResult;
+
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -26,9 +25,9 @@ public class ErrorController extends BaseController {
      * @return 错误信息
      */
     @GetMapping(value = "/404")
-    @ResponseBody
-    public BaseResult error404() {
-        return error(HttpStatus.NOT_FOUND, "请求的资源不存在");
+    public String error404() {
+//        return error(HttpStatus.NOT_FOUND, "请求的资源不存在");
+        return "error/404";
     }
 
     /**
