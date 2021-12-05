@@ -2,11 +2,13 @@ package com.zxdmy.excite.admin.controller.system;
 
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.entity.SysRole;
 import com.zxdmy.excite.system.service.ISysRoleService;
 import com.zxdmy.excite.system.service.ISysUserRoleService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +28,41 @@ public class SysRoleController extends BaseController {
     ISysRoleService roleService;
 
     ISysUserRoleService userRoleService;
+
+    /**
+     * 角色管理 列表页面
+     * @return
+     */
+    @RequestMapping("index")
+    public String index() {
+        return "system/role/index";
+    }
+
+    /**
+     * 添加角色 页面
+     * @return
+     */
+    @RequestMapping("goAdd")
+    public String goAdd() {
+        return "system/role/add";
+    }
+    /**
+     * 编辑角色 页面
+     * @return
+     */
+    @RequestMapping("goEdit/{id}")
+    public String goEdit(@PathVariable String id, ModelMap map) {
+        try {
+            SysRole role = roleService.getRole(Integer.parseInt(id));
+            if (null != role) {
+                map.put("role", role);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return "system/role/edit";
+    }
+
 
     /**
      * 添加角色接口

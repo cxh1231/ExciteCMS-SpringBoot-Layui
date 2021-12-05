@@ -16,6 +16,7 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -136,4 +137,9 @@ public class SysMenu implements Serializable {
     @TableField(exist = false)
     private List<SysMenu> child;
 
+    /**
+     * 复选框使用的字段，默认为"0"，选中为"1"，
+     */
+    @TableField(exist = false)
+    private String checkArr = "0";
 }

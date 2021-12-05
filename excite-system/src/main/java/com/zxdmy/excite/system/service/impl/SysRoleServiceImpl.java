@@ -50,9 +50,12 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     public int addRole(SysRole role, Integer[] menusIds) {
         if (null == role) {
 //            throw new ServiceException("角色实体SysRole不能为null");
+            return 0;
         }
         // 角色的其他信息初始化
-        role.setStatus(SystemCode.STATUS_Y.getCode());
+        if(null == role.getStatus()){
+            role.setStatus(SystemCode.STATUS_Y.getCode());
+        }
         LocalDateTime localDateTime = LocalDateTime.now();
         role.setCreateTime(localDateTime);
         // 先插入角色，以便获取角色的ID

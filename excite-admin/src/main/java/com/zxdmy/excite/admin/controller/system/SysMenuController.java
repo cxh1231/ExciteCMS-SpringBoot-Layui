@@ -25,16 +25,33 @@ public class SysMenuController extends BaseController {
 
     private ISysMenuService menuService;
 
+    /**
+     * 菜单管理 列表页面
+     *
+     * @return
+     */
     @RequestMapping("index")
     public String index() {
         return "system/menu/index";
     }
 
+    /**
+     * 菜单管理 添加菜单页
+     *
+     * @return
+     */
     @RequestMapping("goAdd")
     public String goAdd() {
         return "system/menu/add";
     }
 
+    /**
+     * 菜单管理 编辑页
+     *
+     * @param id
+     * @param map
+     * @return
+     */
     @RequestMapping("goEdit/{id}")
     public String goEdit(@PathVariable String id, ModelMap map) {
         try {
@@ -52,7 +69,7 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 添加一个菜单
+     * 菜单管理接口：添加单个菜单
      *
      * @param menu 菜单实体
      * @return 结果
@@ -70,7 +87,8 @@ public class SysMenuController extends BaseController {
         else if ("C".equals(menu.getType())) {
             menu.setPath("");
         }
-        menu.setIcon("fa " + menu.getIcon());
+        if (!"fa ".equals(menu.getIcon().substring(0, 3)))
+            menu.setIcon("fa " + menu.getIcon());
         if (menuService.addMenu(menu, "list") > 0) {
             return success("菜单添加成功");
         }
@@ -195,7 +213,8 @@ public class SysMenuController extends BaseController {
         else if ("C".equals(menu.getType())) {
             menu.setPath("");
         }
-        menu.setIcon("fa " + menu.getIcon());
+        if (!"fa ".equals(menu.getIcon().substring(0, 3)))
+            menu.setIcon("fa " + menu.getIcon());
         if (menuService.updateMenu(menu, "list") > 0) {
             return success("更新菜单成功");
         }

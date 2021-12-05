@@ -18,29 +18,39 @@
     </div>
 </div>
 
-<!--工具栏模板：-->
+<!-- 工具栏模板 -->
 <script type="text/html" id="toolbar-table-menu">
     <div class="layui-btn-container">
-        <button class="layui-btn layui-btn-normal layui-btn-sm" id="btn-menu-add" lay-event="btn-menu-add">
-            <i class="layui-icon"></i> 添加
-        </button>
-        <a>　</a>
+        <!-- 添加按钮 -->
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-sm" id="btn-menu-expand"><i class="layui-icon">&#xe668;</i> 全部展开</button>
-            <button class="layui-btn layui-btn-sm" id="btn-menu-fold"><i class="layui-icon">&#xe66b;</i> 全部折叠</button>
-            <button class="layui-btn layui-btn-sm" id="btn-menu-fold-diy"><i class="layui-icon">&#xe623;</i> 折叠菜单</button>
+            <button class="layui-btn layui-btn-normal layui-btn-sm" lay-event="btn-menu-add"><i class="fa fa-plus"></i> 添加</button>
+        </div>
+        <!-- 展开与否系列按钮 -->
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-success layui-btn-sm" lay-event="btn-menu-expand"><i class="fa fa-expand"></i> 全部展开</button>
+            <button class="layui-btn layui-btn-success layui-btn-sm" lay-event="btn-menu-fold-diy"><i class="fa fa-arrows-h"></i> 折叠按钮</button>
+            <button class="layui-btn layui-btn-success layui-btn-sm" lay-event="btn-menu-fold"><i class="fa fa-compress"></i> 全部折叠</button>
+        </div>
+        <!-- 下拉菜单：禁用与否 -->
+        <div class="layui-btn-group">
+            <button class="layui-btn layui-btn-sm layui-btn-danger" id="btn-down-menuStatus">修改状态 <i class="fa fa-caret-down"></i></button>
         </div>
     </div>
 </script>
-
+<!-- 表格状态列 -->
+<script type="text/html" id="check-menu-status">
+    <input type="checkbox" lay-filter="check-menu-status" value="{{d.id}}" lay-skin="switch" lay-text="正常|禁用" {{d.status==0?'checked':''}}/>
+</script>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js" charset="utf-8"></script>
 <script>
-    layui.use(['table', 'treeTable'], function () {
-        let $ = layui.jquery;
-        let table = layui.table;
-        let treeTable = layui.treeTable;
+    layui.use(['table', 'treeTable', 'dropdown'], function () {
+        let $ = layui.jquery,
+            // table = layui.table,
+            form = layui.form,
+            treeTable = layui.treeTable,
+            dropdown = layui.dropdown;
 
         // 记录所有的菜单，方便折叠菜单
         let menus = [];
@@ -63,32 +73,29 @@
             },
             tree: {
                 iconIndex: 3,           // 折叠图标显示在第几列
-                isPidData: true,
-                idName: 'id',
-                pidName: 'parentId',
-                arrowType: 'arrow2',   // 自定义箭头风格
-                getIcon: function (d) {  // 自定义图标
-                    // 是目录或菜单，使用其自定义的图标
-                    if (d.type !== "B") {
-                        return '<i class="' + d.icon + '"></i>  ';
-                    }
-                    // 是按钮，使用默认的
-                    else {
+                isPidData: true,        // 是父子类型的数据格式
+                idName: 'id',           // 主键名
+                pidName: 'parentId',    // 父级名
+                arrowType: 'arrow2',    // 自定义箭头风格
+                getIcon: function (d) { // 自定义图标
+                    // 是按钮：使用默认图标。非按钮：使用自定义图标。
+                    if (d.type === "B") {
                         return '<i class="layui-icon layui-icon-file"></i>';
+                    } else {
+                        return '<i class="' + d.icon + '"></i>  ';
                     }
                 }
             },
-            toolbar: '#toolbar-table-menu',
-            defaultToolbar: ['filter'],
+            toolbar: '#toolbar-table-menu', // 表格工具栏（左上方）
+            defaultToolbar: ['filter'],     // 表格默认的工具栏（右上方）
             cols: [
                 [
-                    {type: 'numbers', title: '序'}, // 序号
-                    {field: 'id', width: 40, title: 'ID', align: 'center'},
-                    {field: 'sort', width: 60, align: 'center', title: '排序'},
-                    {field: 'title', minWidth: 120, title: '菜单名称'},
+                    {type: "checkbox", width: 50,},
+                    {field: 'id', width: 20, title: 'ID', align: 'center'},
+                    {field: 'sort', width: 40, title: '排序', align: 'center'},
+                    {field: 'title', minWidth: 150, title: '菜单名称'},
                     {field: 'href', title: '菜单链接'},
                     {field: 'permission', title: '权限标识'},
-                    {field: 'updateTime', title: '更新时间', align: 'center'},
                     {
                         field: 'type', title: '类型', width: 100, align: 'center', templet: function (d) {
                             if (d.type === "N") {
@@ -97,15 +104,17 @@
                                 return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-green">目录</a>';
                             } else if (d.type === "M") {
                                 // 记录菜单的ID，方便折叠
-                                // menus.push(d.id)
+                                menus.push(d.id)
                                 return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-blue">菜单</a>';
                             } else {
                                 return '<a class="layui-btn layui-btn-radius layui-btn-xs layui-bg-black">按钮</a>';
                             }
                         }
                     },
+                    {templet: '#check-menu-status', title: '状态', width: 95},
+                    // {field: 'updateTime', title: '更新时间', align: 'center'},
                     {
-                        field: 'action', title: '操作', width: 140, align: 'center', templet: function (d) {
+                        field: 'action', title: '操作', align: 'center', templet: function (d) {
                             let returnStr = "";
                             if (d.editable === 0) {
                                 returnStr += '<a class="layui-btn layui-btn-disabled layui-btn-xs" lay-event="edit">编辑</a> ';
@@ -123,8 +132,7 @@
                 ]
             ],
             done: function () {
-                // 加载完成后，默认选择全部展开
-                table_menu.expandAll();
+                table_menu.expandAll();  // 加载完成后，默认选择全部展开
                 // 然后把菜单折叠起来
                 // for (let i = 0; i < menus.length; i++) {
                 //     table_menu.fold(menus[i]);
@@ -132,34 +140,138 @@
             }
         });
 
-        // 菜单的【全部展开】
-        $('#btn-menu-expand').click(function () {
-            table_menu.expandAll();
-        });
-        // 菜单的【全部折叠】
-        $('#btn-menu-fold').click(function () {
-            table_menu.foldAll();
-        });
-        // 菜单的【折叠菜单】
-        $('#btn-menu-fold-diy').click(function () {
-            for (let i = 0; i < menus.length; i++) {
-                table_menu.fold(menus[i]);
+        /**
+         * 表格上方工具栏按钮监听
+         */
+        treeTable.on('toolbar(table-system-menu)', function (obj) {
+            console.log(obj.event)
+            let toolbarEvent = obj.event;
+            switch (toolbarEvent) {
+                // 【添加】菜单
+                case "btn-menu-add":
+                    let menu_add_index = layer.open({
+                        title: '添加菜单',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: false,
+                        area: ['800px', '500px'],
+                        content: '/system/menu/goAdd',
+                        end: function () {
+                            table_menu.refresh();
+                        }
+                    });
+                    parent.layer.iframeAuto(menu_add_index);
+                    break;
+                // 【全部展开】菜单
+                case "btn-menu-expand":
+                    table_menu.expandAll();
+                    break;
+                // 【全部折叠】菜单
+                case "btn-menu-fold":
+                    table_menu.foldAll();
+                    break;
+                // 只【折叠按钮】
+                case "btn-menu-fold-diy":
+                    for (let i = 0; i < menus.length; i++) {
+                        table_menu.fold(menus[i]);
+                    }
+                    break;
+
+
             }
+
+        });
+
+        // 下拉菜单，控制状态用
+        dropdown.render({
+            elem: '#btn-down-menuStatus',
+            data: [{
+                title: '开启', id: 0, templet: '开启 <i class="fa fa-check"> </i>'
+            }, {
+                title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
+            }],
+            click: function (obj) {
+                // 判断选择的按钮的ID
+                let clickBtnId = obj.id;
+                // 读取所有选中的按钮
+                let checkData = [];
+                table_menu.checkStatus().map(function (d) {
+                    if (!d.LAY_INDETERMINATE) {
+                        checkData.push(d.id)
+                    }
+                })
+                console.log(checkData)
+                // 选中才响应
+                if (checkData.length > 0) {
+                    let actionText = clickBtnId === 0 ? "开启" : "禁用"
+                    // 二次询问框
+                    layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
+                        title: false,
+                        btn: ['确定', '取消'],
+                        // 按钮【按钮1】的回调
+                        btn1: function (index) {
+                            // TODO 此时进行ajax的服务器访问，如果返回数据正常，则进行后面代码的调用
+
+                            layer.msg('选中菜单已' + actionText + '！', {time: 3000, icon: 1});
+                        },
+                        // // 按钮【按钮二】的回调
+                        // btn2: function (index) {
+                        //     // layer.msg('操作已取消', {time: 2000, icon: 2});
+                        // },
+                        // // 按钮【X】的回调
+                        // cancel: function (index) {
+                        //     // layer.msg('操作已取消', {time: 2000, icon: 2});
+                        // }
+                    });
+                } else {
+                    layer.msg('请先选择菜单', {time: 2000, icon: 7});
+                }
+            }
+        });
+
+        // 监听switch开关切换事件
+        form.on('switch(check-menu-status)', function (data) {
+            // 该值是操作之后的值
+            let isChecked = data.elem.checked;
+            console.log(isChecked)
+            let actionText = isChecked ? "开启" : "禁用"
+            let menuId = data.value;
+            layer.confirm('确认要 ' + actionText + ' 此菜单？', {
+                title: false,
+                btn: ['确定', '取消'],
+                // 按钮【按钮1】的回调
+                btn1: function (index) {
+                    // TODO 此时进行ajax的服务器访问，如果返回数据正常，则进行后面代码的调用
+
+                    data.elem.checked = isChecked;
+                    form.render();
+                    // 更新表格
+                    table_menu.update(menuId, {status: isChecked ? 0 : 1});
+                    layer.close(index);
+                },
+                // 按钮【按钮二】的回调
+                btn2: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                },
+                // 按钮【X】的回调
+                cancel: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                }
+            });
         });
 
         // 监听操作工具条
         treeTable.on('tool(table-system-menu)', function (obj) {
             let data = obj.data;
             let layEvent = obj.event;
-            // 响应【删除】事件
-            if (layEvent === 'del') {
-                if (data.removable === 1) {
-                    // TODO 执行删除的POST操作
-
-                    // layer.msg('禁止删除' + data.id)
-                } else {
-                    layer.msg('禁止删除')
-                }
+            // 响应【改变状态】事件
+            if (layEvent === 'changeStatus') {
+                layer.msg('改变状态')
             }
             // 响应【编辑】事件
             else if (layEvent === 'edit') {
@@ -182,23 +294,15 @@
                     layer.msg('此菜单不允许编辑')
                 }
             }
-        });
-
-        // 【添加菜单】按钮响应事件
-        $('#btn-menu-add').click(function () {
-            let menu_add_index = layer.open({
-                title: '添加菜单',
-                type: 2,
-                shade: 0.2,
-                maxmin: true,
-                shadeClose: false,
-                area: ['800px', '500px'],
-                content: '/system/menu/goAdd',
-                end: function () {
-                    table_menu.refresh();
+            // 响应【删除】事件
+            else if (layEvent === 'del') {
+                if (data.removable === 1) {
+                    // TODO 执行删除的POST操作
+                    layer.msg('删除接口还没写...删除ID：' + data.id)
+                } else {
+                    layer.msg('禁止删除')
                 }
-            });
-            parent.layer.iframeAuto(menu_add_index);
+            }
         });
 
     });

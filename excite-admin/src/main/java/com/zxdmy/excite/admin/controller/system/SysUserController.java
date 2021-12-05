@@ -39,6 +39,16 @@ public class SysUserController extends BaseController {
 
     private RedisService redisUtils;
 
+
+    /**
+     * 角色管理 列表页面
+     * @return
+     */
+    @RequestMapping("index")
+    public String index() {
+        return "system/user/index";
+    }
+
     /**
      * 用户登录接口
      *

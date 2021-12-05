@@ -6,23 +6,48 @@
     <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
     <link rel="stylesheet" href="/css/public.css" media="all">
     <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
-
 </head>
 <body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索</legend>
+            <div style="margin: 5px 5px 5px 5px">
+                <form class="layui-form layui-form-pane" action="">
+                    <div class="layui-form-item">
+                        <!-- 搜索【角色名】-->
+                        <div class="layui-inline">
+                            <label class="layui-form-label">角色名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="roleName" autocomplete="off" class="layui-input"/>
+                            </div>
+                        </div>
+                        <!-- 搜索按钮 -->
+                        <div class="layui-inline">
+                            <button type="submit" class="layui-btn layui-btn-primary" lay-submit lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </fieldset>
 
-<table class="layui-hide" id="tableRole" lay-filter="tableRole"></table>
+        <!-- 表格 -->
+        <table class="layui-hide" id="table-system-role" lay-filter="table-system-role"></table>
 
+    </div>
+</div>
 <!--表格头部工具类（左侧）-->
-<script type="text/html" id="toolbarTableRole">
+<script type="text/html" id="toolbar-table-role">
     <div class="layui-btn-container">
-        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
-        <button class="layui-btn layui-btn-sm" lay-event="getCheckLength">获取选中数目</button>
-        <button class="layui-btn layui-btn-sm" lay-event="isAll">验证是否全选</button>
+        <button class="layui-btn layui-btn-sm layuimini-btn-primary" data-table-refresh="table-system-role"><i class="fa fa-refresh"></i> </button>
+        <button class="layui-btn layui-btn-normal layui-btn-sm" lay-event="btn-role-add"><i class="fa fa-plus"></i> 添加</button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger" data-url="system.auth/delete" data-table-delete="currentTableRenderId"><i class="fa fa-trash-o"></i> 删除</button>
     </div>
 </script>
 <!--表格每行末尾的操作按钮-->
-<script type="text/html" id="barTableRole">
-    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+<script type="text/html" id="tool-table-role">
+    <a class="layui-btn layui-btn-xs" lay-event="role-edit">编辑</a>
     <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
 </script>
 <!--引入JS文件-->
@@ -30,32 +55,82 @@
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 <script>
     layui.use(['table'], function () {
-        var table = layui.table;
+        let $ = layui.jquery,
+            table = layui.table;
 
-        table.render({
-            elem: '#tableRole',
-            url: '/system/role/get',
+        let table_role = table.render({
+            elem: '#table-system-role',
+            url: '/system/role/list',
             response: {
                 statusCode: 200
             },
-            toolbar: '#toolbarTableRole', //开启头部工具栏，并为其绑定左侧模板
-            defaultToolbar: ['filter', 'exports', 'print', { //自定义头部工具栏右侧图标。如无需自定义，去除该参数即可
-                title: '提示', layEvent: 'LAYTABLE_TIPS', icon: 'layui-icon-tips'
-            }],
+            toolbar: '#toolbar-table-role', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: ['filter', 'exports', 'print'],
             title: '用户数据表',
             cols: [
                 [
+                    {type: "checkbox", width: 50},
                     {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
                     {field: 'name', title: '角色名称', width: 150},
-                    {field: 'type', title: '角色类别', width: 150},
+                    {field: 'permission', title: '权限字符', width: 150},
+                    {field: 'sort', title: '显示顺序'},
+                    {field: 'status', title: '角色状态'},
+                    {field: 'remark', title: '备注'},
                     {field: 'createTime', title: '创建时间'},
                     {field: 'updateTime', title: '更新时间'},
-                    {fixed: 'right', title: '操作', toolbar: '#barTableRole'}
+                    {fixed: 'right', title: '操作', toolbar: '#tool-table-role'}
                 ]
             ],
             page: true
         });
 
+        // 监听头部按钮
+        table.on('toolbar(table-system-role)', function (obj) {
+            console.log(obj.event)
+            switch (obj.event) {
+                // 【添加】角色按钮
+                case "btn-role-add":
+                    let role_add_index = layer.open({
+                        title: '添加角色',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: false,
+                        area: ['600px', '500px'],
+                        content: '/system/role/goAdd',
+                        end: function () {
+                            table_role.reload();
+                        }
+                    });
+                    parent.layer.iframeAuto(role_add_index);
+                    break;
+            }
+        });
+
+        // 监听表格行末按钮
+        table.on('tool(table-system-role)', function (obj) {
+            let data = obj.data;
+            let layEvent = obj.event;
+            console.log(obj.data)
+            switch (layEvent) {
+                case "role-edit":
+                    let role_edit_index = layer.open({
+                        title: '添加角色',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: false,
+                        area: ['600px', '500px'],
+                        content: '/system/role/goEdit/'+data.id,
+                        end: function () {
+                            table_role.reload();
+                        }
+                    });
+                    parent.layer.iframeAuto(role_edit_index);
+                    break;
+            }
+
+        });
 
     });
 </script>

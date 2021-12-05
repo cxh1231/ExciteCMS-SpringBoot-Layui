@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑菜单</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <!-- 引入 dtree 相关资源 -->
+    <link rel="stylesheet" href="/js/lay-module/dtree/dtree.css">
+    <link rel="stylesheet" href="/js/lay-module/dtree/font/dtreefont.css">
+    <!-- 引入 font-aswsome 相关资源 -->
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <form class="layui-form layui-form-pane" action="">
+            <input hidden name="id" th:value="${role.id}"/>
+            <!-- 【角色名称】 -->
+            <div class="layui-form-item">
+                <!-- 【角色名称】 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label">菜单名称<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline" style="width: 300px">
+                        <input type="text" name="name" th:value="${role.name}" lay-verify="roleNameVerify" placeholder="请输入角色名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 【菜单权限】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">菜单权限</label>
+                <div class="layui-input-block" style="width: 300px">
+                    <ul id="menuTreeForRole" class="dtree" data-id="-1"></ul>
+                </div>
+            </div>
+
+            <!-- 【权限标识】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">权限标识<span style="color:red"> *</span></label>
+                <div class="layui-input-inline" style="width: 300px">
+                    <input type="text" name="permission" th:value="${role.permission}" lay-verify="rolePermissionVerify" placeholder="控制器中定义的权限标识" autocomplete="off"
+                           class="layui-input">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    如：admin
+                </div>
+            </div>
+
+            <!-- 【顺序】 -->
+            <div class="layui-form-item">
+                <!--【排序】-->
+                <div class="layui-inline">
+                    <label class="layui-form-label">显示顺序<span style="color:red"> *</span></label>
+                    <div class="layui-input-inline" style="width: 300px">
+                        <input type="text" name="sort" th:value="${role.sort}" lay-verify="roleSortVerify" placeholder="请输入" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-form-mid layui-word-aux">数值越大越靠前</div>
+                </div>
+            </div>
+
+            <!--【角色状态】-->
+            <div class="layui-form-item" pane="">
+                <label class="layui-form-label">角色状态</label>
+                <div class="layui-input-block">
+                    <input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="停用|正常">
+                </div>
+            </div>
+
+            <!-- 【备注】 -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注信息</label>
+                <div class="layui-input-block">
+                    <input type="text" name="remark" th:value="${role.remark}" lay-verify="roleRemarkVerify" placeholder="请填写备注信息" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+            <!-- 提交按钮 -->
+            <div class="layui-form-item">
+                <button class="layui-btn" lay-submit="#" lay-filter="form-menu-add">立即添加</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'dtree', 'iconPickerFa'], function () {
+        let $ = layui.jquery;
+        let form = layui.form,
+            layer = layui.layer,
+            dtree = layui.dtree,
+            iconPickerFa = layui.iconPickerFa;
+        window.form = layui.form;
+
+        // 树状菜单选择器
+        dtree.render({
+            elem: "#menuTreeForRole",       // 绑定的菜单
+            width: "100%",                  // 宽度百分百
+            select: true,                   // 指定下拉树模式
+            // TODO 这个接口重写，
+            url: "/system/menu/list/all",   // 请求的URL
+            none: "请选择菜单类型",
+            method: "GET",                  // 请求方式
+            checkbar: true,                 // 设置复选框
+            checkbarType: "all",            // 复选框选中形式: all：子集选中父级也选中，no-all：子集选中父级半选中，子集全选父级选中，
+            dataStyle: "layuiStyle",        // 使用layui风格的数据格式
+            dataFormat: "list",             // 配置data的风格为list
+            //修改response中返回数据的定义，消息主键为msg，成功代码为200
+            response: {
+                message: "msg",
+                statusCode: 200,
+                checkArr: "checkArr",
+            },
+            initLevel: 8,                   // 初始化层级，一般到不了这么高
+            selectCardHeight: "280",        // 卡片高度
+            line: true,                     // 开启连接线
+            ficon: ["1", "-1"],             // 修改一级图标样式（展开与否的按钮，最后一级不显示）
+            icon: "7",                      // 修改二级图标样式
+            selectInputName: {              // 给隐藏的表单输入框指定名称
+                nodeId: "menuIds",         // 上级菜单的input的name
+                context: "parentName"
+            }
+        });
+
+        //自定义验证规则
+        form.verify({
+            // 角色名称
+            roleNameVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色名称！';
+                }
+            },
+            // 角色权限标识
+            rolePermissionVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色权限标识！';
+                }
+            },
+            // 角色排序
+            roleSortVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色显示顺序！';
+                }
+            },
+        });
+
+        //监听提交
+        form.on('submit(form-menu-add)', function (data) {
+            // layer.alert(JSON.stringify(data.field));
+            console.log(JSON.stringify(data.field))
+            // 提交角色
+            $.post("/system/role/update", data.field, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
+                        // 关闭弹窗
+                        layer.close();
+                        // 先得到当前iframe层的索引
+                        let index22 = parent.layer.getFrameIndex(window.name);
+                        // 关闭当前弹窗
+                        parent.layer.close(index22);
+                    });
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+            });
+            return false;
+        });
+
+    });
+</script>
+</body>
+</html>
