@@ -13,7 +13,7 @@ public enum SystemCode {
     /**
      * 系统菜单默认顺序：0
      */
-    MENU_DEFAULT_SORT(0, "菜单默认排序"),
+    MENU_DEFAULT_SORT(50, "菜单默认排序"),
     /**
      * 记录状态：正常，值：0
      */
@@ -22,6 +22,10 @@ public enum SystemCode {
      * 记录状态：异常，值：1
      */
     STATUS_N(1, "记录状态封禁"),
+    /**
+     * 记录状态：异常，值：1
+     */
+    STATUS_Y_BLOCK(2, "状态正常，并且无法编辑状态"),
 
     /**
      * 记录可以编辑：1

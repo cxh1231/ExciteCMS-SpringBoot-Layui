@@ -57,6 +57,9 @@ public class SysRoleController extends BaseController {
             if (null != role) {
                 map.put("role", role);
             }
+            else{
+                return "error/404";
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

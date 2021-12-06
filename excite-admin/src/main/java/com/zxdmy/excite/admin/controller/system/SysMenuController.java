@@ -28,7 +28,7 @@ public class SysMenuController extends BaseController {
     /**
      * 菜单管理 列表页面
      *
-     * @return
+     * @return 菜单管理页面
      */
     @RequestMapping("index")
     public String index() {
@@ -38,7 +38,7 @@ public class SysMenuController extends BaseController {
     /**
      * 菜单管理 添加菜单页
      *
-     * @return
+     * @return 添加菜单页面
      */
     @RequestMapping("goAdd")
     public String goAdd() {
@@ -48,9 +48,9 @@ public class SysMenuController extends BaseController {
     /**
      * 菜单管理 编辑页
      *
-     * @param id
-     * @param map
-     * @return
+     * @param id  菜单ID
+     * @param map Map
+     * @return 菜单编辑页面
      */
     @RequestMapping("goEdit/{id}")
     public String goEdit(@PathVariable String id, ModelMap map) {
@@ -61,6 +61,8 @@ public class SysMenuController extends BaseController {
                     menu.setIcon(menu.getIcon().substring(3));
                 }
                 map.put("menu", menu);
+            } else {
+                return "error/404";
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -77,19 +79,8 @@ public class SysMenuController extends BaseController {
     @PostMapping("/add")
     @ResponseBody
     public BaseResult addMenu(@Validated SysMenu menu) {
-        System.out.println(menu);
-        // 如果是顶级菜单，则将其上级菜单设置为-1
-        if ("N".equals(menu.getType())) {
-            menu.setParentId(-1);
-            menu.setPath("");
-        }
-        // 如果是目录，则将其请求路径设置为空字符串（非NULL）
-        else if ("C".equals(menu.getType())) {
-            menu.setPath("");
-        }
-        if (!"fa ".equals(menu.getIcon().substring(0, 3)))
-            menu.setIcon("fa " + menu.getIcon());
-        if (menuService.addMenu(menu, "list") > 0) {
+        // 添加菜单
+        if (menuService.saveMenu(menu, "list") > 0) {
             return success("菜单添加成功");
         }
         return error(400, "菜单添加失败");
@@ -108,6 +99,27 @@ public class SysMenuController extends BaseController {
             SysMenu menu = menuService.getMenu(Integer.parseInt(id));
             if (null != menu) {
                 return success("获取菜单成功", menu);
+            }
+            return error(400, "获取菜单失败");
+        } catch (Exception e) {
+            return error(400, "error：" + e.getMessage());
+        }
+    }
+
+
+    /**
+     * 根据ID获取一个菜单
+     *
+     * @param roleId 菜单ID
+     * @return 结果
+     */
+    @GetMapping("/listForRoleEdit/{roleId}")
+    @ResponseBody
+    public BaseResult getMenuListForRoleEdit(@PathVariable String roleId) {
+        try {
+            List<SysMenu> menus = menuService.getMenuListForRoleEdit(Integer.parseInt(roleId));
+            if (null != menus) {
+                return success("获取菜单成功", menus);
             }
             return error(400, "获取菜单失败");
         } catch (Exception e) {
@@ -204,21 +216,34 @@ public class SysMenuController extends BaseController {
     @PostMapping("/update")
     @ResponseBody
     public BaseResult updateMenu(@Validated SysMenu menu) {
-        // 如果是顶级菜单，则将其上级菜单设置为-1
-        if ("N".equals(menu.getType())) {
-            menu.setParentId(-1);
-            menu.setPath("");
-        }
-        // 如果是目录，则将其请求路径设置为空字符串（非NULL）
-        else if ("C".equals(menu.getType())) {
-            menu.setPath("");
-        }
-        if (!"fa ".equals(menu.getIcon().substring(0, 3)))
-            menu.setIcon("fa " + menu.getIcon());
-        if (menuService.updateMenu(menu, "list") > 0) {
+        // 执行修改菜单操作
+        if (menuService.saveMenu(menu, "list") > 0) {
             return success("更新菜单成功");
         }
         return error(400, "更新菜单失败");
+    }
+
+
+    /**
+     * 根据ID删除一个菜单
+     *
+     * @param status  修改后的状态：0-正常 1-禁用
+     * @param menuIds 需要修改状态的菜单ID数组
+     * @return BaseResult JSON
+     */
+    @PostMapping("/changeStatus/{status}")
+    @ResponseBody
+    public BaseResult changeMenuStatus(@PathVariable String status, Integer[] menuIds) {
+        System.out.println(menuIds.length);
+        try {
+            int[] result = menuService.changeStatus(Integer.parseInt(status), menuIds);
+            if (result[0] > 0) {
+                return success(result[0] + "个菜单状态更新成功，" + result[1] + "个失败。");
+            }
+            return error(400, "菜单状态更新失败！");
+        } catch (Exception e) {
+            return error(400, "error：" + e.getMessage());
+        }
     }
 
     /**
@@ -231,9 +256,6 @@ public class SysMenuController extends BaseController {
     @ResponseBody
     public BaseResult removeMenu(@PathVariable String id) {
         try {
-            // 测试用
-//            Integer id1 = null;
-//            if (menuService.deleteMenu(id1) > 0) {
             if (menuService.deleteMenu(Integer.parseInt(id), "list") > 0) {
                 return success("菜单删除成功");
             }

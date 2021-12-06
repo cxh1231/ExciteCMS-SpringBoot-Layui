@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>菜单管理</title>
@@ -33,13 +33,9 @@
         </div>
         <!-- 下拉菜单：禁用与否 -->
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-sm layui-btn-danger" id="btn-down-menuStatus">修改状态 <i class="fa fa-caret-down"></i></button>
+            <button class="layui-btn layui-btn-sm layui-btn-warm" id="btn-down-menuStatus">修改状态 <i class="fa fa-caret-down"></i></button>
         </div>
     </div>
-</script>
-<!-- 表格状态列 -->
-<script type="text/html" id="check-menu-status">
-    <input type="checkbox" lay-filter="check-menu-status" value="{{d.id}}" lay-skin="switch" lay-text="正常|禁用" {{d.status==0?'checked':''}}/>
 </script>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
@@ -47,7 +43,6 @@
 <script>
     layui.use(['table', 'treeTable', 'dropdown'], function () {
         let $ = layui.jquery,
-            // table = layui.table,
             form = layui.form,
             treeTable = layui.treeTable,
             dropdown = layui.dropdown;
@@ -111,8 +106,18 @@
                             }
                         }
                     },
-                    {templet: '#check-menu-status', title: '状态', width: 95},
-                    // {field: 'updateTime', title: '更新时间', align: 'center'},
+                    {
+                        field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
+                            let checkStr = "";
+                            if (d.status !== 1) {
+                                checkStr += " checked "
+                            }
+                            if (d.status === 2) {
+                                checkStr += " disabled "
+                            }
+                            return '<input type="checkbox" lay-filter="check-menu-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
+                        }
+                    },
                     {
                         field: 'action', title: '操作', align: 'center', templet: function (d) {
                             let returnStr = "";
@@ -177,13 +182,11 @@
                         table_menu.fold(menus[i]);
                     }
                     break;
-
-
             }
 
         });
 
-        // 下拉菜单，控制状态用
+        // 【修改状态】下拉菜单，控制状态用
         dropdown.render({
             elem: '#btn-down-menuStatus',
             data: [{
@@ -192,37 +195,36 @@
                 title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
             }],
             click: function (obj) {
-                // 判断选择的按钮的ID
-                let clickBtnId = obj.id;
+                // 选中菜单的ID即为新的status
+                let newStatus = obj.id;
                 // 读取所有选中的按钮
-                let checkData = [];
+                let menuId = "";
                 table_menu.checkStatus().map(function (d) {
                     if (!d.LAY_INDETERMINATE) {
-                        checkData.push(d.id)
+                        menuId += (d.id + ",")
                     }
                 })
-                console.log(checkData)
+                menuId = menuId.substring(0, menuId.lastIndexOf(',')); // 去掉末尾的逗号
                 // 选中才响应
-                if (checkData.length > 0) {
-                    let actionText = clickBtnId === 0 ? "开启" : "禁用"
+                if (menuId.length > 0) {
+                    let actionText = newStatus === 0 ? "开启" : "禁用"
                     // 二次询问框
                     layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
                         title: false,
                         btn: ['确定', '取消'],
                         // 按钮【按钮1】的回调
                         btn1: function (index) {
-                            // TODO 此时进行ajax的服务器访问，如果返回数据正常，则进行后面代码的调用
-
-                            layer.msg('选中菜单已' + actionText + '！', {time: 3000, icon: 1});
+                            // 执行ajax请求
+                            $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data) {
+                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                if (data.code === 200) {
+                                    layer.msg(data.msg, {time: 3000, icon: 1});
+                                    table_menu.refresh();
+                                } else {
+                                    layer.msg(data.msg, {time: 3000, icon: 2});
+                                }
+                            });
                         },
-                        // // 按钮【按钮二】的回调
-                        // btn2: function (index) {
-                        //     // layer.msg('操作已取消', {time: 2000, icon: 2});
-                        // },
-                        // // 按钮【X】的回调
-                        // cancel: function (index) {
-                        //     // layer.msg('操作已取消', {time: 2000, icon: 2});
-                        // }
                     });
                 } else {
                     layer.msg('请先选择菜单', {time: 2000, icon: 7});
@@ -233,22 +235,30 @@
         // 监听switch开关切换事件
         form.on('switch(check-menu-status)', function (data) {
             // 该值是操作之后的值
-            let isChecked = data.elem.checked;
+            const isChecked = data.elem.checked;
             console.log(isChecked)
             let actionText = isChecked ? "开启" : "禁用"
+            let newStatus = isChecked ? "0" : "1"
             let menuId = data.value;
             layer.confirm('确认要 ' + actionText + ' 此菜单？', {
                 title: false,
                 btn: ['确定', '取消'],
                 // 按钮【按钮1】的回调
                 btn1: function (index) {
-                    // TODO 此时进行ajax的服务器访问，如果返回数据正常，则进行后面代码的调用
-
-                    data.elem.checked = isChecked;
-                    form.render();
-                    // 更新表格
-                    table_menu.update(menuId, {status: isChecked ? 0 : 1});
-                    layer.close(index);
+                    $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data) {
+                        // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                        if (data.code === 200) {
+                            layer.msg(data.msg, {time: 3000, icon: 1});
+                            data.elem.checked = isChecked;
+                            form.render();
+                            // 更新表格
+                            table_menu.update(menuId, {status: isChecked ? 0 : 1});
+                        } else {
+                            layer.msg(data.msg, {time: 3000, icon: 2});
+                            data.elem.checked = !isChecked;
+                            form.render();
+                        }
+                    });
                 },
                 // 按钮【按钮二】的回调
                 btn2: function (index) {

@@ -90,17 +90,15 @@
         let $ = layui.jquery;
         let form = layui.form,
             layer = layui.layer,
-            dtree = layui.dtree,
-            iconPickerFa = layui.iconPickerFa;
+            dtree = layui.dtree;
         window.form = layui.form;
 
         // 树状菜单选择器
-        dtree.render({
+        let menu_tree = dtree.render({
             elem: "#menuTreeForRole",       // 绑定的菜单
             width: "100%",                  // 宽度百分百
             select: true,                   // 指定下拉树模式
-            // TODO 这个接口重写，
-            url: "/system/menu/list/all",   // 请求的URL
+            url: "/system/menu/listForRoleEdit/" + [[${role.id}]],   // 请求的URL
             none: "请选择菜单类型",
             method: "GET",                  // 请求方式
             checkbar: true,                 // 设置复选框
@@ -121,6 +119,9 @@
             selectInputName: {              // 给隐藏的表单输入框指定名称
                 nodeId: "menuIds",         // 上级菜单的input的name
                 context: "parentName"
+            },
+            done: function () {
+                dtree.selectVal("menuTreeForRole"); // 指定默认选中的值，至input框。填入的值绑定的菜单
             }
         });
 
@@ -169,6 +170,11 @@
             return false;
         });
 
+        // 点击任何地方关闭下拉树
+        $("body").on("click", function (event) {
+            $("div[dtree-id][dtree-select]").removeClass("layui-form-selected");
+            $("div[dtree-id][dtree-card]").removeClass("dtree-select-show layui-anim layui-anim-upbit");
+        });
     });
 </script>
 </body>

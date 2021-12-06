@@ -97,7 +97,7 @@ public class SysMenu implements Serializable {
     private Integer removable;
 
     /**
-     * 状态：0-正常 | 1-封禁
+     * 状态：0-正常 | 1-封禁 | 2-正常且不可编辑
      */
     private Integer status;
 

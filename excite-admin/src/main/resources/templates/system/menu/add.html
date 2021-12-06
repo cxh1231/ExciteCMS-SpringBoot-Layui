@@ -92,12 +92,12 @@
 
             <!--【菜单操作设置】-->
             <div class="layui-form-item" pane="">
-                <label class="layui-form-label">操作设置<span style="color:red"> *</span></label>
+                <label class="layui-form-label">操作设置</label>
                 <div class="layui-input-block">
                     <!-- 几个默认值 -->
-                    <input type="checkbox" name="editable" value="0" lay-skin="switch" lay-text="不可编辑|允许编辑">
-                    <input type="checkbox" name="removable" value="0" lay-skin="switch" lay-text="不可删除|允许删除">
-                    <input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="禁　　用|状态正常">
+                    <input type="checkbox" name="editable" value="0" lay-skin="switch" lay-text="禁止编辑|允许编辑">
+                    <input type="checkbox" name="removable" value="0" lay-skin="switch" lay-text="禁止删除|允许删除">
+                    <input type="checkbox" name="status" value="2" lay-skin="switch" lay-text="状态禁止编辑|状态允许编辑">
                     <span style="color:red;font-size: 12px">注：此操作设置点亮后不可逆！</span>
                 </div>
             </div>
@@ -264,6 +264,12 @@
                 }
             });
             return false;
+        });
+
+        // 点击任何地方关闭下拉树
+        $("body").on("click", function (event) {
+            $("div[dtree-id][dtree-select]").removeClass("layui-form-selected");
+            $("div[dtree-id][dtree-card]").removeClass("dtree-select-show layui-anim layui-anim-upbit");
         });
 
     });

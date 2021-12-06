@@ -42,6 +42,7 @@ public class SysUserController extends BaseController {
 
     /**
      * 角色管理 列表页面
+     *
      * @return
      */
     @RequestMapping("index")
@@ -88,6 +89,23 @@ public class SysUserController extends BaseController {
             return error(400, "验证码已失效或验证码错误，请重试");
         }
 
+    }
+
+    /**
+     * @return
+     */
+    @GetMapping(value = "/list")
+    @ResponseBody
+    public BaseResult getUserList() {
+        List<SysUser> userList = userService.list();
+        if (null != userList) {
+            return success("查询成功", userList, userList.size());
+        } else {
+            // 传入 HttpStatus.BAD_REQUEST，则修改HTTP请求的状态码，浏览器内按F12可查看。
+            return error(HttpStatus.BAD_REQUEST, "查询失败，用户不存在");
+            // 传入 数值，HTTP请求的状态码为200
+            // return error(400, "查询失败，用户不存在");
+        }
     }
 
     /**
