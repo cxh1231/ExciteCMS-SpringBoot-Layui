@@ -28,20 +28,29 @@
         , name, icon, path, permission, component, parent_id, type, sort, editable, removable, status, is_delete, create_time, update_time, delete_time
     </sql>
 
+    <!-- 通过角色ID查询菜单列表（不含禁用菜单） -->
     <select id="selectMenusByRoleId" parameterType="int" resultType="com.zxdmy.excite.system.entity.SysMenu">
         SELECT m.*
         FROM sys_role_menu rm,
              sys_menu m
         WHERE rm.role_id = #{roleId}
+          AND m.status != 1
           AND m.id = rm.menu_id
     </select>
 
-    <select id="selectMenusByUserId" parameterType="int" resultType="com.zxdmy.excite.system.entity.SysMenu">
+    <!-- 通过用户ID查询角色（不含禁用角色） -->
+    <select id="selectMenusByUserId" resultType="com.zxdmy.excite.system.entity.SysMenu">
         SELECT DISTINCT m.*
         FROM sys_user_role ur
-                 LEFT JOIN sys_role_menu rm ON ur.role_id = rm.role_id
-                 LEFT JOIN sys_menu m ON rm.menu_id = m.id
+        LEFT JOIN sys_role_menu rm ON ur.role_id = rm.role_id
+        LEFT JOIN sys_menu m ON rm.menu_id = m.id
         WHERE ur.user_id = #{userId}
-          AND rm.role_id IS NOT NULL
+        <if test="isOnlyMenu == 1">
+            AND m.type != 'B'
+        </if>
+        AND m.status != 1
+        AND rm.role_id IS NOT NULL
     </select>
+
+
 </mapper>

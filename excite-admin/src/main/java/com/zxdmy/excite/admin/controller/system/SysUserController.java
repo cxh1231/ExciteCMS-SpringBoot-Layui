@@ -5,7 +5,8 @@ import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.framework.service.RedisService;
+
+import com.zxdmy.excite.common.service.RedisService;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.service.ISysUserService;
 import io.swagger.v3.oas.annotations.Operation;

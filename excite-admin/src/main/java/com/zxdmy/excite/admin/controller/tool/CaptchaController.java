@@ -4,9 +4,10 @@ package com.zxdmy.excite.admin.controller.tool;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 
-import com.zxdmy.excite.framework.entity.CaptchaDomain;
-import com.zxdmy.excite.framework.service.CaptchaService;
-import com.zxdmy.excite.framework.service.RedisService;
+
+import com.zxdmy.excite.common.entity.CaptchaDomain;
+import com.zxdmy.excite.common.service.CaptchaService;
+import com.zxdmy.excite.common.service.RedisService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

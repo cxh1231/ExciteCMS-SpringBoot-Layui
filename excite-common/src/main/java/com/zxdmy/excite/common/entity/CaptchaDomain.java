@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.entity;
+package com.zxdmy.excite.common.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;

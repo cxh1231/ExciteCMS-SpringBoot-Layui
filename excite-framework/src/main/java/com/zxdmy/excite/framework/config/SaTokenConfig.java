@@ -55,7 +55,7 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
             // 也可以从数据库中读取需要拦截的路由列表
             // getMenuList方法会访问很多次，建议使用Redis开启缓存
-            List<SysMenu> menuList = menuService.getMenuListForSaToken("list");
+            List<SysMenu> menuList = menuService.getMenuListForSaToken();
             for (SysMenu menu : menuList) {
                 // 如果权限标识符不为空，则添加至拦截器中
                 if (null != menu.getPermission()) {

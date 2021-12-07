@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.common.config;
 
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import com.google.code.kaptcha.util.Config;

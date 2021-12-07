@@ -145,18 +145,6 @@
             <version>2.2.6</version>
         </dependency>
 
-        <!--        &lt;!&ndash; Redis https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis &ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
-        <!--        </dependency>-->
-        <!--        &lt;!&ndash; 对象池，使用redis时必须引入 &ndash;&gt;-->
-        <!--        &lt;!&ndash; 使用对象池，每次创建的对象并不实际销毁，而是缓存在对象池中，下次使用的时候，不用再重新创建，直接从对象池的缓存中取即可&ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.commons</groupId>-->
-        <!--            <artifactId>commons-pool2</artifactId>-->
-        <!--        </dependency>-->
-
         <!-- configuration-processor -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -164,16 +152,22 @@
             <optional>true</optional>
         </dependency>
 
-
         <!-- Sa-Token 权限认证, 在线文档：http://sa-token.dev33.cn/ -->
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-spring-boot-starter</artifactId>
-            <version>1.27.0</version>
+            <version>1.28.0</version>
         </dependency>
         <dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
+        </dependency>
+
+        <!-- hutool工具类 -->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-all</artifactId>
+            <version>5.7.12</version>
         </dependency>
 
     </dependencies>

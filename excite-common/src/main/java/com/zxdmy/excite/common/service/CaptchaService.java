@@ -1,9 +1,10 @@
-package com.zxdmy.excite.framework.service;
+package com.zxdmy.excite.common.service;
 
 import cn.hutool.captcha.AbstractCaptcha;
 import cn.hutool.captcha.CaptchaUtil;
 import com.google.code.kaptcha.Producer;
-import com.zxdmy.excite.framework.entity.CaptchaDomain;
+
+import com.zxdmy.excite.common.entity.CaptchaDomain;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import sun.misc.BASE64Encoder;

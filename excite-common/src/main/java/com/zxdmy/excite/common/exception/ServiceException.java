@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.exception;
+package com.zxdmy.excite.common.exception;
 
 /**
  * <p>

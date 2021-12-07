@@ -1,6 +1,7 @@
-package com.zxdmy.excite.framework.service;
+package com.zxdmy.excite.common.service;
 
-import com.zxdmy.excite.framework.config.RedisConfig;
+
+import com.zxdmy.excite.common.config.RedisConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;

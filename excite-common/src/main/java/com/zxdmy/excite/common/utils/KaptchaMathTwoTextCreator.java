@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.utils;
+package com.zxdmy.excite.common.utils;
 
 import com.google.code.kaptcha.text.impl.DefaultTextCreator;
 

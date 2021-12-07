@@ -1,13 +1,12 @@
 package com.zxdmy.excite.admin.utils;
 
 
-import com.zxdmy.excite.framework.config.ExciteConfig;
-import com.zxdmy.excite.framework.service.RedisService;
+import com.zxdmy.excite.common.config.ExciteConfig;
+import com.zxdmy.excite.common.service.RedisService;
 import com.zxdmy.excite.system.entity.SysUser;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

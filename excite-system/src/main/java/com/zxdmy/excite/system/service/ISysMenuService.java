@@ -24,7 +24,7 @@ public interface ISysMenuService extends IService<SysMenu> {
      * @param menu 菜单/权限 实体
      * @return 影响的行数 0-失败 | 1-成功
      */
-    public int saveMenu(SysMenu menu, String cacheKey);
+    public int saveMenu(SysMenu menu);
 
     /**
      * 修改菜单的状态
@@ -58,7 +58,7 @@ public interface ISysMenuService extends IService<SysMenu> {
      * @param id 菜单/权限的ID
      * @return 影响的行数 0-失败 | 1-成功
      */
-    public int deleteMenu(Integer id, String cacheKey);
+    public int deleteMenu(Integer id);
 
     /**
      * 通过角色ID查询全部菜单列表
@@ -72,10 +72,9 @@ public interface ISysMenuService extends IService<SysMenu> {
     /**
      * 权限管理模块使用到的获取权限列表
      *
-     * @param cacheKey 列表的key值
      * @return
      */
-    public List<SysMenu> getMenuListForSaToken(String cacheKey);
+    public List<SysMenu> getMenuListForSaToken();
 
     /**
      * 通过用户的ID获取权限列表

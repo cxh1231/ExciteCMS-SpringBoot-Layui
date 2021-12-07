@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.common.config;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;

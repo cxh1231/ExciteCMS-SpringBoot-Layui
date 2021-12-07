@@ -80,7 +80,7 @@ public class SysMenuController extends BaseController {
     @ResponseBody
     public BaseResult addMenu(@Validated SysMenu menu) {
         // 添加菜单
-        if (menuService.saveMenu(menu, "list") > 0) {
+        if (menuService.saveMenu(menu) > 0) {
             return success("菜单添加成功");
         }
         return error(400, "菜单添加失败");
@@ -217,7 +217,7 @@ public class SysMenuController extends BaseController {
     @ResponseBody
     public BaseResult updateMenu(@Validated SysMenu menu) {
         // 执行修改菜单操作
-        if (menuService.saveMenu(menu, "list") > 0) {
+        if (menuService.saveMenu(menu) > 0) {
             return success("更新菜单成功");
         }
         return error(400, "更新菜单失败");
@@ -256,7 +256,7 @@ public class SysMenuController extends BaseController {
     @ResponseBody
     public BaseResult removeMenu(@PathVariable String id) {
         try {
-            if (menuService.deleteMenu(Integer.parseInt(id), "list") > 0) {
+            if (menuService.deleteMenu(Integer.parseInt(id)) > 0) {
                 return success("菜单删除成功");
             }
             return error(400, "菜单删除失败");

@@ -29,14 +29,13 @@ class ISysMenuServiceTest {
     @Test
     void deleteTest() {
         Integer id = null;
-        menuService.deleteMenu(id, "list");
-
+        menuService.deleteMenu(id);
     }
 
     @Test
     void selectTest() {
         Integer id = 10000;
-        List<SysMenu> sysMenus = menuMapper.selectMenusByUserId(id);
+        List<SysMenu> sysMenus = menuMapper.selectMenusByUserId(id, 0);
         System.out.println(sysMenus);
 
     }

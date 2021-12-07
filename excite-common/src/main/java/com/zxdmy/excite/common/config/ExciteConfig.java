@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.common.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -19,6 +19,7 @@ public class ExciteConfig {
 
     /**
      * 是否允许Redis缓存：true:允许 | false:不允许
+     * 此Redis缓存用到的地方主要有：用户角色、权限控制；
      */
     private Boolean allowRedis;
 

@@ -235,7 +235,7 @@
         // 监听switch开关切换事件
         form.on('switch(check-menu-status)', function (data) {
             // 该值是操作之后的值
-            const isChecked = data.elem.checked;
+            let isChecked = data.elem.checked;
             console.log(isChecked)
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "0" : "1"
@@ -245,16 +245,16 @@
                 btn: ['确定', '取消'],
                 // 按钮【按钮1】的回调
                 btn1: function (index) {
-                    $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data) {
+                    $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data2) {
                         // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                        if (data.code === 200) {
-                            layer.msg(data.msg, {time: 3000, icon: 1});
+                        if (data2.code === 200) {
+                            layer.msg(data2.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
                             form.render();
                             // 更新表格
                             table_menu.update(menuId, {status: isChecked ? 0 : 1});
                         } else {
-                            layer.msg(data.msg, {time: 3000, icon: 2});
+                            layer.msg(data2.msg, {time: 3000, icon: 2});
                             data.elem.checked = !isChecked;
                             form.render();
                         }

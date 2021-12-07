@@ -1,12 +1,10 @@
-package com.zxdmy.excite.framework.exception;
+package com.zxdmy.excite.common.exception;
 
 import cn.dev33.satoken.exception.DisableLoginException;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
-
 import com.zxdmy.excite.common.base.BaseController;
-import com.zxdmy.excite.common.base.BaseResult;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
