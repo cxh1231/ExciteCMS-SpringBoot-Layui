@@ -189,21 +189,22 @@
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "0" : "1"
             let roleId = data.value;
+            console.log(roleId)
             layer.confirm('确认要 ' + actionText + ' 此角色？', {
                 title: false,
                 btn: ['确定', '取消'],
                 // 按钮【按钮1】的回调
                 btn1: function (index) {
-                    $.post("/system/role/changeStatus/" + newStatus, {menuIds: roleId}, function (data) {
+                    $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleId}, function (data2) {
                         // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                        if (data.code === 200) {
-                            layer.msg(data.msg, {time: 3000, icon: 1});
+                        if (data2.code === 200) {
+                            layer.msg(data2.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
                             form.render();
                             // 更新表格
                             table_role.update(roleId, {status: isChecked ? 0 : 1});
                         } else {
-                            layer.msg(data.msg, {time: 3000, icon: 2});
+                            layer.msg(data2.msg, {time: 3000, icon: 2});
                             data.elem.checked = !isChecked;
                             form.render();
                         }
@@ -257,7 +258,7 @@
                                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                 if (data.code === 200) {
                                     layer.msg(data.msg, {time: 3000, icon: 1});
-                                    table_role.refresh();
+                                    table_role.reload();
                                 } else {
                                     layer.msg(data.msg, {time: 3000, icon: 2});
                                 }

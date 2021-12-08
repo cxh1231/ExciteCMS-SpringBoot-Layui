@@ -38,8 +38,8 @@ spring:
     database: 0
     # 自定义属性：开启自定义前缀
     allow-prefix: true
-    # 自定义属性：key的前缀，只在注解@Cacheable、@CachePut等时生效。
-    prefix: "com:zxdmy:excite:"
+    # 自定义属性：key的前缀
+    prefix: "com.zxdmy.excite:"
     lettuce:
       pool:
         # 连接池最大连接数（使用负值表示没有限制） 默认 8
@@ -115,7 +115,7 @@ springdoc:
 # Sa-Token配置（权限配置使用）
 sa-token:
   # token名称 (同时也是cookie名称)
-  token-name: excitecms
+  token-name: "com.zxdmy.excite"
   # token有效期，单位s 默认30天, -1代表永不过期
   timeout: 2592000
   # token临时有效期 (指定时间内无操作就视为token过期) 单位: 秒

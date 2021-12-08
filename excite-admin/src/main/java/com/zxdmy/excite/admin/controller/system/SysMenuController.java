@@ -234,7 +234,7 @@ public class SysMenuController extends BaseController {
     @PostMapping("/changeStatus/{status}")
     @ResponseBody
     public BaseResult changeMenuStatus(@PathVariable String status, Integer[] menuIds) {
-        System.out.println(menuIds.length);
+        // System.out.println(menuIds.length);
         try {
             int[] result = menuService.changeStatus(Integer.parseInt(status), menuIds);
             if (result[0] > 0) {

@@ -21,6 +21,7 @@ public class SaTokenListenerConfig implements SaTokenListener {
      */
     @Override
     public void doLogin(String loginType, Object loginId, SaLoginModel loginModel) {
+        System.out.println(loginType + loginId + loginModel);
         // TODO 可以增加保存登录记录至数据库的操作
     }
 

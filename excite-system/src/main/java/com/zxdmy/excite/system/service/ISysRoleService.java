@@ -23,7 +23,16 @@ public interface ISysRoleService extends IService<SysRole> {
      * @param menusIds 为当前角色添加的菜单/权限ID列表
      * @return 影响的行数 0 - 失败 | >0 - 成功
      */
-    public int addRole(SysRole role, Integer[] menusIds);
+//    public int addRole(SysRole role, Integer[] menusIds);
+
+    /**
+     * 添加|更新角色
+     *
+     * @param role     角色实体，ID为空表示添加
+     * @param menusIds 为当前角色添加的菜单/权限ID列表
+     * @return 影响的行数 0 - 失败 | >0 - 成功
+     */
+    public int saveRole(SysRole role, Integer[] menusIds);
 
     /**
      * 根据ID查询某个角色详情
@@ -47,7 +56,16 @@ public interface ISysRoleService extends IService<SysRole> {
      * @param menusIds 为当前角色添加的菜单/权限ID列表
      * @return 影响的行数 0-失败 | 1-成功
      */
-    public int updateRole(SysRole role, Integer[] menusIds);
+//    public int updateRole(SysRole role, Integer[] menusIds);
+
+    /**
+     * 修改角色状态
+     *
+     * @param newStatus 新状态
+     * @param roleIds   角色ID列表
+     * @return 结果
+     */
+    public int[] changeStatus(Integer newStatus, Integer[] roleIds);
 
     /**
      * 删除角色

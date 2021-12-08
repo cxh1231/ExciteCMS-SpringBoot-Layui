@@ -38,16 +38,20 @@
           AND m.id = rm.menu_id
     </select>
 
-    <!-- 通过用户ID查询角色（不含禁用角色） -->
+    <!-- 通过用户ID查询菜单列表（不含：被禁用的用户、角色、菜单） -->
     <select id="selectMenusByUserId" resultType="com.zxdmy.excite.system.entity.SysMenu">
         SELECT DISTINCT m.*
-        FROM sys_user_role ur
+        FROM sys_user u
+        LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+        LEFT JOIN sys_role r ON r.id = ur.role_id
         LEFT JOIN sys_role_menu rm ON ur.role_id = rm.role_id
         LEFT JOIN sys_menu m ON rm.menu_id = m.id
         WHERE ur.user_id = #{userId}
         <if test="isOnlyMenu == 1">
             AND m.type != 'B'
         </if>
+        AND u.status != 1
+        AND r.status != 1
         AND m.status != 1
         AND rm.role_id IS NOT NULL
     </select>

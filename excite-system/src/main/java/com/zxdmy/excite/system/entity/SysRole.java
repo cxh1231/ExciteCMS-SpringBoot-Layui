@@ -53,7 +53,7 @@ public class SysRole implements Serializable {
     private Integer sort;
 
     /**
-     * 角色状态：0-正常 | 1-封禁
+     * 角色状态：0-正常 | 1-封禁 | 2-状态正常且无法禁用
      */
     private Integer status;
 

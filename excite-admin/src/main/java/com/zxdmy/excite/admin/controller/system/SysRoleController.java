@@ -31,6 +31,7 @@ public class SysRoleController extends BaseController {
 
     /**
      * 角色管理 列表页面
+     *
      * @return
      */
     @RequestMapping("index")
@@ -40,14 +41,17 @@ public class SysRoleController extends BaseController {
 
     /**
      * 添加角色 页面
+     *
      * @return
      */
     @RequestMapping("goAdd")
     public String goAdd() {
         return "system/role/add";
     }
+
     /**
      * 编辑角色 页面
+     *
      * @return
      */
     @RequestMapping("goEdit/{id}")
@@ -56,8 +60,7 @@ public class SysRoleController extends BaseController {
             SysRole role = roleService.getRole(Integer.parseInt(id));
             if (null != role) {
                 map.put("role", role);
-            }
-            else{
+            } else {
                 return "error/404";
             }
         } catch (Exception e) {
@@ -78,7 +81,7 @@ public class SysRoleController extends BaseController {
     @ResponseBody
     public BaseResult addRole(@Validated SysRole role, Integer[] menuIds) {
         try {
-            if (roleService.addRole(role, menuIds) > 0) {
+            if (roleService.saveRole(role, menuIds) > 0) {
                 return success("菜单角色成功");
             }
             return error(400, "菜单角色失败");
@@ -135,14 +138,34 @@ public class SysRoleController extends BaseController {
     @ResponseBody
     public BaseResult updateRole(@Validated SysRole role, Integer[] menuIds) {
         try {
-            if (roleService.updateRole(role, menuIds) > 0) {
+            if (roleService.saveRole(role, menuIds) > 0) {
                 return success("更新角色成功");
             }
             return error(400, "更新角色失败，请重试");
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());
         }
+    }
 
+    /**
+     * 更新角色状态
+     *
+     * @param status  角色新状态
+     * @param roleIds 角色ID列表，数组类型：[1,2,3,4,5,6]
+     * @return 结果
+     */
+    @PostMapping("/changeStatus/{status}")
+    @ResponseBody
+    public BaseResult changeStatus(@PathVariable String status, Integer[] roleIds) {
+        try {
+            int[] result = roleService.changeStatus(Integer.parseInt(status), roleIds);
+            if (result[0] > 0) {
+                return success(result[0] + "个角色状态更新成功，" + result[1] + "个失败！");
+            } else
+                return error(400, "更新角色失败，请重试");
+        } catch (Exception e) {
+            return error(500, "error:" + e.getMessage());
+        }
     }
 
     /**

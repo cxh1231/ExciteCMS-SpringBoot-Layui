@@ -22,9 +22,15 @@
     <dependencies>
 
         <!-- Redis https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-data-redis -->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-data-redis</artifactId>-->
+<!--        </dependency>-->
+        <!-- Sa-Token 整合 Redis （使用jackson序列化方式） -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-dao-redis-jackson</artifactId>
+            <version>1.28.0</version>
         </dependency>
         <!-- 对象池，使用redis时必须引入 -->
         <!-- 使用对象池，每次创建的对象并不实际销毁，而是缓存在对象池中，下次使用的时候，不用再重新创建，直接从对象池的缓存中取即可-->

@@ -242,7 +242,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Override
     public List<SysMenu> getMenuListByUserId(Integer userId) {
 
-//        return menuMapper.selectMenusByUserId(userId, 0);
+        //return menuMapper.selectMenusByUserId(userId, 0);
         return this.getUserMenu4Redis(userId);
     }
 
@@ -327,7 +327,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 return menuList;
             }
             // redis中有：返回
-            return (List<SysMenu>) redisService.get("menu:allMenuList");
+            return (List<SysMenu>) redisService.get("menu:userMenuList:"+userId);
         }
         // 未开启redis，返回空
         return null;

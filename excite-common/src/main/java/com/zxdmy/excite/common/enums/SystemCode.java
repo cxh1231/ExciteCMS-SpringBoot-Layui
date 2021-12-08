@@ -15,6 +15,10 @@ public enum SystemCode {
      */
     MENU_DEFAULT_SORT(50, "菜单默认排序"),
     /**
+     * 默认顺序：50
+     */
+    SORT_DEFAULT(50, "默认排序"),
+    /**
      * 记录状态：正常，值：0
      */
     STATUS_Y(0, "记录状态正常"),

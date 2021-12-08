@@ -2,7 +2,11 @@ package com.zxdmy.excite.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.zxdmy.excite.common.config.ExciteConfig;
 import com.zxdmy.excite.common.enums.SystemCode;
+import com.zxdmy.excite.common.exception.ServiceException;
+import com.zxdmy.excite.common.service.RedisService;
+import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.entity.SysRole;
 import com.zxdmy.excite.system.entity.SysRoleMenu;
 import com.zxdmy.excite.system.mapper.SysRoleMapper;
@@ -19,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -38,33 +43,58 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 
     ISysUserRoleService userRoleService;
 
+    RedisService redisService;
+
+    ExciteConfig exciteConfig;
+
     /**
-     * 添加角色
+     * 添加|更新角色
      *
-     * @param role     角色实体
+     * @param role     角色实体，ID为空表示添加
      * @param menusIds 为当前角色添加的菜单/权限ID列表
-     * @return 影响的行数 =0 - 失败 | >0 - 成功
+     * @return 影响的行数 0 - 失败 | >0 - 成功
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int addRole(SysRole role, Integer[] menusIds) {
+    public int saveRole(SysRole role, Integer[] menusIds) {
         if (null == role) {
-//            throw new ServiceException("角色实体SysRole不能为null");
-            return 0;
+            throw new ServiceException("角色实体不能为null");
         }
-        // 角色的其他信息初始化
-        if(null == role.getStatus()){
+        // 初始化：角色状态
+        if (null == role.getStatus()) {
             role.setStatus(SystemCode.STATUS_Y.getCode());
         }
-        LocalDateTime localDateTime = LocalDateTime.now();
-        role.setCreateTime(localDateTime);
-        // 先插入角色，以便获取角色的ID
-        int result = roleMapper.insert(role);
-        if (result > 0) {
-            // 插入权限关联列表
-            insertRoleMenu(role.getId(), menusIds);
+        // 初始化：角色顺序
+        if (null == role.getSort()) {
+            role.setStatus(SystemCode.SORT_DEFAULT.getCode());
         }
-        // 返回
+        LocalDateTime localDateTime = LocalDateTime.now();
+        int result = 0;
+        // 新增
+        if (null == role.getId()) {
+            role.setCreateTime(localDateTime);
+            // 先插入角色，以便获取角色的ID
+            result = roleMapper.insert(role);
+            if (result > 0) {
+                // 插入权限关联列表
+                insertRoleMenu(role.getId(), menusIds);
+            }
+        }
+        // 更新
+        else {
+            role.setUpdateTime(localDateTime);
+            // 将新菜单插入
+            result = roleMapper.updateById(role);
+            if (result > 0) {
+                // 先从关联表中删除旧数据
+                QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
+                wrapper1.eq("role_id", role.getId());
+                roleMenuService.remove(wrapper1);
+                // 再添加新数据
+                insertRoleMenu(role.getId(), menusIds);
+            }
+        }
+        this.deleteRedisUserMenuCache(result);
         return result;
     }
 
@@ -77,7 +107,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Override
     public SysRole getRole(Integer id) {
         if (null == id) {
-//            throw new ServiceException("角色ID不能为null");
+            throw new ServiceException("角色ID不能为null");
         }
         // 根据ID查询status正常的角色
         QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
@@ -93,37 +123,37 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Override
     public List<SysRole> getList() {
         // 根据ID查询status正常的角色
-        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
-        wrapper.eq("status", SystemCode.STATUS_Y.getCode());
-        return roleMapper.selectList(wrapper);
+//        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
+//        wrapper.eq("status", SystemCode.STATUS_Y.getCode());
+//        return roleMapper.selectList(wrapper);
+        return roleMapper.selectList(null);
     }
 
     /**
-     * 修改角色
+     * 改变角色状态
      *
-     * @param role     角色实体
-     * @param menusIds 为当前角色添加的菜单/权限ID列表
-     * @return 影响的行数 0-失败 | 1-成功
+     * @param newStatus 新状态
+     * @param roleIds   角色ID列表
+     * @return 结果数组
      */
     @Override
-    @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int updateRole(SysRole role, Integer[] menusIds) {
-        if (null == role) {
-//            throw new ServiceException("角色实体SysRole不能为null");
+    public int[] changeStatus(Integer newStatus, Integer[] roleIds) {
+        if (null == newStatus || null == roleIds) {
+            throw new ServiceException("新状态或角色ID不能为空");
         }
-        // 初始化数据
-        LocalDateTime localDateTime = LocalDateTime.now();
-        role.setUpdateTime(localDateTime);
-        // 将新菜单插入
-        int result = roleMapper.updateById(role);
-        if (result > 0) {
-            // 先从关联表中删除旧数据
-            QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
-            wrapper1.eq("role_id", role.getId());
-            roleMenuService.remove(wrapper1);
-            // 再添加新数据
-            insertRoleMenu(role.getId(), menusIds);
+        int[] result = new int[2];
+        for (Integer roleId : roleIds) {
+            SysRole role = new SysRole();
+            QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
+            role.setId(roleId);
+            role.setStatus(newStatus);
+            wrapper.eq("id", roleId)
+                    .ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
+            if (roleMapper.update(role, wrapper) > 0)
+                result[0]++;
+            else result[1]++;
         }
+        this.deleteRedisUserMenuCache(result[0]);
         return result;
     }
 
@@ -137,11 +167,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int deleteRoleById(Integer id) {
         if (null == id) {
-//            throw new ServiceException("角色ID不能为null");
+            throw new ServiceException("角色ID不能为null");
         }
         // 当该角色已经分配给用户，则禁止删除
         if (null != userRoleService.getListByRoleId(id)) {
-//            throw new ServiceException("当前角色已分配给用户，禁止删除！");
+            throw new ServiceException("当前角色已分配给用户，禁止删除！");
         }
         // 删除角色-权限关联表中的数据
         QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
@@ -170,5 +200,23 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             // 批量插入
             roleMenuService.saveBatch(roleMenuList);
         }
+    }
+
+    /**
+     * 如果角色信息有改动，则需要情况Redis里的用户权限缓存
+     */
+    private void deleteRedisUserMenuCache(int result) {
+        if (exciteConfig.getAllowRedis() && result > 0) {
+            // 获取已缓存的用户列表
+            Set<Integer> userSet = (Set<Integer>) redisService.get("menu:userList");
+            // 统统清空
+            if (userSet != null) {
+                for (Integer userId : userSet) {
+                    redisService.remove("menu:userMenuList:" + userId);
+                }
+                redisService.remove("menu:userList");
+            }
+        }
+
     }
 }
