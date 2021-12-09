@@ -34,7 +34,7 @@
         FROM sys_role_menu rm,
              sys_menu m
         WHERE rm.role_id = #{roleId}
-          AND m.status != 1
+          AND m.status != 0
           AND m.id = rm.menu_id
     </select>
 
@@ -50,9 +50,9 @@
         <if test="isOnlyMenu == 1">
             AND m.type != 'B'
         </if>
-        AND u.status != 1
-        AND r.status != 1
-        AND m.status != 1
+        AND u.status != 0
+        AND r.status != 0
+        AND m.status != 0
         AND rm.role_id IS NOT NULL
     </select>
 

@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.framework.satoken;
 
 import cn.dev33.satoken.interceptor.SaAnnotationInterceptor;
 import cn.dev33.satoken.interceptor.SaRouteInterceptor;
@@ -42,9 +42,8 @@ public class SaTokenConfig implements WebMvcConfigurer {
 
         // 方案2：注册启用【路由拦截器】
         registry.addInterceptor(new SaRouteInterceptor((request, response, handler) -> {
-            // 打印请求的链接
+            // 请求的完整链接
             System.out.println(request.getUrl());
-            System.out.println(request.getMethod());
 
             // 可以在此处直接[批量]指定哪些路由需要拦截/排除[登录]
             // SaRouter.match(Arrays.asList("/system/**", ""), Arrays.asList("/system/login", "/system/user/login"), StpUtil::checkLogin);

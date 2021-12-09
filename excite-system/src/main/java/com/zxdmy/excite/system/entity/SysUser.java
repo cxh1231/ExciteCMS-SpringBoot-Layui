@@ -38,8 +38,8 @@ public class SysUser implements Serializable {
     /**
      * 用户昵称
      */
-    @Schema(name = "nickname",description = "用户昵称")
-    private String nickname;
+    @Schema(name = "username",description = "用户昵称")
+    private String username;
 
     /**
      * 用户头像
@@ -71,7 +71,7 @@ public class SysUser implements Serializable {
     /**
      * 用户状态
      */
-    @JsonIgnore
+//    @JsonIgnore
     private Integer status;
 
     /**
@@ -99,7 +99,7 @@ public class SysUser implements Serializable {
     /**
      * 更新时间
      */
-    @JsonIgnore
+//    @JsonIgnore
     private LocalDateTime updateTime;
 
     /**

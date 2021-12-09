@@ -89,7 +89,7 @@ public class CodeGenerator {
         DataSourceConfig dsConfig = new DataSourceConfig();
         dsConfig
                 // 数据库链接URL
-                .setUrl("jdbc:mysql://localhost:3306/db_excite?useUnicode=true&serverTimezone=UTC&useSSL=false&characterEncoding=utf8")
+                .setUrl("jdbc:mysql://localhost:3306/db_excite_cms?useUnicode=true&serverTimezone=UTC&useSSL=false&characterEncoding=utf8")
                 // .setSchemaName("public")     //数据库 schema name
                 .setDbType(DbType.MYSQL)        // 数据库类型
                 // 数据库驱动，MySQL5.X：com.mysql.jdbc.Driver

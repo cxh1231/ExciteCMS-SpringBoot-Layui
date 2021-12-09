@@ -35,7 +35,7 @@ class ISysUserServiceTest {
     @Test
     void createOneTest() {
         SysUser user = new SysUser();
-        user.setNickname("张三");
+        user.setUsername("张三");
         user.setEmail("1000@zxdmy.com");
         user.setPassword("sfdnfjdsfhdsjk");
         if (userService.save(user)) {
@@ -57,7 +57,7 @@ class ISysUserServiceTest {
             // 定义用户实体
             SysUser user = new SysUser();
             // 随机填充数据
-            user.setNickname("用户" + i);
+            user.setUsername("用户" + i);
             user.setEmail("1000@zxdmy.com" + i);
             user.setPassword(DigestUtils.md5DigestAsHex(("password" + i).getBytes()));
             // 添加至列表
@@ -82,7 +82,7 @@ class ISysUserServiceTest {
         SysUser user = new SysUser();
         // 随机填充数据
         user.setId(10006);
-        user.setNickname("李四");
+        user.setUsername("李四");
         // 执行修改
         if (userService.updateById(user)) {
             System.out.println("修改用户信息成功");

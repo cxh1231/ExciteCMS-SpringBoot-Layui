@@ -64,8 +64,11 @@
             <!--【角色状态】-->
             <div class="layui-form-item" pane="">
                 <label class="layui-form-label">角色状态</label>
-                <div class="layui-input-block">
-                    <input type="checkbox" name="status" value="1" lay-skin="switch" lay-text="停用|正常">
+                <div class="layui-input-inline">
+                    <input type="checkbox" name="status" value="2" th:checked="${role.status} eq 2" th:disabled="${role.status == 2}" lay-skin="switch" lay-text="启用且不可禁用|允许启用与禁用">
+                </div>
+                <div class="layui-form-mid layui-word-aux">
+                    <span style="color:red;font-size: 12px">注：此操作设置点亮后不可逆！</span>
                 </div>
             </div>
 

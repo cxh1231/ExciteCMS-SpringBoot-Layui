@@ -3,10 +3,12 @@ package com.zxdmy.excite.admin.controller.system;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 
 import com.zxdmy.excite.common.service.RedisService;
+import com.zxdmy.excite.framework.aop.AnnotationSaveReLog;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.service.ISysUserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,7 +46,7 @@ public class SysUserController extends BaseController {
     /**
      * 角色管理 列表页面
      *
-     * @return
+     * @return 列表页面
      */
     @RequestMapping("index")
     public String index() {
@@ -62,6 +64,7 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/login")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult login(String username, String password, String captcha, String remember) {
         // 如果提交的信息有空信息
         if (StrUtil.hasBlank(username, password, captcha)) {
@@ -97,65 +100,12 @@ public class SysUserController extends BaseController {
      */
     @GetMapping(value = "/list")
     @ResponseBody
-    public BaseResult getUserList() {
-        List<SysUser> userList = userService.list();
-        if (null != userList) {
-            return success("查询成功", userList, userList.size());
+    public BaseResult getUserList(Integer page, Integer limit, String username, String account) {
+        Page<SysUser> userPage = userService.getPage(page, limit, username, account);
+        if (null != userPage) {
+            return success("查询成功", userPage.getRecords(), (int) userPage.getTotal());
         } else {
-            // 传入 HttpStatus.BAD_REQUEST，则修改HTTP请求的状态码，浏览器内按F12可查看。
-            return error(HttpStatus.BAD_REQUEST, "查询失败，用户不存在");
-            // 传入 数值，HTTP请求的状态码为200
-            // return error(400, "查询失败，用户不存在");
-        }
-    }
-
-    /**
-     * 根据ID查询用户信息
-     *
-     * @param id 用户ID
-     * @return 用户信息
-     */
-    @Operation(summary = "获取用户信息接口",
-            description = "根据ID查询用户信息",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "获取成功", content = @Content(mediaType = "application/json")),
-                    @ApiResponse(responseCode = "400", description = "获取失败", content = @Content(mediaType = "application/json"))},
-            security = @SecurityRequirement(name = "需要认证"))
-    @GetMapping(value = "/get/{id}")
-    @ResponseBody
-    public String getOne(@PathVariable String id) {
-        SysUser user = userService.getById(id);
-        if (null != user) {
-            return user.toString();
-        } else {
-            return "用户信息不存在";
-        }
-    }
-
-
-    @GetMapping(value = "/demo/get/{id}")
-    @ResponseBody
-    public BaseResult demoGetById(@PathVariable String id) {
-        SysUser user = userService.getById(id);
-        if (null != user) {
-            return success("查询成功", user);
-        } else {
-            // 传入 HttpStatus.BAD_REQUEST，则修改HTTP请求的状态码，浏览器内按F12可查看。
-            return error(HttpStatus.BAD_REQUEST, "查询失败，用户不存在");
-            // 传入 数值，HTTP请求的状态码为200
-            // return error(400, "查询失败，用户不存在");
-        }
-    }
-
-
-    @GetMapping(value = "/demo/getAll")
-    @ResponseBody
-    public BaseResult demoGetAll() {
-        List<SysUser> userList = userService.list();
-        if (null != userList) {
-            return success("查询成功", userList, userList.size());
-        } else {
-            return error("查询失败，用户列表为空");
+            return error(400, "查询失败，用户不存在");
         }
     }
 

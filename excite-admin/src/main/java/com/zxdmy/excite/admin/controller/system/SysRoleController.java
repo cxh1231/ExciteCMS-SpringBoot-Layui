@@ -1,8 +1,9 @@
 package com.zxdmy.excite.admin.controller.system;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
-import com.zxdmy.excite.system.entity.SysMenu;
+import com.zxdmy.excite.framework.aop.AnnotationSaveReLog;
 import com.zxdmy.excite.system.entity.SysRole;
 import com.zxdmy.excite.system.service.ISysRoleService;
 import com.zxdmy.excite.system.service.ISysUserRoleService;
@@ -79,9 +80,10 @@ public class SysRoleController extends BaseController {
      */
     @PostMapping("/add")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult addRole(@Validated SysRole role, Integer[] menuIds) {
         try {
-            if (roleService.saveRole(role, menuIds) > 0) {
+            if (roleService.saveRole(null, menuIds) > 0) {
                 return success("菜单角色成功");
             }
             return error(400, "菜单角色失败");
@@ -118,10 +120,10 @@ public class SysRoleController extends BaseController {
      */
     @GetMapping("/list")
     @ResponseBody
-    public BaseResult getRoleList() {
+    public BaseResult getRoleList(Integer page, Integer limit, String name, String permission) {
         try {
-            List<SysRole> roleList = roleService.getList();
-            return success("获取角色列表成功", roleList, roleList.size());
+            Page<SysRole> rolePage = roleService.getPage(page, limit, name, permission);
+            return success("获取角色列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());
         }
@@ -136,6 +138,7 @@ public class SysRoleController extends BaseController {
      */
     @PostMapping("/update")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult updateRole(@Validated SysRole role, Integer[] menuIds) {
         try {
             if (roleService.saveRole(role, menuIds) > 0) {
@@ -156,6 +159,7 @@ public class SysRoleController extends BaseController {
      */
     @PostMapping("/changeStatus/{status}")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult changeStatus(@PathVariable String status, Integer[] roleIds) {
         try {
             int[] result = roleService.changeStatus(Integer.parseInt(status), roleIds);
@@ -176,6 +180,7 @@ public class SysRoleController extends BaseController {
      */
     @PostMapping("/remove/{id}")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult removeRole(@PathVariable String id) {
         try {
             if (roleService.deleteRoleById(Integer.parseInt(id)) > 0) {

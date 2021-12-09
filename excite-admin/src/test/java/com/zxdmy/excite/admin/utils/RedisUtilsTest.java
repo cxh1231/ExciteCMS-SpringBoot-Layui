@@ -77,11 +77,11 @@ class RedisUtilsTest {
         // 测试实体
         SysUser user = new SysUser();
         user.setId(10006);
-        user.setNickname("这是昵称");
+        user.setUsername("这是昵称");
         redisUtils.set("10006", user);
         // 测试获取实体
         SysUser user2 = (SysUser) redisUtils.get("10006");
-        System.out.println(user2.getNickname()); // 输出：这是昵称
+        System.out.println(user2.getUsername()); // 输出：这是昵称
 
         // 测试列表
         System.out.println("测试保存列表");

@@ -1,5 +1,6 @@
 package com.zxdmy.excite.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zxdmy.excite.system.entity.SysUser;
 
@@ -22,4 +23,6 @@ public interface ISysUserService extends IService<SysUser> {
      */
     public SysUser login(String username, String password);
 
+
+    Page<SysUser> getPage(Integer current, Integer size, String username, String account);
 }

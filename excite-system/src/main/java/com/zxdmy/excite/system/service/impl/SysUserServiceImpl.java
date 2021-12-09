@@ -3,12 +3,15 @@ package com.zxdmy.excite.system.service.impl;
 import cn.hutool.core.lang.Validator;
 import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.mapper.SysUserMapper;
 import com.zxdmy.excite.system.service.ISysUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -43,5 +46,23 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             wrapper.eq("phone", username).eq("password", SecureUtil.md5(password));
         }
         return userMapper.selectOne(wrapper);
+    }
+
+    @Override
+    public Page<SysUser> getPage(Integer current, Integer size, String username, String account) {
+        size = null == size ? 1 : size;
+        current = null == current ? 10 : current;
+        QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+        wrapper.like(null != username && !"".equals(username), "username", username)
+                .and(null != account && !"".equals(account), new Consumer<QueryWrapper<SysUser>>() {
+                    @Override
+                    public void accept(QueryWrapper<SysUser> sysUserQueryWrapper) {
+                        sysUserQueryWrapper
+                                .like("email", account)
+                                .or()
+                                .like("phone", account);
+                    }
+                });
+        return userMapper.selectPage(new Page<>(current, size), wrapper);
     }
 }

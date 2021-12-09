@@ -20,16 +20,21 @@
                     <div class="layui-inline">
                         <label class="layui-form-label">角色名</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="roleName" id="inputRoleName" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputRoleName" autocomplete="off" class="layui-input"/>
                         </div>
                         <label class="layui-form-label">权限字符</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="roleName" id="inputRolePermission" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputRolePermission" autocomplete="off" class="layui-input"/>
                         </div>
                     </div>
                     <!-- 搜索按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-role-search" data-type="reload"><i class="layui-icon"></i> 搜 索</button>
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-role-search" data-type="reload">
+                            <i class="layui-icon"></i> 搜 索
+                        </button>
+<!--                        <button type="button" class="layui-btn layui-btn-primary layui-border-box" id="btn-role-refresh" data-type="refresh">-->
+<!--                            <i class="layui-icon"></i> 清 空-->
+<!--                        </button>-->
                     </div>
                 </div>
             </div>
@@ -92,8 +97,10 @@
                     {
                         field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
                             let checkStr = "";
-                            if (d.status === 0) {
-                                checkStr += " checked "
+                            if (d.status === 1) {
+                                checkStr = " checked "
+                            } else if (d.status === 2) {
+                                checkStr = " checked disabled "
                             }
                             return '<input type="checkbox" lay-filter="check-role-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
                         }
@@ -111,12 +118,25 @@
             reload: function () {
                 // 几个搜索框
                 let roleName = $('#inputRoleName');
+                let rolePermission = $('#inputRolePermission');
                 //执行重载
                 table.reload('table-system-role', {
                     page: {
                         curr: 1         //重新从第 1 页开始
                     }, where: {
-                        name: roleName.val()
+                        name: roleName.val(),
+                        permission: rolePermission.val()
+                    }
+                });
+            },
+            refresh: function () {
+                //执行重载
+                table.reload('table-system-role', {
+                    page: {
+                        curr: 1         //重新从第 1 页开始
+                    }, where: {
+                        name: "",
+                        permission: ""
                     }
                 });
             }
@@ -127,7 +147,7 @@
         });
 
 
-        // 监听头部按钮
+        // 【头部按钮】监听头部按钮
         table.on('toolbar(table-system-role)', function (obj) {
             console.log(obj.event)
             switch (obj.event) {
@@ -149,12 +169,20 @@
                     break;
                 // 【刷新】按钮
                 case "btn-role-refresh":
-                    table_role.reload();
+                    //执行重载
+                    table.reload('table-system-role', {
+                        page: {
+                            curr: 1
+                        }, where: {
+                            name: "",
+                            permission: ""
+                        }
+                    });
                     break;
             }
         });
 
-        // 监听表格行末按钮
+        // 【行末操作】监听表格行末按钮
         table.on('tool(table-system-role)', function (obj) {
             let data = obj.data;
             let layEvent = obj.event;
@@ -162,7 +190,7 @@
                 // 【编辑】按钮
                 case "role-edit":
                     let role_edit_index = layer.open({
-                        title: '添加角色',
+                        title: '编辑角色',
                         type: 2,
                         shade: 0.2,
                         maxmin: true,
@@ -177,17 +205,18 @@
                     break;
                 // 【删除】按钮
                 case "role-delete":
-                    console.log("点击删除按钮，删除角色：" + data.name)
+                    // TODO 执行删除的POST操作
+                    layer.msg('删除接口未对接...删除角色：' + data.name)
                     break;
             }
         });
 
-        // 监听switch开关切换事件
+        // 【修改状态】监听switch开关切换事件
         form.on('switch(check-role-status)', function (data) {
             // 该值是操作之后的值
             let isChecked = data.elem.checked;
             let actionText = isChecked ? "开启" : "禁用"
-            let newStatus = isChecked ? "0" : "1"
+            let newStatus = isChecked ? "1" : "0"
             let roleId = data.value;
             console.log(roleId)
             layer.confirm('确认要 ' + actionText + ' 此角色？', {
@@ -229,9 +258,9 @@
         dropdown.render({
             elem: '#btn-down-roleStatus',
             data: [{
-                title: '开启', id: 0, templet: '开启 <i class="fa fa-check"> </i>'
+                title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
             }, {
-                title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
+                title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
             }],
             click: function (obj) {
                 // 选中菜单的ID即为新的status
@@ -246,7 +275,7 @@
                 console.log(roleIds)
                 // 选中才响应
                 if (roleIds.length > 0) {
-                    let actionText = newStatus === 0 ? "开启" : "禁用"
+                    let actionText = newStatus === 1 ? "开启" : "禁用"
                     // 二次询问框
                     layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
                         title: false,

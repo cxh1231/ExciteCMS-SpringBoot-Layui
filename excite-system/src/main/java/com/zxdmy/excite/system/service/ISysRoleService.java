@@ -1,5 +1,6 @@
 package com.zxdmy.excite.system.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zxdmy.excite.system.entity.SysRole;
 
@@ -15,15 +16,6 @@ import java.util.List;
  * @since 2021-09-23
  */
 public interface ISysRoleService extends IService<SysRole> {
-
-    /**
-     * 添加角色
-     *
-     * @param role     角色实体
-     * @param menusIds 为当前角色添加的菜单/权限ID列表
-     * @return 影响的行数 0 - 失败 | >0 - 成功
-     */
-//    public int addRole(SysRole role, Integer[] menusIds);
 
     /**
      * 添加|更新角色
@@ -49,15 +41,8 @@ public interface ISysRoleService extends IService<SysRole> {
      */
     public List<SysRole> getList();
 
-    /**
-     * 修改角色
-     *
-     * @param role     角色实体
-     * @param menusIds 为当前角色添加的菜单/权限ID列表
-     * @return 影响的行数 0-失败 | 1-成功
-     */
-//    public int updateRole(SysRole role, Integer[] menusIds);
 
+    public Page<SysRole> getPage(Integer current, Integer size, String name, String permission);
     /**
      * 修改角色状态
      *

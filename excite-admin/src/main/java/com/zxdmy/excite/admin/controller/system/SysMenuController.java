@@ -2,6 +2,7 @@ package com.zxdmy.excite.admin.controller.system;
 
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.framework.aop.AnnotationSaveReLog;
 import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.service.ISysMenuService;
 import lombok.AllArgsConstructor;
@@ -78,6 +79,7 @@ public class SysMenuController extends BaseController {
      */
     @PostMapping("/add")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult addMenu(@Validated SysMenu menu) {
         // 添加菜单
         if (menuService.saveMenu(menu) > 0) {
@@ -215,6 +217,7 @@ public class SysMenuController extends BaseController {
      */
     @PostMapping("/update")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult updateMenu(@Validated SysMenu menu) {
         // 执行修改菜单操作
         if (menuService.saveMenu(menu) > 0) {
@@ -233,6 +236,7 @@ public class SysMenuController extends BaseController {
      */
     @PostMapping("/changeStatus/{status}")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult changeMenuStatus(@PathVariable String status, Integer[] menuIds) {
         // System.out.println(menuIds.length);
         try {
@@ -254,6 +258,7 @@ public class SysMenuController extends BaseController {
      */
     @PostMapping("/remove/{id}")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult removeMenu(@PathVariable String id) {
         try {
             if (menuService.deleteMenu(Integer.parseInt(id)) > 0) {

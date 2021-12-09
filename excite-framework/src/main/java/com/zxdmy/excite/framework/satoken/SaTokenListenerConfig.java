@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.framework.satoken;
 
 import cn.dev33.satoken.listener.SaTokenListener;
 import cn.dev33.satoken.stp.SaLoginModel;
@@ -22,7 +22,7 @@ public class SaTokenListenerConfig implements SaTokenListener {
     @Override
     public void doLogin(String loginType, Object loginId, SaLoginModel loginModel) {
         System.out.println(loginType + loginId + loginModel);
-        // TODO 可以增加保存登录记录至数据库的操作
+        // TODO 登录日志保存至数据集
     }
 
     /**

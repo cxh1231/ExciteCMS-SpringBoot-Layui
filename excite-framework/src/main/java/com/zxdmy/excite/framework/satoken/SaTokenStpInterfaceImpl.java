@@ -1,4 +1,4 @@
-package com.zxdmy.excite.framework.config;
+package com.zxdmy.excite.framework.satoken;
 
 import cn.dev33.satoken.stp.StpInterface;
 import com.zxdmy.excite.system.entity.SysMenu;

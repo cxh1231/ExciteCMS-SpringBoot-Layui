@@ -109,11 +109,11 @@
                     {
                         field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
                             let checkStr = "";
-                            if (d.status !== 1) {
-                                checkStr += " checked "
+                            if (d.status === 1) {
+                                checkStr = " checked "
                             }
                             if (d.status === 2) {
-                                checkStr += " disabled "
+                                checkStr = " checked disabled "
                             }
                             return '<input type="checkbox" lay-filter="check-menu-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
                         }
@@ -190,9 +190,9 @@
         dropdown.render({
             elem: '#btn-down-menuStatus',
             data: [{
-                title: '开启', id: 0, templet: '开启 <i class="fa fa-check"> </i>'
+                title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
             }, {
-                title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
+                title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
             }],
             click: function (obj) {
                 // 选中菜单的ID即为新的status
@@ -207,7 +207,7 @@
                 menuId = menuId.substring(0, menuId.lastIndexOf(',')); // 去掉末尾的逗号
                 // 选中才响应
                 if (menuId.length > 0) {
-                    let actionText = newStatus === 0 ? "开启" : "禁用"
+                    let actionText = newStatus === 1 ? "开启" : "禁用"
                     // 二次询问框
                     layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
                         title: false,
@@ -238,7 +238,7 @@
             let isChecked = data.elem.checked;
             console.log(isChecked)
             let actionText = isChecked ? "开启" : "禁用"
-            let newStatus = isChecked ? "0" : "1"
+            let newStatus = isChecked ? "1" : "0"
             let menuId = data.value;
             layer.confirm('确认要 ' + actionText + ' 此菜单？', {
                 title: false,
@@ -308,7 +308,7 @@
             else if (layEvent === 'del') {
                 if (data.removable === 1) {
                     // TODO 执行删除的POST操作
-                    layer.msg('删除接口还没写...删除ID：' + data.id)
+                    layer.msg('删除接口还没写...删除菜单：' + data.name)
                 } else {
                     layer.msg('禁止删除')
                 }

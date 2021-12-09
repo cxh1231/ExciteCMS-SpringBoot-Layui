@@ -91,7 +91,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             menu.setIcon("fa " + menu.getIcon());
         // 如果未输入排序，则填充默认顺序：50
         if (null == menu.getSort()) {
-            menu.setSort(SystemCode.MENU_DEFAULT_SORT.getCode());
+            menu.setSort(SystemCode.SORT_DEFAULT.getCode());
         }
         // 设置时间信息
         LocalDateTime localDateTime = LocalDateTime.now();
@@ -180,16 +180,20 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         if (id == null) {
             throw new ServiceException("服务错误：菜单/权限的ID不能为null");
         }
-        // 当删除一个菜单后，需要从【角色-权限关联表】中删除含有该菜单的记录
-        QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
-        wrapper1.eq("menu_id", id);
-        roleMenuMapper.delete(wrapper1);
+        // 这里注意：menu表和roleMenu表未设置关联，所以可以先删除菜单，再删除关联。
+        // 如果二者设置了外键关联，则流程是：判断menu可删除-->删除roleMenu关联-->删除menu
         // 只有removable=1的菜单才可以删除
         QueryWrapper<SysMenu> wrapper2 = new QueryWrapper<>();
         wrapper2.eq("id", id)
                 .ne("status", SystemCode.STATUS_N.getCode())
                 .eq("removable", SystemCode.REMOVABLE_Y.getCode());
         int result = menuMapper.delete(wrapper2);
+        // 当删除一个菜单后，需要从【角色-权限关联表】中删除含有该菜单的记录
+        if (result > 0) {
+            QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
+            wrapper1.eq("menu_id", id);
+            roleMenuMapper.delete(wrapper1);
+        }
         this.saveAllMenu2Redis(result);
         return result;
     }
@@ -327,7 +331,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 return menuList;
             }
             // redis中有：返回
-            return (List<SysMenu>) redisService.get("menu:userMenuList:"+userId);
+            return (List<SysMenu>) redisService.get("menu:userMenuList:" + userId);
         }
         // 未开启redis，返回空
         return null;

@@ -5,7 +5,7 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.zxdmy.excite.system.entity.SysUser">
         <id column="id" property="id" />
-        <result column="nickname" property="nickname" />
+        <result column="username" property="username" />
         <result column="avatar" property="avatar" />
         <result column="sex" property="sex" />
         <result column="email" property="email" />
@@ -22,7 +22,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, nickname, avatar, sex, email, phone, password, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
+        id, username, avatar, sex, email, phone, password, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
     </sql>
 
 </mapper>

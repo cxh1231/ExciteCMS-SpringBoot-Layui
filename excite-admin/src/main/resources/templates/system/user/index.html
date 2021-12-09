@@ -16,13 +16,13 @@
             <div class="layui-form layui-form-pane">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">用户名</label>
+                        <label class="layui-form-label">用户名称</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="userName" id="inputUserNickName" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputUserName" autocomplete="off" class="layui-input"/>
                         </div>
                         <label class="layui-form-label">电话/邮箱</label>
                         <div class="layui-input-inline">
-                            <input type="text" name="userAccount" id="inputUserAccount" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputUserAccount" autocomplete="off" class="layui-input"/>
                         </div>
                     </div>
                     <!-- 搜索按钮 -->
@@ -72,7 +72,7 @@
             table = layui.table;
 
         // 表格
-        let table_role = table.render({
+        let table_user = table.render({
             elem: '#table-system-user',
             url: '/system/user/list',
             response: {
@@ -85,16 +85,16 @@
                 [
                     {type: "checkbox", width: 50},
                     {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
-                    {field: 'nickname', title: '用户名', width: 150, align: 'center'},
+                    {field: 'username', title: '用户名称', width: 150, align: 'center'},
                     {field: 'email', title: '邮箱', width: 150, align: 'center'},
                     {field: 'phone', title: '手机', width: 150, align: 'center'},
                     {
                         field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
                             let checkStr = "";
-                            if (d.status === 0) {
+                            if (d.status === 1) {
                                 checkStr += " checked "
                             }
-                            return '<input type="checkbox" lay-filter="check-role-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
+                            return '<input type="checkbox" lay-filter="check-user-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
                         }
                     },
                     {field: 'remark', title: '备注', align: 'center'},
@@ -108,14 +108,26 @@
         // 表格重载
         let active = {
             reload: function () {
-                // 几个搜索框
-                let roleName = $('#inputUserNickName');
                 //执行重载
                 table.reload('table-system-user', {
                     page: {
-                        curr: 1         //重新从第 1 页开始
+                        curr: 1
                     }, where: {
-                        name: roleName.val()
+                        // 几个搜索栏的数据
+                        username: $('#inputUserName').val(),
+                        account: $('#inputUserAccount').val()
+                    }
+                });
+            },
+            refresh: function () {
+                //执行刷新
+                table.reload('table-system-user', {
+                    page: {
+                        curr: 1
+                    }, where: {
+                        // 几个搜索栏的数据
+                        username: "",
+                        account: ""
                     }
                 });
             }
@@ -141,14 +153,14 @@
                         area: ['600px', '500px'],
                         content: '/system/user/goAdd',
                         end: function () {
-                            table_role.reload();
+                            table_user.reload();
                         }
                     });
                     parent.layer.iframeAuto(role_add_index);
                     break;
                 // 【刷新】按钮
                 case "btn-user-refresh":
-                    table_role.reload();
+                    active['refresh'].call(this)
                     break;
             }
         });
@@ -169,7 +181,7 @@
                         area: ['600px', '500px'],
                         content: '/system/role/goEdit/' + data.id,
                         end: function () {
-                            table_role.reload();
+                            table_user.reload();
                         }
                     });
                     parent.layer.iframeAuto(role_edit_index);
@@ -200,7 +212,7 @@
                             data.elem.checked = isChecked;
                             form.render();
                             // 更新表格
-                            table_role.update(roleId, {status: isChecked ? 0 : 1});
+                            table_user.update(roleId, {status: isChecked ? 0 : 1});
                         } else {
                             layer.msg(data.msg, {time: 3000, icon: 2});
                             data.elem.checked = !isChecked;
@@ -256,7 +268,7 @@
                                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                 if (data.code === 200) {
                                     layer.msg(data.msg, {time: 3000, icon: 1});
-                                    table_role.refresh();
+                                    table_user.refresh();
                                 } else {
                                     layer.msg(data.msg, {time: 3000, icon: 2});
                                 }

@@ -2,65 +2,82 @@ package com.zxdmy.excite.system.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+
+import java.time.LocalDateTime;
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.validation.constraints.NotBlank;
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 /**
  * <p>
- * 系统角色表
+ *
  * </p>
  *
  * @author 拾年之璐
- * @since 2021-09-23
+ * @since 2021-12-09
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
-public class SysRole implements Serializable {
+public class SysLogRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * 角色ID
+     * 主键
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     * 角色名称
+     * 请求用户ID
      */
-    @NotBlank(message = "角色名称不能为空")
-    private String name;
+    private Integer userId;
 
     /**
-     * 角色权限标识符，如：admin、guest
+     * 请求IP
      */
-    @NotBlank(message = "权限标识符不能为空")
-    private String permission;
+    private String ip;
 
     /**
-     * 备注
+     * 浏览器Agent
      */
-    private String remark;
+    private String userAgent;
 
     /**
-     * 排序：数值越大越靠前
+     * 请求的URI
      */
-    private Integer sort;
+    private String reqUri;
 
     /**
-     * 角色状态：0-封禁 | 1-正常 | 2-正常且禁止封禁
+     * 请求方法：GET | POST | DELETE
+     */
+    private String reqMethod;
+    /**
+     * 请求的函数
+     */
+    private String reqFunction;
+
+    /**
+     * 请求的数据
+     */
+    private String reqData;
+
+    /**
+     * 返回的数据
+     */
+    private String resData;
+
+    /**
+     * 耗时，单位：ms
+     */
+    private Integer timeCost;
+
+    /**
+     * 耗时，单位：ms
      */
     private Integer status;
-
-    /**
-     * 是否删除：0-未删除 | 1-已删除
-     */
-    private Integer isDelete;
 
     /**
      * 创建时间

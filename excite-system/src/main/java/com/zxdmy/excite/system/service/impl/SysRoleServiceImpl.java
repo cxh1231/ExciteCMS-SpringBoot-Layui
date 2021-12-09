@@ -1,6 +1,7 @@
 package com.zxdmy.excite.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zxdmy.excite.common.config.ExciteConfig;
 import com.zxdmy.excite.common.enums.SystemCode;
@@ -111,7 +112,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         }
         // 根据ID查询status正常的角色
         QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
-        wrapper.eq("id", id).eq("status", SystemCode.STATUS_Y.getCode());
+        wrapper.eq("id", id).ne("status", SystemCode.STATUS_N.getCode());
         return roleMapper.selectOne(wrapper);
     }
 
@@ -127,6 +128,16 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
 //        wrapper.eq("status", SystemCode.STATUS_Y.getCode());
 //        return roleMapper.selectList(wrapper);
         return roleMapper.selectList(null);
+    }
+
+    @Override
+    public Page<SysRole> getPage(Integer current, Integer size, String name, String permission) {
+        current = null == current ? 1 : current;
+        size = null == size ? 10 : size;
+        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
+        wrapper.like(null != name && !"".equals(name), "name", name)
+                .like(null != permission && !"".equals(permission), "permission", permission);
+        return roleMapper.selectPage(new Page<>(current, size), wrapper);
     }
 
     /**
