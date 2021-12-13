@@ -100,6 +100,7 @@ public class SysRoleController extends BaseController {
      */
     @GetMapping("/get/{id}")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult getRole(@PathVariable String id) {
         try {
             SysRole role = roleService.getRole(Integer.parseInt(id));

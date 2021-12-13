@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>操作日志</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <!-- 表格 -->
+        <table class="layui-hide" id="table-system-requestLog" lay-filter="table-system-requestLog"></table>
+
+    </div>
+</div>
+<!--表格头部工具类（左上）-->
+<script type="text/html" id="toolbar-table-requestLog">
+    <div class="layui-btn-container">
+        <!-- 【刷新】-->
+        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-requestLog-refresh"><i class="fa fa-refresh"></i></button>
+    </div>
+
+</script>
+<!--表格每行末尾的操作按钮-->
+<script type="text/html" id="tool-table-requestLog">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="requestLog-details">详情</a>
+    <!--    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="requestLog-delete">删除</a>-->
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            dropdown = layui.dropdown,
+            table = layui.table;
+
+        // 表格
+        let table_requestLog = table.render({
+            elem: '#table-system-requestLog',
+            url: '/system/log/requestList',
+            response: {
+                statusCode: 200
+            },
+            toolbar: '#toolbar-table-requestLog', //开启头部工具栏，并为其绑定左侧模板
+            defaultToolbar: ['filter', 'exports'],
+            title: '用户数据表',
+            cols: [
+                [
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'userId', title: '用户ID', width: 100, align: 'center'},
+                    {field: 'ip', title: 'IP', width: 100, align: 'center'},
+                    {field: 'reqUri', title: '请求URI', width: 300},
+                    {field: 'reqMethod', title: '请求方法', align: 'center', width: 100},
+                    {field: 'timeCost', title: '用时(ms)', align: 'center', width: 100},
+                    {
+                        field: 'status', title: '请求结果', align: 'center', width: 95, templet: function (d) {
+                            if (d.status === 1) {
+                                return '<span class="layui-badge layui-bg-green">成功</span>'
+                            } else {
+                                return '<span class="layui-badge">失败</span>'
+                            }
+                        }
+                    },
+                    {field: 'reqData', title: '请求数据', align: 'center'},
+                    {field: 'resData', title: '响应信息', align: 'center'},
+                    {field: 'createTime', title: '操作时间', align: 'center'},
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-requestLog', width: 95}
+                ]
+            ],
+            page: true
+        });
+
+        // 表格重载
+        let active = {
+            reload: function () {
+                // 几个搜索框
+                let roleName = $('#inputRoleName');
+                let rolePermission = $('#inputRolePermission');
+                //执行重载
+                table.reload('table-system-requestLog', {
+                    page: {
+                        curr: 1         //重新从第 1 页开始
+                    }, where: {
+                        name: roleName.val(),
+                        permission: rolePermission.val()
+                    }
+                });
+            },
+            refresh: function () {
+                //执行重载
+                table.reload('table-system-requestLog', {
+                    page: {
+                        curr: 1         //重新从第 1 页开始
+                    }, where: {
+                        name: "",
+                        permission: ""
+                    }
+                });
+            }
+        };
+        $('#btn-requestLog-search').on('click', function () {
+            let type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+
+
+        // 【头部按钮】监听头部按钮
+        table.on('toolbar(table-system-requestLog)', function (obj) {
+            console.log(obj.event)
+            switch (obj.event) {
+                // 【刷新】按钮
+                case "btn-requestLog-refresh":
+                    //执行重载
+                    table.reload('table-system-requestLog', {
+                        page: {
+                            curr: 1
+                        }, where: {
+                            name: "",
+                            permission: ""
+                        }
+                    });
+                    break;
+            }
+        });
+
+
+    });
+</script>
+</body>
+</html>
