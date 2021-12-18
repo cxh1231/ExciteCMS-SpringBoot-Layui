@@ -198,7 +198,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
      * @param roleId   角色ID
      * @param menusIds 菜单ID
      */
-    public void insertRoleMenu(Integer roleId, Integer[] menusIds) {
+    private void insertRoleMenu(Integer roleId, Integer[] menusIds) {
         List<SysRoleMenu> roleMenuList = new ArrayList<>();
         for (Integer menuId : menusIds) {
             SysRoleMenu roleMenu = new SysRoleMenu();

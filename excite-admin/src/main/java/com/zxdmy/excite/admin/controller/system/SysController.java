@@ -3,8 +3,11 @@ package com.zxdmy.excite.admin.controller.system;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.zxdmy.excite.common.base.BaseController;
+import com.zxdmy.excite.system.entity.SysUser;
+import com.zxdmy.excite.system.service.ISysUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -17,15 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @AllArgsConstructor
 public class SysController extends BaseController {
 
-    /**
-     * 默认访问域名，跳转至后台主页
-     *
-     * @return 页面跳转
-     */
-    @RequestMapping("login2")
-    public String login2() {
-        return "/system/login2";
-    }
+    ISysUserService userService;
+
     /**
      * 默认访问域名，跳转至后台主页
      *
@@ -42,8 +38,13 @@ public class SysController extends BaseController {
      * @return 后台首页
      */
     @RequestMapping("system/index")
-    public String index() {
-        return "system/index";
+    public String index(ModelMap map) {
+        if (StpUtil.isLogin()) {
+            SysUser user = userService.getById(StpUtil.getLoginIdAsInt());
+            map.put("user", user);
+            return "system/index";
+        }
+        return "redirect:/system/login";
     }
 
     /**

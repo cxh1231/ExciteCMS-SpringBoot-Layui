@@ -24,5 +24,23 @@ public interface ISysUserService extends IService<SysUser> {
     public SysUser login(String username, String password);
 
 
-    Page<SysUser> getPage(Integer current, Integer size, String username, String account);
+    /**
+     * 获取用户列表
+     *
+     * @param current  当前页
+     * @param size     当前页大小
+     * @param username 检索用户名
+     * @param account  检索邮箱/手机号
+     * @return Page
+     */
+    public Page<SysUser> getPage(Integer current, Integer size, String username, String account);
+
+    /**
+     * 保存用户：添加 | 更新
+     *
+     * @param user    用户信息
+     * @param roleIds 角色ID列表
+     * @return 修改的行数 >0：成功 | <=0：失败
+     */
+    public int save(SysUser user, Integer[] roleIds);
 }

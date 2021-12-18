@@ -29,7 +29,11 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息（返回码：200；Status Code：200）
+     * 请求成功消息（JSON code：200；浏览器Status Code：200）
+     * 相关说明：
+     * --- JSON code：指的是返回的JSON数据中的code字段的值
+     * --- Status Code：指的是前端按下F12后，浏览器控制台中请求相关API后，返回给浏览器的状态值。
+     * 如果需要修改Status Code，则需要传入[org.springframework.http.HttpStatus]类中的各个参数，如：HttpStatus.OK.value()。
      *
      * @param message 消息
      * @return 结果类
@@ -40,7 +44,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息（返回码：自定义；Status Code：200）
+     * 请求成功消息（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code    状态码
      * @param message 消息
@@ -52,7 +56,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功实体（返回码：200；Status Code：200）
+     * 请求成功实体（JSON code：200；浏览器Status Code：200）
      *
      * @param data 实体
      * @return 结果类
@@ -63,7 +67,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功实体（返回码：自定义；Status Code：200）
+     * 请求成功实体（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code 状态码
      * @param data 消息
@@ -75,7 +79,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息（返回码：自定义；Status Code：同返回码）
+     * 请求成功消息（JSON code：自定义；浏览器Status Code：同返回码）
      *
      * @param httpStatus 状态码
      * @param message    消息
@@ -87,7 +91,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据（返回码：200；Status Code：200）
+     * 请求成功消息+数据（JSON code：200；浏览器Status Code：200）
      *
      * @param message 消息
      * @param data    数据
@@ -99,7 +103,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据（返回码：自定义；Status Code：200）
+     * 请求成功消息+数据（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code    状态码
      * @param message 消息
@@ -112,7 +116,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据（返回码：自定义；Status Code：同返回码）
+     * 请求成功消息+数据（JSON code：自定义；浏览器Status Code：同返回码）
      *
      * @param httpStatus 状态码
      * @param message    消息
@@ -125,7 +129,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据+总数，用于分页显示（返回码：200；Status Code：200）
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：200；浏览器Status Code：200）
      *
      * @param message 消息
      * @param data    数据
@@ -138,7 +142,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据+总数，用于分页显示（返回码：自定义；Status Code：200）
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code    状态码
      * @param message 消息
@@ -152,7 +156,7 @@ public class BaseController {
     }
 
     /**
-     * 请求成功消息+数据+总数，用于分页显示（返回码：自定义；Status Code：同返回码）
+     * 请求成功消息+数据+总数，用于分页显示（JSON code：自定义；浏览器Status Code：同返回码）
      *
      * @param httpStatus 状态码
      * @param message    消息
@@ -167,18 +171,18 @@ public class BaseController {
 
 
     /**
-     * 请求失败消息（返回码：200）
+     * 请求失败消息（JSON code：400；浏览器Status Code：200）
      *
      * @param message 消息
      * @return 结果类
      */
     public BaseResult error(String message) {
         response.setStatus(HttpStatus.OK.value());
-        return new BaseResult(HttpStatus.OK.value(), message);
+        return new BaseResult(HttpStatus.BAD_REQUEST.value(), message);
     }
 
     /**
-     * 请求失败消息（返回码：自定义）
+     * 请求失败消息（JSON code：自定义；浏览器Status Code：200）
      *
      * @param code    状态码
      * @param message 消息
@@ -190,7 +194,7 @@ public class BaseController {
     }
 
     /**
-     * 请求失败消息（返回码：自定义；浏览器Status Code：同返回码）
+     * 请求失败消息（JSON code：自定义；浏览器Status Code：同返回码）
      *
      * @param httpStatus 状态码
      * @param message    消息
