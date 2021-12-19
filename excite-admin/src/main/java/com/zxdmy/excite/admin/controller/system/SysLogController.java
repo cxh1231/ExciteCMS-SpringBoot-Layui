@@ -4,15 +4,14 @@ package com.zxdmy.excite.admin.controller.system;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.system.entity.SysLogRequest;
+import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.service.ISysLogRequestService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 import com.zxdmy.excite.common.base.BaseController;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * <p>
@@ -37,6 +36,26 @@ public class SysLogController extends BaseController {
     @RequestMapping("request")
     public String requestLogPage() {
         return "system/log/request";
+    }
+
+    /**
+     * 请求日志列表
+     *
+     * @return
+     */
+    @RequestMapping("request/detail/{id}")
+    public String requestLogDetailPage(@PathVariable String id, ModelMap map) {
+        try {
+            SysLogRequest logRequest = logRequestService.getById(Integer.parseInt(id));
+            if (null != logRequest) {
+                map.put("logRequest", logRequest);
+            } else {
+                return "error/404";
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+        return "system/log/requestDetail";
     }
 
     /**

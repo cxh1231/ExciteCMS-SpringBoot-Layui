@@ -55,7 +55,7 @@
                     {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
                     {field: 'userId', title: '用户ID', width: 100, align: 'center'},
                     {field: 'ip', title: 'IP', width: 100, align: 'center'},
-                    {field: 'reqUri', title: '请求URI', width: 300},
+                    {field: 'reqUri', title: '请求URI'},
                     {field: 'reqMethod', title: '请求方法', align: 'center', width: 100},
                     {field: 'timeCost', title: '用时(ms)', align: 'center', width: 100},
                     {
@@ -67,9 +67,9 @@
                             }
                         }
                     },
-                    {field: 'reqData', title: '请求数据', align: 'center'},
-                    {field: 'resData', title: '响应信息', align: 'center'},
-                    {field: 'createTime', title: '操作时间', align: 'center'},
+                    // {field: 'reqData', title: '请求数据', align: 'center'},
+                    // {field: 'resData', title: '响应信息', align: 'center'},
+                    {field: 'createTime', title: '操作时间', align: 'center', width: 200},
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-requestLog', width: 95}
                 ]
             ],
@@ -130,6 +130,34 @@
         });
 
 
+        // 【行末操作】监听表格行末按钮
+        table.on('tool(table-system-requestLog)', function (obj) {
+            let data = obj.data;
+            let layEvent = obj.event;
+            switch (layEvent) {
+                // 【编辑】按钮
+                case "requestLog-details":
+                    let reqLog_details_index = layer.open({
+                        title: '编辑角色',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: true,
+                        area: ['600px', '500px'],
+                        content: '/system/log/request/detail/' + data.id,
+                        end: function () {
+
+                        }
+                    });
+                    parent.layer.iframeAuto(reqLog_details_index);
+                    break;
+                // 【删除】按钮
+                case "role-delete":
+                    // TODO 执行删除的POST操作
+                    layer.msg('删除接口未对接...删除角色：' + data.name)
+                    break;
+            }
+        });
     });
 </script>
 </body>

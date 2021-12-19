@@ -78,6 +78,7 @@ public class SaveReLogAspect {
         // 写入请求的函数
         logRequest.setReqFunction(pjp.getSignature().toShortString());
         // 写入请求的数据
+        // TODO 转换为JSON格式
         logRequest.setReqData(Arrays.toString(pjp.getArgs()));
         // 执行方法获取的返回值
         Object returnValue;

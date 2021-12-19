@@ -150,9 +150,9 @@ layui.define(["element", "layer", "jquery"], function (exports) {
             miniTab.closeTabRignMenu();
             var menuHtml = '<div class="layui-unselect layui-form-select layui-form-selected layuimini-tab-mousedown layui-show" data-tab-id="' + tabId + '" style="left: ' + left + 'px!important">\n' +
                 '<dl>\n' +
-                '<dd><a href="javascript:;" layuimini-tab-menu-close="current">关 闭 当 前</a></dd>\n' +
-                '<dd><a href="javascript:;" layuimini-tab-menu-close="other">关 闭 其 他</a></dd>\n' +
-                '<dd><a href="javascript:;" layuimini-tab-menu-close="all">关 闭 全 部</a></dd>\n' +
+                '<dd><a href="javascript:;" layuimini-tab-menu-close="current"><i class="layui-icon layui-icon-close"></i> 关闭当前</a></dd>\n' +
+                '<dd><a href="javascript:;" layuimini-tab-menu-close="other"><i class="layui-icon layui-icon-reduce-circle"></i> 关闭其他</a></dd>\n' +
+                '<dd><a href="javascript:;" layuimini-tab-menu-close="all"><i class="layui-icon layui-icon-close-fill"></i> 关闭全部</a></dd>\n' +
                 '</dl>\n' +
                 '</div>';
             var makeHtml = '<div class="layuimini-tab-make"></div>';
