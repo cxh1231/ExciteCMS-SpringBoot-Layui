@@ -70,9 +70,29 @@ public class SysUserController extends BaseController {
      *
      * @return 跳转至编辑用户页面
      */
-    @RequestMapping("goEdit")
-    public String goEdit() {
+    @RequestMapping("goEdit/{id}")
+    public String goEdit(@PathVariable String id) {
         return "system/user/edit";
+    }
+
+    /**
+     * 用户个人信息管理 - 修改用户信息
+     *
+     * @return 跳转至编辑用户页面
+     */
+    @RequestMapping("setting")
+    public String goSetting() {
+        return "system/user/setting";
+    }
+
+    /**
+     * 用户管理 - 编辑用户信息页面
+     *
+     * @return 跳转至编辑用户页面
+     */
+    @RequestMapping("password")
+    public String goChangePassword() {
+        return "system/user/changePassword";
     }
 
     /**
@@ -236,12 +256,12 @@ public class SysUserController extends BaseController {
     @AnnotationSaveReLog
     public BaseResult delete(@PathVariable String id) {
         // TODO 删除用户的同时，从用户-角色关联表中删除相关信息，同时把该用户踢下线，清除Redis缓存
-        StpUtil.kickout(id);
-        
-        if (userService.removeById(id)) {
-            return success("用户删除成功");
-        }
-        return error("添加失败，请重试！");
+//        StpUtil.kickout(id);
+//
+//        if (userService.removeById(id)) {
+//            return success("用户删除成功");
+//        }
+        return error("用户删除失败");
     }
 
     @PostMapping(value = "/setRole")

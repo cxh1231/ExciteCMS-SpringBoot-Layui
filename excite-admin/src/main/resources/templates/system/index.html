@@ -61,10 +61,10 @@
                     <a href="javascript:;" th:text="${user.username}">admin</a>
                     <dl class="layui-nav-child">
                         <dd>
-                            <a href="javascript:;" layuimini-content-href="page/user-setting.html" data-title="基本资料" data-icon="fa fa-gears">基本资料</a>
+                            <a href="javascript:;" layuimini-content-href="/system/user/setting" data-title="基本资料" data-icon="fa fa-gears">基本资料</a>
                         </dd>
                         <dd>
-                            <a href="javascript:;" layuimini-content-href="page/user-password.html" data-title="修改密码" data-icon="fa fa-gears">修改密码</a>
+                            <a href="javascript:;" layuimini-content-href="/system/user/password" data-title="修改密码" data-icon="fa fa-gears">修改密码</a>
                         </dd>
                         <dd>
                             <hr>
@@ -148,15 +148,24 @@
         miniAdmin.render(options);
 
         $('.login-out').on("click", function () {
-            $.post("/system/user/logout", function (data) {
-                if (data.code === 200) {
-                    layer.msg('退出登录成功', function () {
-                        window.location = '/system/login';
+            layer.confirm('确认要退出登录吗？', {
+                title: false,
+                btn: ['退出登录', '取消'],
+                // 按钮【按钮1】的回调
+                btn1: function (index) {
+                    $.post("/system/user/logout", function (data) {
+                        if (data.code === 200) {
+                            layer.msg('退出登录成功', function () {
+                                window.location = '/system/login';
+                            });
+                        } else {
+                            layer.msg(data.msg);
+                        }
                     });
-                } else {
-                    layer.msg(data.msg);
-                }
+                },
             });
+
+
         });
     });
 </script>

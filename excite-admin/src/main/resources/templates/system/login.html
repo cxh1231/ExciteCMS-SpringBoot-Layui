@@ -20,20 +20,20 @@
             <span class="bg1"></span>
             <span class="bg2"></span>
         </div>
-        <form class="layui-form login-bottom">
+        <form class="layui-form login-bottom" id="loginFrom">
             <div class="center">
                 <!-- 用户名输入框 -->
                 <div class="item">
                     <span class="icon icon-2"></span>
                     <label>
-                        <input type="text" name="username" placeholder="请输入登录邮箱/手机号" maxlength="24" autocomplete="off" required/>
+                        <input type="text" name="username" placeholder="请输入登录邮箱/手机号" lay-verify="usernameVerify" maxlength="24" autocomplete="off" required/>
                     </label>
                 </div>
                 <!-- 密码输入框 -->
                 <div class="item">
                     <span class="icon icon-3"></span>
                     <label>
-                        <input type="password" name="password" placeholder="请输入密码" maxlength="20" autocomplete="off" required/>
+                        <input type="password" name="password" placeholder="请输入密码" lay-verify="passwordVerify" maxlength="20" autocomplete="off" required/>
                     </label>
                     <span class="bind-password icon icon-4"></span>
                 </div>
@@ -41,7 +41,7 @@
                 <div id="validatePanel" class="item" style="width: 137px;">
                     <span class="icon icon-1"></span>
                     <label>
-                        <input type="text" name="captcha" placeholder="请输入验证码" maxlength="8" autocomplete="off" required/>
+                        <input type="text" name="captcha" placeholder="请输入验证码" lay-verify="captchaVerify" maxlength="8" autocomplete="off" required/>
                     </label>
                     <img id="refreshCaptcha" class="validateImg" width="100px" height="38px" alt="" src="">
                 </div>
@@ -55,7 +55,7 @@
 
             <!--  登录按钮 -->
             <div class="layui-form-item" style="text-align:center; width:100%;height:100%;margin:0;">
-                <button type="button" class="login-btn" lay-submit lay-filter="login">立即登录</button>
+                <button type="button" class="login-btn" id="submitButton" lay-submit lay-filter="login">立即登录</button>
             </div>
 
             <!-- 第三方登录按钮 -->
@@ -100,32 +100,65 @@
             document.getElementById("refreshCaptcha").src = captchaUrl + '?t=' + (new Date).getTime();
         }).trigger('click');
 
+        // 自定义验证规则
+        form.verify({
+            // 用户名输入框校验
+            usernameVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入登录账号！';
+                }
+            },
+            // 密码校验
+            passwordVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入密码！';
+                }
+            },
+            // 验证码校验
+            captchaVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入验证码！';
+                }
+            },
+        });
         // 进行登录操作
         form.on('submit(login)', function (data) {
             data = data.field;
-            if (data.username === '') {
-                layer.msg('用户名不能为空');
-                return false;
-            }
-            if (data.password === '') {
-                layer.msg('密码不能为空');
-                return false;
-            }
-            if (data.captcha === '') {
-                layer.msg('验证码不能为空');
-                return false;
-            }
-            console.log(data);
+            // if (data.username === '') {
+            //     layer.msg('用户名不能为空');
+            //     return false;
+            // }
+            // if (data.password === '') {
+            //     layer.msg('密码不能为空');
+            //     return false;
+            // }
+            // if (data.captcha === '') {
+            //     layer.msg('验证码不能为空');
+            //     return false;
+            // }
+            // console.log(data);
             $.post("/system/user/login", data, function (data) {
                 if (data.code === 200) {
-                    layer.msg('登录成功', function () {
+                    layer.msg('登录成功！', {
+                        icon: 1, time: 2000
+                    }, function () {
                         window.location = '/system/index';
                     });
                 } else {
-                    layer.msg(data.msg);
+                    layer.msg(data.msg, {
+                        icon: 2, time: 3000
+                    }, function () {
+                        document.getElementById("refreshCaptcha").src = captchaUrl + '?t=' + (new Date).getTime();
+                    });
                 }
             });
             return false;
+        });
+        // 回车键登录
+        $('#loginFrom').bind('keypress', function (e) {
+            if (e.keyCode === 13) {
+                $("#submitButton").trigger("click");
+            }
         });
     });
 </script>

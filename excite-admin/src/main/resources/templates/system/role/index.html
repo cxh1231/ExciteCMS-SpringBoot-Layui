@@ -32,9 +32,9 @@
                         <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-role-search" data-type="reload">
                             <i class="layui-icon"></i> 搜 索
                         </button>
-<!--                        <button type="button" class="layui-btn layui-btn-primary layui-border-box" id="btn-role-refresh" data-type="refresh">-->
-<!--                            <i class="layui-icon"></i> 清 空-->
-<!--                        </button>-->
+                        <!--                        <button type="button" class="layui-btn layui-btn-primary layui-border-box" id="btn-role-refresh" data-type="refresh">-->
+                        <!--                            <i class="layui-icon"></i> 清 空-->
+                        <!--                        </button>-->
                     </div>
                 </div>
             </div>
@@ -54,7 +54,7 @@
         <button class="layui-btn layui-btn-normal layui-btn-sm" lay-event="btn-role-add"><i class="fa fa-plus"></i> 添加</button>
         <!-- 【修改状态】下拉菜单：禁用与否 -->
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-sm layui-btn-warm" id="btn-down-roleStatus">修改状态 <i class="fa fa-caret-down"></i></button>
+            <button class="layui-btn layui-btn-sm layui-btn-warm" lay-event="btn-role-changeStatus">修改状态 <i class="fa fa-caret-down"></i></button>
         </div>
         <!-- 【删除】 -->
         <div class="layui-btn-group">
@@ -113,8 +113,8 @@
             page: true
         });
 
-        // 表格重载
         let active = {
+            // 表格重载
             reload: function () {
                 // 几个搜索框
                 let roleName = $('#inputRoleName');
@@ -129,6 +129,7 @@
                     }
                 });
             },
+            // 表格刷新
             refresh: function () {
                 //执行重载
                 table.reload('table-system-role', {
@@ -139,7 +140,8 @@
                         permission: ""
                     }
                 });
-            }
+            },
+
         };
         $('#btn-role-search').on('click', function () {
             let type = $(this).data('type');
@@ -149,7 +151,7 @@
 
         // 【头部按钮】监听头部按钮
         table.on('toolbar(table-system-role)', function (obj) {
-            console.log(obj.event)
+            let that = this;
             switch (obj.event) {
                 // 【添加】角色按钮
                 case "btn-role-add":
@@ -176,6 +178,54 @@
                         }, where: {
                             name: "",
                             permission: ""
+                        }
+                    });
+                    break;
+                // 【修改状态】下拉菜单，控制状态用
+                case "btn-role-changeStatus":
+                    dropdown.render({
+                        elem: that,
+                        // elem: '#btn-down-roleStatus',
+                        data: [{
+                            title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
+                        }, {
+                            title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
+                        }],
+                        click: function (obj) {
+                            // 选中菜单的ID即为新的status
+                            let newStatus = obj.id;
+                            // 读取所有选中的按钮
+                            let roleIds = "";
+                            let checkRoleList = table.checkStatus('table-system-role').data
+                            for (let i = 0; i < checkRoleList.length; i++) {
+                                roleIds += (checkRoleList[i].id + ",")
+                            }
+                            roleIds = roleIds.substring(0, roleIds.lastIndexOf(',')); // 去掉末尾的逗号
+                            console.log(roleIds)
+                            // 选中才响应
+                            if (roleIds.length > 0) {
+                                let actionText = newStatus === 1 ? "开启" : "禁用"
+                                // 二次询问框
+                                layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
+                                    title: false,
+                                    btn: ['确定', '取消'],
+                                    // 按钮【按钮1】的回调
+                                    btn1: function (index) {
+                                        // 执行ajax请求
+                                        $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleIds}, function (data) {
+                                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                            if (data.code === 200) {
+                                                layer.msg(data.msg, {time: 3000, icon: 1});
+                                                table_role.reload();
+                                            } else {
+                                                layer.msg(data.msg, {time: 3000, icon: 2});
+                                            }
+                                        });
+                                    },
+                                });
+                            } else {
+                                layer.msg('请先选择菜单', {time: 2000, icon: 7});
+                            }
                         }
                     });
                     break;
@@ -208,6 +258,7 @@
                     // TODO 执行删除的POST操作
                     layer.msg('删除接口未对接...删除角色：' + data.name)
                     break;
+
             }
         });
 
@@ -252,52 +303,6 @@
                     layer.close(index);
                 }
             });
-        });
-
-        // 【修改状态】下拉菜单，控制状态用
-        dropdown.render({
-            elem: '#btn-down-roleStatus',
-            data: [{
-                title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
-            }, {
-                title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
-            }],
-            click: function (obj) {
-                // 选中菜单的ID即为新的status
-                let newStatus = obj.id;
-                // 读取所有选中的按钮
-                let roleIds = "";
-                let checkRoleList = table.checkStatus('table-system-role').data
-                for (let i = 0; i < checkRoleList.length; i++) {
-                    roleIds += (checkRoleList[i].id + ",")
-                }
-                roleIds = roleIds.substring(0, roleIds.lastIndexOf(',')); // 去掉末尾的逗号
-                console.log(roleIds)
-                // 选中才响应
-                if (roleIds.length > 0) {
-                    let actionText = newStatus === 1 ? "开启" : "禁用"
-                    // 二次询问框
-                    layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
-                        title: false,
-                        btn: ['确定', '取消'],
-                        // 按钮【按钮1】的回调
-                        btn1: function (index) {
-                            // 执行ajax请求
-                            $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleIds}, function (data) {
-                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                                if (data.code === 200) {
-                                    layer.msg(data.msg, {time: 3000, icon: 1});
-                                    table_role.reload();
-                                } else {
-                                    layer.msg(data.msg, {time: 3000, icon: 2});
-                                }
-                            });
-                        },
-                    });
-                } else {
-                    layer.msg('请先选择菜单', {time: 2000, icon: 7});
-                }
-            }
         });
 
     });

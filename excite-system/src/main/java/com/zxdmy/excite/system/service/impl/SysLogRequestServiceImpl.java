@@ -1,7 +1,9 @@
 package com.zxdmy.excite.system.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.system.entity.SysLogRequest;
+import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.mapper.SysLogRequestMapper;
 import com.zxdmy.excite.system.service.ISysLogRequestService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -26,6 +28,8 @@ public class SysLogRequestServiceImpl extends ServiceImpl<SysLogRequestMapper, S
     public Page<SysLogRequest> getPage(Integer current, Integer size) {
         current = null == current ? 1 : current;
         size = null == size ? 10 : size;
-        return logRequestMapper.selectPage(new Page<>(current, size), null);
+        QueryWrapper<SysLogRequest> wrapper = new QueryWrapper<>();
+        wrapper.orderByDesc("id");
+        return logRequestMapper.selectPage(new Page<>(current, size), wrapper);
     }
 }
