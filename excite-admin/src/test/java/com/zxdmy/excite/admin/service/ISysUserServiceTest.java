@@ -1,5 +1,9 @@
 package com.zxdmy.excite.admin.service;
 
+import cn.dev33.satoken.SaManager;
+import cn.dev33.satoken.stp.StpLogic;
+import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.mapper.SysUserMapper;
@@ -10,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.DigestUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -29,6 +34,7 @@ class ISysUserServiceTest {
     @Autowired
     private ISysUserService userService;
 
+
     /**
      * 测试添加一个用户
      */
@@ -45,6 +51,42 @@ class ISysUserServiceTest {
         }
     }
 
+    @Test
+    void tokenTest(){
+        // 查询value包括1000的所有token，结果集从第0条开始，返回10条
+        System.out.println();
+        List<String> tokenList = StpUtil.searchTokenValue("", 0, 10);
+        for (String token : tokenList) {
+            System.out.println(token);
+        }
+        System.out.println();
+        List<String> tokenList2 = StpUtil.searchTokenSessionId("",-1,10000);
+        for (String token : tokenList2) {
+            System.out.println(token);
+        }
+        System.out.println();
+        List<String> tokenList3 = StpUtil.searchSessionId("",0,10000);
+        for (String token : tokenList3) {
+
+            System.out.println(token);
+        }
+
+//        List<String> sessionIds = StpUtil.searchTokenValue(null, -1, 1000);
+//        MySaTokenListener.ONLINE_USERS.sort((o1, o2) -> DateUtil.compare(o2.getLoginTime(), o1.getLoginTime()));
+//        PageDtoUtil pageDto = PageDtoUtil.getPageDto(MySaTokenListener.ONLINE_USERS, page, limit);
+//
+//        List<OnlineUser> pageList = (List<OnlineUser>) pageDto.getPageList();
+//        pageList.forEach(onlineUser -> {
+//            String keyLastActivityTime = StpUtil.stpLogic.splicingKeyLastActivityTime(onlineUser.getTokenValue());
+//            String lastActivityTimeString = SaManager.getSaTokenDao().get(keyLastActivityTime);
+//            if (lastActivityTimeString != null) {
+//                long lastActivityTime = Long.parseLong(lastActivityTimeString);
+//                onlineUser.setLastActivityTime(DateUtil.date(lastActivityTime));
+//            }
+//        });
+//        return PageResponse.ok(pageList, (long) pageDto.getTotal());
+
+    }
     /**
      * 测试添加一系列数据
      */

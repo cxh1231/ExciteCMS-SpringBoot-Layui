@@ -1,6 +1,7 @@
 package com.zxdmy.excite.system.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -81,4 +82,12 @@ public class SysRole implements Serializable {
     private LocalDateTime deleteTime;
 
 
+    /**
+     * 复选框使用的字段，默认为"0"，选中为"1"，
+     */
+    @TableField(exist = false)
+    private String checkArr = "0";
+
+    @TableField(exist = false)
+    private String parentId = "-1";
 }

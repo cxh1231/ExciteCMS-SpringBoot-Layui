@@ -148,7 +148,7 @@ public class SysMenuController extends BaseController {
             HashMap<String, String> map2 = new HashMap<>();
             map2.put("title", "ExciteCMS");
             map2.put("image", "/images/logo.png");
-            map2.put("href", "/system/welcome");
+            map2.put("href", "/system/index");
             // 转换成相应的格式
             return success("获取菜单成功").put("homeInfo", map).put("logoInfo", map2).put("menuInfo", menus);
 

@@ -117,17 +117,17 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     /**
-     * 查询角色列表
+     * 查询状态正常的角色列表
      *
      * @return 角色列表
      */
     @Override
     public List<SysRole> getList() {
-        // 根据ID查询status正常的角色
-//        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
-//        wrapper.eq("status", SystemCode.STATUS_Y.getCode());
-//        return roleMapper.selectList(wrapper);
-        return roleMapper.selectList(null);
+        // 查询status正常的角色
+        QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
+        wrapper.ne("status", SystemCode.STATUS_N.getCode());
+        return roleMapper.selectList(wrapper);
+//        return roleMapper.selectList(null);
     }
 
     @Override

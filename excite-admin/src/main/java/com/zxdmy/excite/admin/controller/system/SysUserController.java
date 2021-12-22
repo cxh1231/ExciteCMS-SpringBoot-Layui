@@ -1,5 +1,6 @@
 package com.zxdmy.excite.admin.controller.system;
 
+import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.util.StrUtil;
@@ -42,7 +43,7 @@ public class SysUserController extends BaseController {
 
     private ISysUserService userService;
 
-    private RedisService redisUtils;
+//    private RedisService redisUtils;
 
 
     /**
@@ -136,6 +137,8 @@ public class SysUserController extends BaseController {
                     // 保持登录与否
                     StpUtil.login(user.getId(), "1".equals(remember));
                     // 获取Token等信息
+                    SaSession saSession = StpUtil.getTokenSession();
+                    saSession.set("id", user.getId());
                     SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
                     return success("登录成功！", tokenInfo);
                 }
@@ -202,11 +205,14 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/add")
     @ResponseBody
-    @AnnotationSaveReLog
+//    @AnnotationSaveReLog
     public BaseResult add(SysUser user, Integer[] roleIds) {
+        System.out.println(roleIds);
+        System.out.println(user);
         // 新建用户：其邮箱或手机号、密码不能为空，因为这是登录凭证.
         if (null != user && null != user.getPassword() && (null != user.getEmail() || null != user.getPhone())) {
             if (userService.save(user, roleIds) > 0) {
+//            if (-1> 0) {
                 return success("新用户添加成功！");
             } else {
                 return error("新用户添加失败，请重试！");
@@ -280,5 +286,14 @@ public class SysUserController extends BaseController {
     @ResponseBody
     public BaseResult resetPassword(String userId, String newPassword, String newPassword2) {
         return error("添加失败，请重试！");
+    }
+
+    @GetMapping(value = "/token")
+    @ResponseBody
+    public BaseResult testToken() {
+        List<String> tokenList = StpUtil.searchTokenValue("", 0, 10);
+        List<String> tokenList2 = StpUtil.searchTokenSessionId("", -1, 100);
+        List<String> tokenList3 = StpUtil.searchSessionId("", -1, 10000);
+        return success(tokenList2);
     }
 }

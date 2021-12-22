@@ -83,7 +83,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     public int save(SysUser user, Integer[] roleIds) {
         int result = 0;
         // 新建用户：其ID为空
-        if (null != user.getId()) {
+        if (null == user.getId()) {
             // 初始化部分信息
             if (null == user.getStatus())
                 user.setStatus(SystemCode.STATUS_Y.getCode());

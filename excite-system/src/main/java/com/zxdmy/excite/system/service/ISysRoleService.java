@@ -35,7 +35,7 @@ public interface ISysRoleService extends IService<SysRole> {
     public SysRole getRole(Integer id);
 
     /**
-     * 查询角色列表
+     * 查询状态正常的角色列表
      *
      * @return 角色列表
      */

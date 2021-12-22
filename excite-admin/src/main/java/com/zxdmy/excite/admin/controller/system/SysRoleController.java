@@ -13,6 +13,7 @@ import org.springframework.ui.ModelMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -125,6 +126,22 @@ public class SysRoleController extends BaseController {
         try {
             Page<SysRole> rolePage = roleService.getPage(page, limit, name, permission);
             return success("获取角色列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
+        } catch (Exception e) {
+            return error(500, "error:" + e.getMessage());
+        }
+    }
+
+    /**
+     * 获取所有正常的角色
+     *
+     * @return 结果
+     */
+    @GetMapping("/list/user")
+    @ResponseBody
+    public BaseResult getRoleListOK() {
+        try {
+            List<SysRole> roleList = roleService.getList();
+            return success("获取角色列表成功", roleList, roleList.size());
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());
         }
