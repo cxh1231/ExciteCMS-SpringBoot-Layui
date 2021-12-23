@@ -75,6 +75,15 @@ public class SysUserController extends BaseController {
     public String goEdit(@PathVariable String id) {
         return "system/user/edit";
     }
+    /**
+     * 用户管理 - 编辑用户信息页面
+     *
+     * @return 跳转至编辑用户页面
+     */
+    @RequestMapping("goAuthRole/{id}")
+    public String goAuthRole(@PathVariable String id) {
+        return "system/user/authRole";
+    }
 
     /**
      * 用户个人信息管理 - 修改用户信息

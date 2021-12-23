@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>分配角色</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <!-- 引入 font-aswsome 相关资源 -->
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+
+        <form class="layui-form layui-form-pane" action="">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend style="font-size: 17px">用户信息</legend>
+            </fieldset>
+            <!-- 【用户名称】和【性别】 -->
+            <div class="layui-form-item">
+                <!--【ID】-->
+                <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px">ID</label>
+                    <div class="layui-input-inline" style="width: 100px">
+                        <input type="text" name="id" value="1000" autocomplete="off" disabled class="layui-input">
+                    </div>
+                </div>
+                <!-- 【用户名称】 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label">用户名称</label>
+                    <div class="layui-input-inline" style="width: 200px">
+                        <input type="text" name="username" value="张三" autocomplete="off" disabled class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend style="font-size: 17px">角色列表</legend>
+            </fieldset>
+            <!-- 表格 -->
+            <table class="layui-hide" id="table-system-roleForUser" lay-filter="table-system-roleForUser"></table>
+            <!-- 放在底部按钮 -->
+            <div class="layer-footer" style="z-index: 10; position: fixed; text-align: right; margin-left: -9%; bottom: 0; width:100%; height:50px">
+                <button type="button" class="layui-btn" lay-submit="" lay-filter="formDemo">保存</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table', 'iconPickerFa'], function () {
+        let $ = layui.jquery;
+        let form = layui.form,
+            layer = layui.layer,
+            table = layui.table;
+        window.form = layui.form;
+
+        table.render({
+            elem: '#table-system-roleForUser',
+            url: '/system/role/listForUser/10000',
+            response: {
+                statusCode: 200,
+            },
+            title: '用户数据表',
+            cols: [
+                [
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'name', title: '角色名称', width: 150, align: 'center'},
+                    {field: 'remark', title: '备注', align: 'center'},
+                ]
+            ],
+        });
+
+        //自定义验证规则
+        form.verify({
+            // 角色名称
+            roleNameVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色名称！';
+                }
+            },
+            // 角色权限标识
+            rolePermissionVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色权限标识！';
+                }
+            },
+            // 角色排序
+            roleSortVerify: function (value) {
+                if (value.length <= 0) {
+                    return '请输入角色显示顺序！';
+                }
+            },
+        });
+
+        //监听提交
+        form.on('submit(form-menu-add)', function (data) {
+            // layer.alert(JSON.stringify(data.field));
+            console.log(JSON.stringify(data.field))
+            // 提交角色
+            $.post("/system/role/update", data.field, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
+                        // 关闭弹窗
+                        layer.close();
+                        // 先得到当前iframe层的索引
+                        let index22 = parent.layer.getFrameIndex(window.name);
+                        // 关闭当前弹窗
+                        parent.layer.close(index22);
+                    });
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+            });
+            return false;
+        });
+
+
+    });
+</script>
+</body>
+</html>

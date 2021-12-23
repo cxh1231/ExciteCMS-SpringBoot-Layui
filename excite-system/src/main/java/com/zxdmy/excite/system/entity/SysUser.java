@@ -75,6 +75,11 @@ public class SysUser implements Serializable {
     private Integer status;
 
     /**
+     * 用户备注信息
+     */
+    private String remark;
+
+    /**
      * 登录IP
      */
     private String loginIp;

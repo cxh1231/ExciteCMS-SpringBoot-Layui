@@ -86,8 +86,8 @@
                     {type: "checkbox", width: 50},
                     {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
                     {field: 'username', title: '用户名称', width: 150, align: 'center'},
-                    {field: 'email', title: '邮箱', width: 150, align: 'center'},
-                    {field: 'phone', title: '手机', width: 150, align: 'center'},
+                    {field: 'email', title: '邮箱', width: 200, align: 'center'},
+                    {field: 'phone', title: '手机', width: 200, align: 'center'},
                     {
                         field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
                             let checkStr = "";
@@ -201,7 +201,21 @@
                         }], click: function (data, othis) {
                             // 分配角色
                             if (data.id === 'set-role') {
-                                layer.msg("还没写...分配角色")
+                                // layer.msg("还没写...分配角色")
+                                let role_edit_index = layer.open({
+                                    title: '更新用户角色',
+                                    type: 2,
+                                    shade: 0.2,
+                                    maxmin: true,
+                                    shadeClose: false,
+                                    area: ['600px', '500px'],
+                                    content: '/system/user/goAuthRole/' + data.id,
+                                    end: function () {
+                                        table_user.reload();
+                                    }
+                                });
+                                parent.layer.iframeAuto(role_edit_index);
+                                // break;
                             }
                             // 重置密码
                             else if (data.id === 'reset-password') {

@@ -11,6 +11,7 @@
         <result column="email" property="email" />
         <result column="phone" property="phone" />
         <result column="password" property="password" />
+        <result column="remark" property="remark" />
         <result column="status" property="status" />
         <result column="login_ip" property="loginIp" />
         <result column="login_date" property="loginDate" />
@@ -22,7 +23,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, username, avatar, sex, email, phone, password, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
+        id, username, avatar, sex, email, phone, password, remark, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
     </sql>
 
 </mapper>

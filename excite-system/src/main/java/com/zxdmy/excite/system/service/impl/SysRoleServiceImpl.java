@@ -10,6 +10,7 @@ import com.zxdmy.excite.common.service.RedisService;
 import com.zxdmy.excite.system.entity.SysMenu;
 import com.zxdmy.excite.system.entity.SysRole;
 import com.zxdmy.excite.system.entity.SysRoleMenu;
+import com.zxdmy.excite.system.entity.SysUserRole;
 import com.zxdmy.excite.system.mapper.SysRoleMapper;
 import com.zxdmy.excite.system.service.ISysRoleMenuService;
 import com.zxdmy.excite.system.service.ISysRoleService;
@@ -25,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -122,12 +124,30 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
      * @return 角色列表
      */
     @Override
-    public List<SysRole> getList() {
+    public List<SysRole> getListByUserId(Integer userId) {
         // 查询status正常的角色
         QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
         wrapper.ne("status", SystemCode.STATUS_N.getCode());
-        return roleMapper.selectList(wrapper);
-//        return roleMapper.selectList(null);
+        // 如果userId为0，则表示获取全部角色
+        if (userId == 0) {
+            return roleMapper.selectList(wrapper);
+        }
+        // 否则，获取角色后，将该用户已分配的角色checkArr设置为1
+        else {
+            // 获取全部正常角色
+            List<SysRole> roleList = roleMapper.selectList(wrapper);
+            // 获取当前用户拥有的角色ID列表
+            List<Integer> userRoleList = userRoleService.getListByUserId(userId).stream().map(SysUserRole::getRoleId).collect(Collectors.toList());
+            // 使用lambda表达式，直接在角色列表上修改checkArr字段
+            return roleList.stream().peek(
+                    role -> {
+                        if (userRoleList.contains(role.getId())) {
+                            role.setCheckArr("1");
+                            role.setLAY_CHECKED(true);
+                        }
+                    }
+            ).collect(Collectors.toList());
+        }
     }
 
     @Override

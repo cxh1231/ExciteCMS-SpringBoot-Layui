@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -90,4 +91,11 @@ public class SysRole implements Serializable {
 
     @TableField(exist = false)
     private String parentId = "-1";
+
+    /**
+     * 前端Layui表格中，多选框使用
+     */
+    @TableField(exist = false)
+    @JsonProperty("LAY_CHECKED")
+    private Boolean LAY_CHECKED = false;
 }

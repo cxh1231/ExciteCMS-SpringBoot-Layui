@@ -39,7 +39,7 @@ public interface ISysRoleService extends IService<SysRole> {
      *
      * @return 角色列表
      */
-    public List<SysRole> getList();
+    public List<SysRole> getListByUserId(Integer userId);
 
 
     public Page<SysRole> getPage(Integer current, Integer size, String name, String permission);

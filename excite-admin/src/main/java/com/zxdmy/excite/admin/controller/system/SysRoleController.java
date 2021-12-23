@@ -132,15 +132,17 @@ public class SysRoleController extends BaseController {
     }
 
     /**
-     * 获取所有正常的角色
+     * 获取获取所有正常的角色，为用户模块所用（添加、编辑用户）
+     * 其中：如果指定ID（即ID不为0），则该用户的角色列表中，已分配的角色属性中的checkArr=1
      *
-     * @return 结果
+     * @param userId 用户ID，如果为0，则表示获取所有列表
+     * @return JSON结果
      */
-    @GetMapping("/list/user")
+    @GetMapping("/listForUser/{userId}")
     @ResponseBody
-    public BaseResult getRoleListOK() {
+    public BaseResult getRoleListForUser(@PathVariable String userId) {
         try {
-            List<SysRole> roleList = roleService.getList();
+            List<SysRole> roleList = roleService.getListByUserId(Integer.parseInt(userId));
             return success("获取角色列表成功", roleList, roleList.size());
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());
