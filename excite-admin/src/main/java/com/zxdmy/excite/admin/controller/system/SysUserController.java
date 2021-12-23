@@ -75,6 +75,7 @@ public class SysUserController extends BaseController {
     public String goEdit(@PathVariable String id) {
         return "system/user/edit";
     }
+
     /**
      * 用户管理 - 编辑用户信息页面
      *
@@ -133,7 +134,7 @@ public class SysUserController extends BaseController {
         if (StrUtil.hasBlank(username, password, captcha)) {
             return error("用户名、密码或验证码不能为空！");
         }
-        // 前后端同域，就用session
+        // 前后端同域：使用session存储验证码。如果不同域：使用redis
         HttpSession session = request.getSession();
         // 如果验证码session不为空，表示以获取验证码
         if (null != session.getAttribute("captcha")) {
@@ -143,28 +144,28 @@ public class SysUserController extends BaseController {
                 SysUser user = userService.login(username, password);
                 // 如果用户不为空，则登录成功
                 if (null != user) {
-                    // 保持登录与否
-                    StpUtil.login(user.getId(), "1".equals(remember));
-                    // 获取Token等信息
-                    SaSession saSession = StpUtil.getTokenSession();
-                    saSession.set("id", user.getId());
-                    SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
-                    return success("登录成功！", tokenInfo);
+                    // 账号状态正常
+                    if (SystemCode.STATUS_N.getCode() != user.getStatus()) {
+                        // 保持登录与否
+                        StpUtil.login(user.getId(), "1".equals(remember));
+                        SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
+                        return success("登录成功！", tokenInfo);
+                    }
+                    // 账号已被封禁
+                    else
+                        return error("该账号已被封禁，请联系系统管理员");
                 }
                 // 登录失败
-                else {
+                else
                     return error("登录失败：用户名或密码错误");
-                }
             }
             // 验证码错误
-            else {
+            else
                 return error("验证码错误，请重新输入！");
-            }
         }
         // 未获取验证码：提示重新获取
-        else {
+        else
             return error("验证码已失效，请重新获取！");
-        }
     }
 
     /**
