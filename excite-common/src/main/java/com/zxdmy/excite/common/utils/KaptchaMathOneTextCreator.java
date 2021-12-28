@@ -18,7 +18,8 @@ public class KaptchaMathOneTextCreator extends DefaultTextCreator {
 
     @Override
     public String getText() {
-        Random random = new SecureRandom();
+//        Random random = new SecureRandom();
+        SecureRandom random = new SecureRandom();
         // 生成两个随机数，随机数范围：[0,10)，并返回结果
         Map<String, String> result = MyCaptchaUtil.mathTextCreator(random.nextInt(10), random.nextInt(10));
         return result.get("resultString");

@@ -23,7 +23,8 @@ public class MyCaptchaUtil {
      * @return 字符
      */
     public static Map<String, String> mathTextCreator(int a, int b) {
-        Random random = new SecureRandom();
+        SecureRandom random = new SecureRandom();
+//        Random random = new SecureRandom();
         // 生成随机操作，操作范围：[0,4)，分别表示： +  -  *  /
         int op = random.nextInt(4);
         // 定义计算的结果

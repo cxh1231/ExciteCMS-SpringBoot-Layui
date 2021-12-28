@@ -18,7 +18,8 @@ public class KaptchaMathTwoTextCreator extends DefaultTextCreator {
 
     @Override
     public String getText() {
-        Random random = new SecureRandom();
+//        Random random = new SecureRandom();
+        SecureRandom random = new SecureRandom();
         // 保存计算结果
         Map<String, String> result = MyCaptchaUtil.mathTextCreator(random.nextInt(100), random.nextInt(100));
         // 生成两个随机数，随机数范围：[0,100)，并返回结果
