@@ -3,8 +3,10 @@ package com.zxdmy.excite.admin.controller.system;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.system.entity.SysLogLogin;
 import com.zxdmy.excite.system.entity.SysLogRequest;
 import com.zxdmy.excite.system.entity.SysMenu;
+import com.zxdmy.excite.system.service.ISysLogLoginService;
 import com.zxdmy.excite.system.service.ISysLogRequestService;
 import lombok.AllArgsConstructor;
 import org.springframework.ui.ModelMap;
@@ -27,6 +29,8 @@ import com.zxdmy.excite.common.base.BaseController;
 public class SysLogController extends BaseController {
 
     ISysLogRequestService logRequestService;
+
+    ISysLogLoginService logLoginService;
 
     /**
      * 请求日志列表
@@ -75,9 +79,23 @@ public class SysLogController extends BaseController {
      */
     @GetMapping("/requestList")
     @ResponseBody
-    public BaseResult addRole(Integer page, Integer limit) {
+    public BaseResult requestList(Integer page, Integer limit) {
         try {
             Page<SysLogRequest> rolePage = logRequestService.getPage(page, limit);
+            return success("获取日志列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
+        } catch (Exception e) {
+            return error(500, "error:" + e.getMessage());
+        }
+    }    /**
+     * 获取日志列表
+     *
+     * @return 结果
+     */
+    @GetMapping("/loginList")
+    @ResponseBody
+    public BaseResult loginList(Integer page, Integer limit) {
+        try {
+            Page<SysLogLogin> rolePage = logLoginService.getPage(page, limit);
             return success("获取日志列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());

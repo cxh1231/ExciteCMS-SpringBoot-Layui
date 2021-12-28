@@ -19,6 +19,7 @@ public class ExciteAdminApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(ExciteAdminApplication.class, args);
+        System.out.println("系统启动成功，访问 http://localhost:8181 ");
     }
 
 }

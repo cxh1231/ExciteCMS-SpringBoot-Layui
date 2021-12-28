@@ -11,6 +11,7 @@ import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.common.enums.ReturnCode;
 import com.zxdmy.excite.common.enums.SystemCode;
 import com.zxdmy.excite.common.service.RedisService;
+import com.zxdmy.excite.framework.aop.AnnotationSaveLoginLog;
 import com.zxdmy.excite.framework.aop.AnnotationSaveReLog;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.service.ISysUserService;
@@ -129,6 +130,7 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/login")
     @ResponseBody
+    @AnnotationSaveLoginLog
     public BaseResult login(String username, String password, String captcha, String remember) {
         // 如果提交的信息有空信息
         if (StrUtil.hasBlank(username, password, captcha)) {
