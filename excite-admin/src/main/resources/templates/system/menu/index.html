@@ -83,14 +83,15 @@
             },
             toolbar: '#toolbar-table-menu', // 表格工具栏（左上方）
             defaultToolbar: ['filter'],     // 表格默认的工具栏（右上方）
+            height: 'full-52', //高度最大化减去差值
             cols: [
                 [
                     {type: "checkbox", width: 50,},
-                    {field: 'id', width: 20, title: 'ID', align: 'center'},
-                    {field: 'sort', width: 40, title: '排序', align: 'center'},
-                    {field: 'title', minWidth: 150, title: '菜单名称'},
-                    {field: 'href', title: '菜单链接'},
-                    {field: 'permission', title: '权限标识'},
+                    {field: 'id', title: 'ID', width: 50, align: 'center'},
+                    {field: 'sort', title: '排序', width: 50, align: 'center'},
+                    {field: 'title', title: '菜单名称', minWidth: 250,},
+                    {field: 'href', title: '菜单链接', minWidth: 150,},
+                    {field: 'permission', title: '权限标识', minWidth: 150,},
                     {
                         field: 'type', title: '类型', width: 100, align: 'center', templet: function (d) {
                             if (d.type === "N") {
@@ -119,7 +120,7 @@
                         }
                     },
                     {
-                        field: 'action', title: '操作', align: 'center', templet: function (d) {
+                        field: 'action', fixed: 'right', title: '操作', align: 'center', width: 150, templet: function (d) {
                             let returnStr = "";
                             if (d.editable === 0) {
                                 returnStr += '<a class="layui-btn layui-btn-disabled layui-btn-xs" lay-event="edit">编辑</a> ';

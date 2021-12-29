@@ -10,6 +10,35 @@
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索</legend>
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <div class="layui-inline">
+                        <!-- 用户ID-->
+                        <label class="layui-form-label" style="width: 100px">用户ID</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputUserId" autocomplete="off" class="layui-input" placeholder="输入ID"/>
+                        </div>
+                        <!-- 时间范围选择 -->
+                        <label class="layui-form-label" style="width: 100px">日期范围</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputDateStart" autocomplete="off" class="layui-input" placeholder="选择开始时间" readonly>
+                        </div>
+                        <div class="layui-form-mid">-</div>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputDateEnd" autocomplete="off" class="layui-input" placeholder="选择结束时间" readonly>
+                        </div>
+                    </div>
+                    <!-- 搜索按钮 -->
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-user-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
 
         <!-- 表格 -->
         <table class="layui-hide" id="table-system-requestLog" lay-filter="table-system-requestLog"></table>
@@ -36,7 +65,7 @@
     layui.use(['table'], function () {
         let $ = layui.jquery,
             form = layui.form,
-            dropdown = layui.dropdown,
+            laydate = layui.laydate,
             table = layui.table;
 
         // 表格
@@ -46,9 +75,10 @@
             response: {
                 statusCode: 200
             },
+            height: 'full-158', //高度最大化减去差值
             toolbar: '#toolbar-table-requestLog', //开启头部工具栏，并为其绑定左侧模板
             defaultToolbar: ['filter', 'exports'],
-            title: '用户数据表',
+            title: '操作日志表',
             cols: [
                 [
                     {type: "checkbox", width: 50},
@@ -67,8 +97,6 @@
                             }
                         }
                     },
-                    // {field: 'reqData', title: '请求数据', align: 'center'},
-                    // {field: 'resData', title: '响应信息', align: 'center'},
                     {field: 'createTime', title: '操作时间', align: 'center', width: 200},
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-requestLog', width: 95}
                 ]
@@ -109,6 +137,52 @@
             active[type] ? active[type].call(this) : '';
         });
 
+        //日期范围
+        let dateStart = laydate.render({
+            elem: '#inputDateStart',
+            max: 1, // 最大时间为下一天的0点
+            type: 'datetime',
+            trigger: 'click', //采用click弹出
+            btns: ['clear', 'confirm'],
+            done: function (value, dates) {
+                if ("" !== value) {
+                    dateEnd.config.min = {
+                        year: dates.year,
+                        month: dates.month - 1, //关键
+                        date: dates.date,
+                        hours: dates.hours,
+                        minutes: dates.minutes,
+                        seconds: dates.seconds + 1
+                    };
+                } else {
+                    dateEnd.config.min = '1900-01-01 00:00:00'
+                }
+            }
+        });
+        let dateEnd = laydate.render({
+            elem: '#inputDateEnd',
+            max: 1,
+            type: 'datetime',
+            trigger: 'click',
+            btns: ['clear', 'confirm'],
+            done: function (value, dates) {
+                // 不为空：表示没有点击清空按钮
+                if ("" !== value) {
+                    dateStart.config.max = {
+                        year: dates.year,
+                        month: dates.month - 1, //关键
+                        date: dates.date,
+                        hours: dates.hours,
+                        minutes: dates.minutes,
+                        seconds: dates.seconds - 1
+                    };
+                }
+                // 为空：表示点击清空按钮
+                else {
+                    dateStart.config.max = dateEnd.config.max
+                }
+            }
+        });
 
         // 【头部按钮】监听头部按钮
         table.on('toolbar(table-system-requestLog)', function (obj) {

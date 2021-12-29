@@ -16,13 +16,13 @@
             <div class="layui-form layui-form-pane">
                 <div class="layui-form-item">
                     <div class="layui-inline">
-                        <label class="layui-form-label">用户名称</label>
-                        <div class="layui-input-inline">
-                            <input type="text" id="inputUserName" autocomplete="off" class="layui-input"/>
+                        <label class="layui-form-label" style="width: 100px">用户名称</label>
+                        <div class="layui-input-inline" style="width: 100px">
+                            <input type="text" id="inputUserName" autocomplete="off" class="layui-input" placeholder="输入名称"/>
                         </div>
-                        <label class="layui-form-label">电话/邮箱</label>
-                        <div class="layui-input-inline">
-                            <input type="text" id="inputUserAccount" autocomplete="off" class="layui-input"/>
+                        <label class="layui-form-label" style="width: 100px">电话/邮箱</label>
+                        <div class="layui-input-inline" style="width: 200px">
+                            <input type="text" id="inputUserAccount" autocomplete="off" class="layui-input" placeholder="输入电话/邮箱"/>
                         </div>
                     </div>
                     <!-- 搜索按钮 -->
@@ -48,7 +48,7 @@
         <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="btn-user-add"><i class="fa fa-plus"></i> 添加</button>
         <!-- 【修改状态】下拉菜单：禁用与否 -->
         <div class="layui-btn-group">
-            <button class="layui-btn layui-btn-sm layui-btn-warm" id="btn-down-userStatus">修改状态 <i class="fa fa-caret-down"></i></button>
+            <button class="layui-btn layui-btn-sm layui-btn-warm" lay-event="btn-user-changeStatus">修改状态 <i class="fa fa-caret-down"></i></button>
         </div>
         <!-- 【删除】 -->
         <div class="layui-btn-group">
@@ -80,14 +80,15 @@
             response: {
                 statusCode: 200
             },
+            height: 'full-158', //高度最大化减去差值
             toolbar: '#toolbar-table-user', //开启头部工具栏，并为其绑定左侧模板
             defaultToolbar: ['filter', 'exports'],
             title: '用户数据表',
             cols: [
                 [
-                    {type: "checkbox", width: 50,fixed: 'left',},
-                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true, fixed: 'left', unresize: true},
-                    {field: 'username', title: '用户名称', width: 150, align: 'center',fixed: 'left', unresize: true},
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'username', title: '用户名称', width: 150, align: 'center'},
                     {field: 'email', title: '邮箱', width: 200, align: 'center'},
                     {field: 'phone', title: '手机', width: 200, align: 'center'},
                     {
@@ -141,9 +142,14 @@
 
         // 监听头部按钮
         table.on('toolbar(table-system-user)', function (obj) {
-            console.log(obj.event)
+            let that = this;
+            // console.log(obj.event)
             switch (obj.event) {
-                // 【添加】角色按钮
+                // 上方【刷新】按钮
+                case "btn-user-refresh":
+                    active['refresh'].call(this)
+                    break;
+                // 上方【添加】角色按钮
                 case "btn-user-add":
                     let role_add_index = layer.open({
                         title: '添加新用户',
@@ -159,9 +165,66 @@
                     });
                     parent.layer.iframeAuto(role_add_index);
                     break;
-                // 【刷新】按钮
-                case "btn-user-refresh":
-                    active['refresh'].call(this)
+                // 上方批量【修改状态】按钮
+                case "btn-user-changeStatus":
+                    // 操作：批量修改用户状态（修改状态按钮下拉菜单的按钮响应事件）
+                    dropdown.render({
+                        // elem: '#btn-down-userStatus',
+                        elem: that,
+                        data: [{
+                            title: '开启', id: 0, templet: '开启 <i class="fa fa-check"> </i>'
+                        }, {
+                            title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
+                        }],
+                        click: function (obj) {
+                            // 选中菜单的ID即为新的status
+                            let newStatus = obj.id;
+                            // 读取所有选中的按钮
+                            let userIds = "";
+                            let checkRoleList = table.checkStatus('table-system-user').data
+                            for (let i = 0; i < checkRoleList.length; i++) {
+                                userIds += (checkRoleList[i].id + ",")
+                            }
+                            // 去掉末尾的逗号
+                            userIds = userIds.substring(0, userIds.lastIndexOf(','));
+                            // 选中才响应
+                            if (userIds.length > 0) {
+                                // console.log(userIds)
+                                let actionText = newStatus === 0 ? "启用" : "禁用"
+                                // 二次询问框
+                                layer.confirm('确认要 ' + actionText + ' 选中的用户吗？', {
+                                    title: false,
+                                    btn: ['确定', '取消'],
+                                    // 按钮【按钮1】的回调
+                                    btn1: function (index) {
+                                        // 执行ajax请求
+                                        $.post("/system/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
+                                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                            if (d.code === 200) {
+                                                layer.msg(d.msg, {time: 3000, icon: 1});
+                                                table_user.refresh();
+                                            } else {
+                                                layer.msg(d.msg, {time: 3000, icon: 2});
+                                            }
+                                        });
+                                    },
+                                });
+                            } else {
+                                layer.msg('请先选择用户！', {time: 2000, icon: 7});
+                            }
+                        }
+                    });
+                    break;
+                // 上方批量【删除】按钮
+                case "btn-user-delete":
+                    let checkRoleList = table.checkStatus('table-system-user').data
+                    let userIds = "";
+                    for (let i = 0; i < checkRoleList.length; i++) {
+                        userIds += (checkRoleList[i].id + ",")
+                    }
+                    // 去掉末尾的逗号
+                    userIds = userIds.substring(0, userIds.lastIndexOf(','));
+                    layer.msg('删除接口未对接...删除用户：' + userIds)
                     break;
             }
         });
@@ -340,51 +403,6 @@
             });
         });
 
-        // 操作：批量修改用户状态（修改状态按钮下拉菜单的按钮响应事件）
-        dropdown.render({
-            elem: '#btn-down-userStatus',
-            data: [{
-                title: '开启', id: 0, templet: '开启 <i class="fa fa-check"> </i>'
-            }, {
-                title: '禁用', id: 1, templet: '禁用 <i class="fa fa-close"> </i>'
-            }],
-            click: function (obj) {
-                // 选中菜单的ID即为新的status
-                let newStatus = obj.id;
-                // 读取所有选中的按钮
-                let userIds = "";
-                let checkRoleList = table.checkStatus('table-system-user').data
-                for (let i = 0; i < checkRoleList.length; i++) {
-                    userIds += (checkRoleList[i].id + ",")
-                }
-                userIds = userIds.substring(0, userIds.lastIndexOf(',')); // 去掉末尾的逗号
-                console.log(userIds)
-                // 选中才响应
-                if (userIds.length > 0) {
-                    let actionText = newStatus === 0 ? "启用" : "禁用"
-                    // 二次询问框
-                    layer.confirm('确认要 ' + actionText + ' 选中的用户吗？', {
-                        title: false,
-                        btn: ['确定', '取消'],
-                        // 按钮【按钮1】的回调
-                        btn1: function (index) {
-                            // 执行ajax请求
-                            $.post("/system/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
-                                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                                if (d.code === 200) {
-                                    layer.msg(d.msg, {time: 3000, icon: 1});
-                                    table_user.refresh();
-                                } else {
-                                    layer.msg(d.msg, {time: 3000, icon: 2});
-                                }
-                            });
-                        },
-                    });
-                } else {
-                    layer.msg('请先选择菜单', {time: 2000, icon: 7});
-                }
-            }
-        });
 
     });
 </script>

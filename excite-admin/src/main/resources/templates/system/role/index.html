@@ -86,12 +86,13 @@
             },
             toolbar: '#toolbar-table-role', //开启头部工具栏，并为其绑定左侧模板
             defaultToolbar: ['filter', 'exports'],
-            title: '用户数据表',
+            title: '用户角色表',
+            height: 'full-158', //高度最大化减去差值
             cols: [
                 [
-                    {type: "checkbox", width: 50},
-                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
-                    {field: 'name', title: '角色名称', width: 150},
+                    {type: "checkbox", width: 50, fixed: 'left'},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true,fixed: 'left'},
+                    {field: 'name', title: '角色名称', align: 'center', width: 150,fixed: 'left'},
                     {field: 'permission', title: '权限字符', width: 150, align: 'center'},
                     {field: 'sort', title: '显示顺序', align: 'center', sort: true},
                     {
@@ -107,7 +108,7 @@
                     },
                     {field: 'remark', title: '备注', align: 'center'},
                     {field: 'updateTime', title: '更新时间', align: 'center'},
-                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-role'}
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-role',width: 150}
                 ]
             ],
             page: true
@@ -201,7 +202,7 @@
                                 roleIds += (checkRoleList[i].id + ",")
                             }
                             roleIds = roleIds.substring(0, roleIds.lastIndexOf(',')); // 去掉末尾的逗号
-                            console.log(roleIds)
+                            // console.log(roleIds)
                             // 选中才响应
                             if (roleIds.length > 0) {
                                 let actionText = newStatus === 1 ? "开启" : "禁用"
@@ -269,7 +270,7 @@
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "1" : "0"
             let roleId = data.value;
-            console.log(roleId)
+            // console.log(roleId)
             layer.confirm('确认要 ' + actionText + ' 此角色？', {
                 title: false,
                 btn: ['确定', '取消'],
