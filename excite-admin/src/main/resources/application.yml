@@ -15,11 +15,18 @@ excite:
 spring:
   # 数据库链接配置
   datasource:
+    name: druidDataSource
+    type: com.alibaba.druid.pool.DruidDataSource
+    # 链接地址，这里需要修改自己的数据库IP和数据库名
+    url: jdbc:mysql://127.0.0.1:3306/db_excite_cms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+    username: chen
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
     druid:
       # 链接地址，这里需要修改自己的数据库IP和数据库名
-      url: jdbc:mysql://127.0.0.1:3306/db_excite_cms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
-      username: chen # 数据库用户名
-      password: 123456 # 数据库密码
+      # url: jdbc:mysql://127.0.0.1:3306/db_excite_cms?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=UTC
+      # username: chen # 数据库用户名
+      # password: 123456 # 数据库密码
       initial-size: 1
       min-idle: 1
       max-active: 20
@@ -27,7 +34,7 @@ spring:
       # 连接驱动类名
       # MySQL 8.x: com.mysql.cj.jdbc.Driver
       # MySQL 5.x: com.mysql.jdbc.Driver
-      driver-class-name: com.mysql.cj.jdbc.Driver
+      # driver-class-name: com.mysql.cj.jdbc.Driver
   redis:
     # Redis服务器地址
     host: localhost
