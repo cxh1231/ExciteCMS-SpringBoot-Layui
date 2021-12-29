@@ -74,6 +74,9 @@
 </div>
 <!-- JS脚本 -->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<!--RSA-->
+<script src="/lib/jsencrypt/jsencrypt.min.js" charset="utf-8"></script>
+<script src="/lib/jsencrypt/rsa.js" charset="utf-8"></script>
 <script>
     layui.use(['form', 'jquery'], function () {
         const $ = layui.jquery,
@@ -125,19 +128,11 @@
         // 进行登录操作
         form.on('submit(login)', function (data) {
             data = data.field;
-            // if (data.username === '') {
-            //     layer.msg('用户名不能为空');
-            //     return false;
-            // }
-            // if (data.password === '') {
-            //     layer.msg('密码不能为空');
-            //     return false;
-            // }
-            // if (data.captcha === '') {
-            //     layer.msg('验证码不能为空');
-            //     return false;
-            // }
-            // console.log(data);
+            // 密码加密
+            let encrypt = new JSEncrypt()
+            encrypt.setPublicKey(PUBLIC_KEY)
+            data.password = encrypt.encrypt(data.password)
+            // 执行请求
             $.post("/system/user/login", data, function (data) {
                 if (data.code === 200) {
                     layer.msg('登录成功！', {

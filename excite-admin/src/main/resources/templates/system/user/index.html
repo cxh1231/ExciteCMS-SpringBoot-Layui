@@ -64,6 +64,8 @@
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/jsencrypt/jsencrypt.min.js" charset="utf-8"></script>
+<script src="/lib/jsencrypt/rsa.js" charset="utf-8"></script>
 <script>
     layui.use(['table', 'dropdown'], function () {
         let $ = layui.jquery,
@@ -83,9 +85,9 @@
             title: '用户数据表',
             cols: [
                 [
-                    {type: "checkbox", width: 50},
-                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
-                    {field: 'username', title: '用户名称', width: 150, align: 'center'},
+                    {type: "checkbox", width: 50,fixed: 'left',},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true, fixed: 'left', unresize: true},
+                    {field: 'username', title: '用户名称', width: 150, align: 'center',fixed: 'left', unresize: true},
                     {field: 'email', title: '邮箱', width: 200, align: 'center'},
                     {field: 'phone', title: '手机', width: 200, align: 'center'},
                     {
@@ -99,7 +101,7 @@
                     },
                     {field: 'remark', title: '备注', align: 'center'},
                     {field: 'updateTime', title: '更新时间', align: 'center'},
-                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user'}
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user', width: 150}
                 ]
             ],
             page: true
@@ -234,10 +236,25 @@
                                         let newPassword2 = $(l).find("#newPassword2").val()
                                         if (newPassword1 !== '' && newPassword2 !== '') {
                                             if (newPassword1 === newPassword2) {
+                                                // 密码加密传输
+                                                let encrypt = new JSEncrypt()
+                                                encrypt.setPublicKey(PUBLIC_KEY)
+                                                newPassword1 = encrypt.encrypt(newPassword1)
+                                                newPassword2 = encrypt.encrypt(newPassword2)
                                                 // TODO 执行ajax请求，修改该用户的密码
-                                                layer.msg('修改成功！', {icon: 1});
-                                                // 关闭弹窗
-                                                layer.close(index);
+                                                $.post("/system/user/resetPassword/", {
+                                                    userId: obj.data.id,
+                                                    newPassword: newPassword1,
+                                                    newPassword2: newPassword2
+                                                }, function (d) {
+                                                    // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                                    if (d.code === 200) {
+                                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                                        layer.close(index);
+                                                    } else {
+                                                        layer.msg(d.msg, {time: 3000, icon: 2});
+                                                    }
+                                                });
                                             } else {
                                                 layer.msg('输入的新密码不一致，请重新输入！', {icon: 2});
                                             }

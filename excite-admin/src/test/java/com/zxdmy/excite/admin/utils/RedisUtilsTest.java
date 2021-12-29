@@ -31,7 +31,7 @@ class RedisUtilsTest {
 
     @Test
     void MyConfigTest() {
-        System.out.println(exciteConfig.getName());
+        System.out.println(exciteConfig.getRsaPrivateKey());
     }
 
     @Test

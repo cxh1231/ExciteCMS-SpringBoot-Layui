@@ -3,11 +3,16 @@ package com.zxdmy.excite.admin.controller.system;
 import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.SaTokenInfo;
 import cn.dev33.satoken.stp.StpUtil;
+import cn.hutool.core.util.CharsetUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
+import cn.hutool.crypto.asymmetric.KeyType;
+import cn.hutool.crypto.asymmetric.RSA;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 
+import com.zxdmy.excite.common.config.ExciteConfig;
 import com.zxdmy.excite.common.enums.ReturnCode;
 import com.zxdmy.excite.common.enums.SystemCode;
 import com.zxdmy.excite.common.service.RedisService;
@@ -46,6 +51,7 @@ public class SysUserController extends BaseController {
 
 //    private RedisService redisUtils;
 
+    private ExciteConfig exciteConfig;
 
     /**
      * 用户管理 - 列表页面
@@ -143,7 +149,7 @@ public class SysUserController extends BaseController {
             // 验证码正确
             if (session.getAttribute("captcha").toString().equals(captcha)) {
                 // 使用用户名和密码登录
-                SysUser user = userService.login(username, password);
+                SysUser user = userService.login(username, SecureUtil.md5(this.decrypt(password)));
                 // 如果用户不为空，则登录成功
                 if (null != user) {
                     // 账号状态正常
@@ -217,14 +223,12 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/add")
     @ResponseBody
-//    @AnnotationSaveReLog
+    @AnnotationSaveReLog
     public BaseResult add(SysUser user, Integer[] roleIds) {
-        System.out.println(roleIds);
-        System.out.println(user);
         // 新建用户：其邮箱或手机号、密码不能为空，因为这是登录凭证.
         if (null != user && null != user.getPassword() && (null != user.getEmail() || null != user.getPhone())) {
+            user.setPassword(SecureUtil.md5(this.decrypt(user.getPassword())));
             if (userService.save(user, roleIds) > 0) {
-//            if (-1> 0) {
                 return success("新用户添加成功！");
             } else {
                 return error("新用户添加失败，请重试！");
@@ -296,8 +300,31 @@ public class SysUserController extends BaseController {
 
     @PostMapping(value = "/resetPassword")
     @ResponseBody
+    @AnnotationSaveReLog
     public BaseResult resetPassword(String userId, String newPassword, String newPassword2) {
-        return error("添加失败，请重试！");
+        if (null == userId || null == newPassword || null == newPassword2) {
+            return error("输入信息有误，请重新输入！");
+        }
+        // 密码先解密
+        newPassword = this.decrypt(newPassword);
+        newPassword2 = this.decrypt(newPassword2);
+        // 密码相同
+        if (newPassword.equals(newPassword2)) {
+            SysUser user = new SysUser();
+            try {
+                user.setId(Integer.parseInt(userId));
+                // 密码MD5加密
+                user.setPassword(SecureUtil.md5(newPassword));
+                if (userService.save(user, null) > 0) {
+                    return success("密码重置成功！");
+                } else {
+                    error("密码重置失败，请重试！");
+                }
+            } catch (Exception e) {
+                return error(e.getMessage());
+            }
+        }
+        return error("密码重置失败，新密码不一致！");
     }
 
     @GetMapping(value = "/token")
@@ -307,5 +334,18 @@ public class SysUserController extends BaseController {
         List<String> tokenList2 = StpUtil.searchTokenSessionId("", -1, 100);
         List<String> tokenList3 = StpUtil.searchSessionId("", -1, 10000);
         return success(tokenList2);
+    }
+
+    /**
+     * 私有方法：解密密码
+     *
+     * @param encrypt 加密密码
+     * @return 解密密码
+     */
+    private String decrypt(String encrypt) {
+        // 根据私钥生成新的对象
+        RSA rsa = new RSA(exciteConfig.getRsaPrivateKey(), null);
+        byte[] decrypt = rsa.decrypt(encrypt, KeyType.PrivateKey);
+        return StrUtil.str(decrypt, CharsetUtil.CHARSET_UTF_8);
     }
 }

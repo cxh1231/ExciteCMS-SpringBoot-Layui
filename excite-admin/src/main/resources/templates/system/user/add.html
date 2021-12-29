@@ -108,6 +108,8 @@
 </div>
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/jsencrypt/jsencrypt.min.js" charset="utf-8"></script>
+<script src="/lib/jsencrypt/rsa.js" charset="utf-8"></script>
 <script>
     layui.use(['form', 'dtree', 'iconPickerFa'], function () {
         let $ = layui.jquery;
@@ -188,7 +190,11 @@
         //监听提交
         form.on('submit(form-user-add)', function (data) {
             // layer.alert(JSON.stringify(data.field));
-            console.log(JSON.stringify(data.field))
+            // console.log(JSON.stringify(data.field))
+            // 密码加密
+            let encrypt = new JSEncrypt()
+            encrypt.setPublicKey(PUBLIC_KEY)
+            data.password = encrypt.encrypt(data.password)
             // 提交角色
             $.post("/system/user/add", data.field, function (data) {
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败

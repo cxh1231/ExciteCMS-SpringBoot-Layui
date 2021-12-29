@@ -23,6 +23,16 @@ public class ExciteConfig {
      */
     private Boolean allowRedis;
 
+    /**
+     * RSA加密算法的公钥
+     */
+    private String rsaPublicKey;
+
+    /**
+     * RSA加密算法的私钥
+     */
+    private String rsaPrivateKey;
+
     public String getName() {
         return name;
     }
@@ -38,5 +48,21 @@ public class ExciteConfig {
 
     public void setAllowRedis(Boolean allowRedis) {
         this.allowRedis = allowRedis;
+    }
+
+    public String getRsaPublicKey() {
+        return rsaPublicKey;
+    }
+
+    public void setRsaPublicKey(String rsaPublicKey) {
+        this.rsaPublicKey = rsaPublicKey;
+    }
+
+    public String getRsaPrivateKey() {
+        return rsaPrivateKey;
+    }
+
+    public void setRsaPrivateKey(String rsaPrivateKey) {
+        this.rsaPrivateKey = rsaPrivateKey;
     }
 }

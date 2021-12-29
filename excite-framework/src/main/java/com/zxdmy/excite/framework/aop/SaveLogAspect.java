@@ -158,7 +158,7 @@ public class SaveLogAspect {
         logLogin.setUserAgent(userAgent.getOs().getName() + ";" + userAgent.getBrowser().getName() + " " + userAgent.getVersion());
         // 解析请求数据
         String request = objectMapper.writeValueAsString(pjp.getArgs());
-        System.out.println(request);
+        // System.out.println(request);
         logLogin.setReqData(request);
         // 写入请求用户名
         if (JSONUtil.isJsonObj(request)) {

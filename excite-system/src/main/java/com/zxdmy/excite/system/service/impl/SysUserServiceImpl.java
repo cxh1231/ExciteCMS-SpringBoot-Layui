@@ -1,16 +1,13 @@
 package com.zxdmy.excite.system.service.impl;
 
 import cn.hutool.core.lang.Validator;
-import cn.hutool.crypto.SecureUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zxdmy.excite.common.enums.SystemCode;
-import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.entity.SysUserRole;
 import com.zxdmy.excite.system.mapper.SysUserMapper;
-import com.zxdmy.excite.system.mapper.SysUserRoleMapper;
 import com.zxdmy.excite.system.service.ISysUserRoleService;
 import com.zxdmy.excite.system.service.ISysUserService;
 import lombok.AllArgsConstructor;
@@ -52,10 +49,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
         // 这里用了 Hutool 的验证工具Validator
         if (Validator.isEmail(username)) {
-            // 这里用了 Hutool 的加密工具SecureUtil
-            wrapper.eq("email", username).eq("password", SecureUtil.md5(password));
+            wrapper.eq("email", username).eq("password", password);
         } else {
-            wrapper.eq("phone", username).eq("password", SecureUtil.md5(password));
+            wrapper.eq("phone", username).eq("password", password);
         }
         return userMapper.selectOne(wrapper);
     }

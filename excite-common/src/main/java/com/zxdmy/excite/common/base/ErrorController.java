@@ -38,6 +38,6 @@ public class ErrorController extends BaseController {
     @GetMapping(value = "/500")
     @ResponseBody
     public BaseResult error500() {
-        return error(HttpStatus.INTERNAL_SERVER_ERROR, "服务器内部错误");
+        return error(HttpStatus.INTERNAL_SERVER_ERROR, "服务器内部错误：可能请求资源不存在");
     }
 }
