@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
     <link rel="stylesheet" href="/css/public.css" media="all">
     <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="/lib/highlight/highlight.min.css">
 </head>
 <body>
 <div class="layuimini-container">
@@ -33,7 +34,9 @@
                     </div>
                     <!-- 搜索按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-user-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-requestLog-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-requestLog-refresh" data-type="refresh"><i class="layui-icon"></i> 清 除
                         </button>
                     </div>
                 </div>
@@ -56,11 +59,63 @@
 <!--表格每行末尾的操作按钮-->
 <script type="text/html" id="tool-table-requestLog">
     <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="requestLog-details">详情</a>
-    <!--    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="requestLog-delete">删除</a>-->
 </script>
+<!-- 点击行末【详情】后的弹窗内容 -->
+<div id="dom_req_details" style="display: none;">
+    <!--    <div class="layuimini-container">-->
+    <div class="layuimini-main">
+        <div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求用户：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserId"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求IP：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogIp"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>用户UA：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserAgent"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求URI：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUri"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求函数：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogFunction"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求数据：</b></label>
+                <div class="layui-input-block">
+                    <pre><code class="language-json" id="logReqData"></code></pre>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>响应数据：</b></label>
+                <div class="layui-input-block">
+                    <pre><code class="language-json" id="logResData"></code></pre>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--    </div>-->
+</div>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/highlight/highlight.min.js"></script>
 <script>
     layui.use(['table'], function () {
         let $ = layui.jquery,
@@ -107,28 +162,25 @@
         // 表格重载
         let active = {
             reload: function () {
-                // 几个搜索框
-                let roleName = $('#inputRoleName');
-                let rolePermission = $('#inputRolePermission');
+                // 获取几个搜索框的数据
+                let userId = $('#inputUserId');
+                let startDate = $('#inputDateStart');
+                let endDate = $('#inputDateEnd');
                 //执行重载
                 table.reload('table-system-requestLog', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: roleName.val(),
-                        permission: rolePermission.val()
+                    //重新从第 1 页开始
+                    page: {curr: 1},
+                    where: {
+                        userId: userId.val(),
+                        startDate: startDate.val(),
+                        endDate: endDate.val()
                     }
                 });
             },
             refresh: function () {
                 //执行重载
                 table.reload('table-system-requestLog', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: "",
-                        permission: ""
-                    }
+                    page: {curr: 1}, where: {}
                 });
             }
         };
@@ -136,15 +188,20 @@
             let type = $(this).data('type');
             active[type] ? active[type].call(this) : '';
         });
+        $('#btn-requestLog-refresh').on('click', function () {
+            let type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
 
         //日期范围
         let dateStart = laydate.render({
             elem: '#inputDateStart',
-            max: 1, // 最大时间为下一天的0点
+            max: 1,                 // 最大时间为下一天的0点
             type: 'datetime',
-            trigger: 'click', //采用click弹出
+            trigger: 'click',       //采用click弹出
             btns: ['clear', 'confirm'],
             done: function (value, dates) {
+                // 不为空：表示没有点击清空按钮
                 if ("" !== value) {
                     dateEnd.config.min = {
                         year: dates.year,
@@ -154,7 +211,9 @@
                         minutes: dates.minutes,
                         seconds: dates.seconds + 1
                     };
-                } else {
+                }
+                // 为空：表示点击清空按钮
+                else {
                     dateEnd.config.min = '1900-01-01 00:00:00'
                 }
             }
@@ -166,19 +225,16 @@
             trigger: 'click',
             btns: ['clear', 'confirm'],
             done: function (value, dates) {
-                // 不为空：表示没有点击清空按钮
                 if ("" !== value) {
                     dateStart.config.max = {
                         year: dates.year,
-                        month: dates.month - 1, //关键
+                        month: dates.month - 1,
                         date: dates.date,
                         hours: dates.hours,
                         minutes: dates.minutes,
                         seconds: dates.seconds - 1
                     };
-                }
-                // 为空：表示点击清空按钮
-                else {
+                } else {
                     dateStart.config.max = dateEnd.config.max
                 }
             }
@@ -190,19 +246,10 @@
             switch (obj.event) {
                 // 【刷新】按钮
                 case "btn-requestLog-refresh":
-                    //执行重载
-                    table.reload('table-system-requestLog', {
-                        page: {
-                            curr: 1
-                        }, where: {
-                            name: "",
-                            permission: ""
-                        }
-                    });
+                    active["reload"] ? active["reload"].call(this) : '';
                     break;
             }
         });
-
 
         // 【行末操作】监听表格行末按钮
         table.on('tool(table-system-requestLog)', function (obj) {
@@ -211,28 +258,76 @@
             switch (layEvent) {
                 // 【编辑】按钮
                 case "requestLog-details":
-                    let reqLog_details_index = layer.open({
-                        title: '编辑角色',
-                        type: 2,
+                    layer.open({
+                        type: 1,
                         shade: 0.2,
-                        maxmin: true,
+                        title: '操作日志详情',
+                        skin: 'layui-layer-prompt',
                         shadeClose: true,
                         area: ['600px', '500px'],
-                        content: '/system/log/request/detail/' + data.id,
-                        end: function () {
-
+                        content: $("#dom_req_details"),
+                        success: function (layero, index) {
+                            $("#reqLogUserId").html(data.userId)
+                            $("#reqLogIp").html(data.ip)
+                            $("#reqLogUserAgent").html(data.userAgent)
+                            $("#reqLogUri").html(data.reqUri)
+                            $("#reqLogFunction").html(data.reqFunction)
+                            $("#logReqData").html(format(data.reqData, false))
+                            $("#logResData").html(format(data.resData, false))
                         }
                     });
-                    parent.layer.iframeAuto(reqLog_details_index);
-                    break;
-                // 【删除】按钮
-                case "role-delete":
-                    // TODO 执行删除的POST操作
-                    layer.msg('删除接口未对接...删除角色：' + data.name)
                     break;
             }
         });
     });
+
+    hljs.configure({
+        tabReplace: '    ', // 4 spaces
+    });
+    hljs.highlightAll()
+
+    // JSON字符串格式化工具
+    function format(txt, compress/*是否为压缩模式*/) {
+        // 缩进字符
+        let indentChar = '   ';
+        if (/^\s*$/.test(txt)) {
+            // console.log('数据为空,无法格式化! ');
+            return txt;
+        }
+        let data = "";
+        try {
+            data = eval('(' + txt + ')');
+        } catch (e) {
+            // console.log('数据源语法错误,格式化失败! 错误信息: ' + e.description);
+            return txt;
+        }
+        let draw = [], last = false, This = this, line = compress ? '' : '\n', nodeCount = 0, maxDepth = 0;
+
+        let notify = function (name, value, isLast, indent/*缩进*/, formObj) {
+            nodeCount++;/*节点计数*/
+            for (var i = 0, tab = ''; i < indent; i++) tab += indentChar;/* 缩进HTML */
+            tab = compress ? '' : tab;/*压缩模式忽略缩进*/
+            maxDepth = ++indent;/*缩进递增并记录*/
+            if (value && value.constructor === Array) {/*处理数组*/
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + '[' + line);/*缩进'[' 然后换行*/
+                for (var i = 0; i < value.length; i++)
+                    notify(i, value[i], i === value.length - 1, indent, false);
+                draw.push(tab + ']' + (isLast ? line : (',' + line)));/*缩进']'换行,若非尾元素则添加逗号*/
+            } else if (value && typeof value == 'object') {/*处理对象*/
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + '{' + line);/*缩进'{' 然后换行*/
+                var len = 0, i = 0;
+                for (var key in value) len++;
+                for (var key in value) notify(key, value[key], ++i === len, indent, true);
+                draw.push(tab + '}' + (isLast ? line : (',' + line)));/*缩进'}'换行,若非尾元素则添加逗号*/
+            } else {
+                if (typeof value == 'string') value = '"' + value + '"';
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + value + (isLast ? '' : ',') + line);
+            }
+        };
+        var isLast = true, indent = 0;
+        notify('', data, isLast, indent, false);
+        return draw.join('');
+    }
 </script>
 </body>
 </html>

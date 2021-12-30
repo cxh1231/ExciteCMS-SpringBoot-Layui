@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 import com.zxdmy.excite.common.base.BaseController;
 
+import java.time.LocalDateTime;
+
 /**
  * <p>
  * 前端控制器
@@ -42,25 +44,25 @@ public class SysLogController extends BaseController {
         return "system/log/request";
     }
 
-    /**
-     * 请求日志列表
-     *
-     * @return
-     */
-    @RequestMapping("request/detail/{id}")
-    public String requestLogDetailPage(@PathVariable String id, ModelMap map) {
-        try {
-            SysLogRequest logRequest = logRequestService.getById(Integer.parseInt(id));
-            if (null != logRequest) {
-                map.put("logRequest", logRequest);
-            } else {
-                return "error/404";
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
-        return "system/log/requestDetail";
-    }
+//    /**
+//     * 请求日志列表
+//     *
+//     * @return
+//     */
+//    @RequestMapping("request/detail/{id}")
+//    public String requestLogDetailPage(@PathVariable String id, ModelMap map) {
+//        try {
+//            SysLogRequest logRequest = logRequestService.getById(Integer.parseInt(id));
+//            if (null != logRequest) {
+//                map.put("logRequest", logRequest);
+//            } else {
+//                return "error/404";
+//            }
+//        } catch (Exception e) {
+//            System.out.println(e.getMessage());
+//        }
+//        return "system/log/requestDetail";
+//    }
 
     /**
      * 登录日志列表
@@ -79,14 +81,16 @@ public class SysLogController extends BaseController {
      */
     @GetMapping("/requestList")
     @ResponseBody
-    public BaseResult requestList(Integer page, Integer limit) {
+    public BaseResult requestList(Integer page, Integer limit, String userId, String startDate, String endDate) {
         try {
             Page<SysLogRequest> rolePage = logRequestService.getPage(page, limit);
             return success("获取日志列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
             return error(500, "error:" + e.getMessage());
         }
-    }    /**
+    }
+
+    /**
      * 获取日志列表
      *
      * @return 结果
