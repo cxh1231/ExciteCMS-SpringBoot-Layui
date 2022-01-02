@@ -98,9 +98,9 @@ public class SysUserController extends BaseController {
      *
      * @return 跳转至编辑用户页面
      */
-    @RequestMapping("setting")
+    @RequestMapping("center/setting")
     public String goSetting() {
-        return "system/user/setting";
+        return "system/userCenter/setting";
     }
 
     /**
@@ -108,9 +108,9 @@ public class SysUserController extends BaseController {
      *
      * @return 跳转至编辑用户页面
      */
-    @RequestMapping("password")
+    @RequestMapping("center/password")
     public String goChangePassword() {
-        return "system/user/changePassword";
+        return "system/userCenter/changePassword";
     }
 
     /**
