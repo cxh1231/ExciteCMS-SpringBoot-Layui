@@ -29,10 +29,11 @@ public class IGlobalConfigServiceTest {
         qiniuEntity.setSecretKey("WzYdBI8FL9999999999999999999");
         qiniuEntity.setDomain("666.hd-bkt.clouddn.com");
         qiniuEntity.setBucket("test-spring");
+        qiniuEntity.setRegion("z0");
         qiniuEntity.setProtocol("http");
 
         try {
-            componentConfigService.save("component", "qiniuOss", qiniuEntity, true);
+            componentConfigService.save("qiniu", "qiniuOss", qiniuEntity, false);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
@@ -43,7 +44,7 @@ public class IGlobalConfigServiceTest {
         // 初始数据定义
         QiniuVO qiniuEntity = new QiniuVO();
 
-        qiniuEntity = (QiniuVO) componentConfigService.get("component", "qiniuOss", qiniuEntity);
+        qiniuEntity = (QiniuVO) componentConfigService.get("qiniu", "qiniuOss", qiniuEntity);
 
         System.out.println(qiniuEntity);
     }

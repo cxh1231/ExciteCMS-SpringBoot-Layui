@@ -30,9 +30,9 @@ public class GlobalConfig implements Serializable {
     private Integer id;
 
     /**
-     * 配置信息的模块：如system、user、component
+     * 配置信息的服务：如qiniu，aliyun
      */
-    private String confModule;
+    private String confService;
 
     /**
      * 配置信息的主键：如qiniu、alipay等等

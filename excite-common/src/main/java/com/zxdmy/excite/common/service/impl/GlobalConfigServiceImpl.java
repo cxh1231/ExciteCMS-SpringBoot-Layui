@@ -35,17 +35,17 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
     /**
      * 将配置信息保存/更新至数据库
      *
-     * @param confModule 配置模块
-     * @param confKey    配置信息主键
-     * @param object     实体类
-     * @param encrypt    是否对value开启加密
+     * @param confService 配置服务名
+     * @param confKey     配置信息主键
+     * @param object      实体类
+     * @param encrypt     是否对value开启加密
      * @return 结果
      */
     @Override
-    public boolean save(String confModule, String confKey, Object object, boolean encrypt) {
+    public boolean save(String confService, String confKey, Object object, boolean encrypt) {
         // 全局配置信息类
         GlobalConfig globalConfig = new GlobalConfig();
-        globalConfig.setConfModule(confModule);
+        globalConfig.setConfService(confService);
         globalConfig.setConfKey(confKey);
         // 实体类转JSON格式字符串
         String confValue;
@@ -66,15 +66,15 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         globalConfig.setConfValue(confValue);
         globalConfig.setUpdateTime(LocalDateTime.now());
         QueryWrapper<GlobalConfig> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("conf_module", confModule).eq("conf_key", confKey);
+        queryWrapper.eq("conf_service", confService).eq("conf_key", confKey);
         return this.saveOrUpdate(globalConfig, queryWrapper);
     }
 
     @Override
-    public Object get(String confModule, String confKey, Object object) {
+    public Object get(String confService, String confKey, Object object) {
         // 根据要求查询指定【模块】和【key】的【value】
         QueryWrapper<GlobalConfig> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("conf_module", confModule).eq("conf_key", confKey);
+        queryWrapper.eq("conf_service", confService).eq("conf_key", confKey);
         GlobalConfig globalConfig = this.getOne(queryWrapper);
         String confValue = globalConfig.getConfValue();
         // 为空：返回null

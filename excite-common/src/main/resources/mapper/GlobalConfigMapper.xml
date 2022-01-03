@@ -5,7 +5,7 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.zxdmy.excite.common.entity.GlobalConfig">
         <id column="id" property="id" />
-        <result column="conf_module" property="confModule" />
+        <result column="conf_service" property="confService" />
         <result column="conf_key" property="confKey" />
         <result column="conf_value" property="confValue" />
         <result column="create_time" property="createTime" />
@@ -16,7 +16,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, conf_module, conf_key, conf_value, encrypt, create_time, update_time, delete_time
+        id, conf_service, conf_key, conf_value, encrypt, create_time, update_time, delete_time
     </sql>
 
 </mapper>

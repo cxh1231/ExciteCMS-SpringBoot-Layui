@@ -20,7 +20,7 @@ public class QiniuVO implements Serializable {
     /**
      * 主键
      */
-    private Integer id;
+    private String key;
 
     /**
      * 七牛云账号的秘钥管理之：AccessKey

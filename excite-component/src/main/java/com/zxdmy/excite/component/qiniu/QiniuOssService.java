@@ -2,7 +2,6 @@ package com.zxdmy.excite.component.qiniu;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.qiniu.common.QiniuException;
-import com.qiniu.common.Zone;
 import com.qiniu.http.Response;
 import com.qiniu.storage.Configuration;
 import com.qiniu.storage.Region;
@@ -43,7 +42,7 @@ public class QiniuOssService {
         if (null == qiniuVO.getProtocol()) {
             qiniuVO.setProtocol("http");
         }
-        return configService.save("component", "qiniuOss", qiniuVO, false);
+        return configService.save("qiniu", "qiniuOss", qiniuVO, false);
     }
 
     /**
@@ -60,7 +59,7 @@ public class QiniuOssService {
         }
         // 读取配置信息
         QiniuVO qiniuVO = new QiniuVO();
-        qiniuVO = (QiniuVO) configService.get("component", "qiniuOss", qiniuVO);
+        qiniuVO = (QiniuVO) configService.get("qiniu", "qiniuOss", qiniuVO);
         // 生成Token
         Auth auth = Auth.create(qiniuVO.getAccessKey(), qiniuVO.getSecretKey());
         String upToken = auth.uploadToken(qiniuVO.getBucket(), fileKey, expireSeconds, null);

@@ -14,7 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IGlobalConfigService extends IService<GlobalConfig> {
 
-    boolean save(String confModule, String confKey, Object object, boolean encrypt) throws JsonProcessingException;
+    boolean save(String confService, String confKey, Object object, boolean encrypt) throws JsonProcessingException;
 
-    Object get(String confModule, String confKey, Object object);
+    Object get(String confService, String confKey, Object object);
 }
