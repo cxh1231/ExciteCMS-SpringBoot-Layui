@@ -24,6 +24,12 @@
             <artifactId>excite-framework</artifactId>
             <version>2.0.0</version>
         </dependency>
+        <!-- 这里不仅可以添加官网mvn仓库的依赖，还可以添加其他几项的依赖 -->
+        <dependency>
+            <groupId>com.zxdmy.excite</groupId>
+            <artifactId>excite-component</artifactId>
+            <version>2.0.0</version>
+        </dependency>
 
         <!-- Spring Boot Test -->
         <dependency>

@@ -11,6 +11,7 @@ import cn.hutool.crypto.asymmetric.ECIES;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.power.common.util.RSAUtil;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.mapper.SysUserMapper;
 import com.zxdmy.excite.system.service.ISysUserService;
@@ -20,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.util.DigestUtils;
 
 import java.security.KeyPair;
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -47,42 +49,54 @@ class ISysUserServiceTest {
      */
     @Test
     void RSA() {
-        // 原始字符串
-        String origin = "哈哈哈哈哈啊啊";
-        System.out.println("原始字符串：");
-        System.out.println(origin);
 
-        // 定义对象
-        RSA rsa = new RSA();
-
-        //获得私钥
-//        System.out.println(rsa.getPrivateKey());
-        System.out.println("私钥如下：");
-        String privateKey = rsa.getPrivateKeyBase64();
-        System.out.println(privateKey);
-
-        //获得公钥
-//        System.out.println(rsa.getPublicKey());
-        System.out.println("公钥如下：");
-        String publicKey = rsa.getPublicKeyBase64();
-        System.out.println(publicKey);
-
-        // 使用公钥进行加密
-        byte[] encrypt = rsa.encrypt(StrUtil.bytes(origin, CharsetUtil.CHARSET_UTF_8), KeyType.PublicKey);
-        // 加密结果
-        System.out.println("加密后的密文：");
-        System.out.println(Arrays.toString(encrypt));
 
         String en = "EH5BLHO6HQGERUoJGzJxE4rX8SRC5j9fDkgN2lu7sSWHv5fHpIjg9Mct6Qbe3NO9nUlmpjsb0j+veiebK3g5so8EXkM71uUvCiq3zVX0hrLOWFBIi9/ikzrXFkxtFLfUIVhchuRncozQTZOux7QyOTBPFUdR2s3A8A80fWLZkfg=";
         String PRIVATE_KEY = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALwcyvYIGmhk+be320JWWsq1OYjiM0lzv8eHGMgSIOMLxzM/g9X7jguNe8thxJXR/CLqcTgsfZzk8E8Sc9+qnSDxNl5f5tga93vRxd5713zAeAGqLiTQnRffdzRmdbsmu5+0/K8mj056VhKh8FdBNzAj7e4iX9i+uBBG/oDmZbTVAgMBAAECgYEAmgNU5NTDkj9B+Pnt6UU8doSjw3+3j+bV2K2yS3QUOvAUus/Ax7x6ktjWxzCXvDY9IfUil2RNv9vtKEAqYLCWjc+lf8PV/yH1b7NEgyeAPBXtAJRoOnmYL2bdPW92kP9KgxJruF6Dz/C5AmMOncsvq8ABD+9Darn4p8dwj2ZC4O0CQQDf/AHmZsQokEItfCy4mHS9UbxbfIhEUv1ApPh/+Sr7NkJkHWYCtBQo+8jKO6zurAZQgWBPD1XX2UE4R+VIiZazAkEA1wAqtMvGhccyRZr+6kpkpDIa8+9jOE+nGUzqTDvgCID6as8AzOONFVVK6m/UUqkhcJ8Qu1pF36BGojy5BX2KVwJBAJSFpbji0hXXupowqfLp3RcgmNbNWAp+QUJZYhJx5cdYbmO2fssyH+AhPT6knYJR/YnqkDM8hv6vKCkqu2YDHjMCQAOA8TE5EOclM+CGghj3VWSHnIDVKdzFD4gOBNNxNlltIKeU8AJmwunSFgJ0CBXAw9a+ANvMwM7AIeaK7sj0HskCQAvxfDCq7gaNx+pfu0FHG8Gix08A/A6foggBl1fVu+L9sr9ZuOQ3HbXnl28F9ewuB9xdjnLUDjp7W7U0pB+vKoQ=";
 
+        System.out.println(RSAUtil.decryptString(en, PRIVATE_KEY));
 
-        // 根据私钥生成新的对象
-        RSA rsa2 = new RSA(PRIVATE_KEY, null);
-        byte[] decrypt = rsa2.decrypt(en, KeyType.PrivateKey);
 
-        System.out.println("解密后的密文：");
-        System.out.println(StrUtil.str(decrypt, CharsetUtil.CHARSET_UTF_8));
+        // 原始字符串
+//        String origin = "哈哈哈哈哈啊啊";
+//        System.out.println("原始字符串：");
+//        System.out.println(origin);
+
+//        // 定义对象
+//        RSA rsa = new RSA();
+//
+//        //获得私钥
+////        System.out.println(rsa.getPrivateKey());
+//        System.out.println("私钥如下：");
+//        String privateKey = rsa.getPrivateKeyBase64();
+//        System.out.println(privateKey);
+//
+//        //获得公钥
+////        System.out.println(rsa.getPublicKey());
+//        System.out.println("公钥如下：");
+//        String publicKey = rsa.getPublicKeyBase64();
+//        System.out.println(publicKey);
+//
+//        // 使用公钥进行加密
+//        byte[] encrypt = rsa.encrypt(StrUtil.bytes(origin, CharsetUtil.CHARSET_UTF_8), KeyType.PublicKey);
+//        // 加密结果
+//        System.out.println("加密后的密文：");
+//        String en = StrUtil.str(encrypt, CharsetUtil.CHARSET_UTF_8);
+//        System.out.println(en);
+//
+//        // 使用私钥解密
+//        byte[] decrypt = rsa.decrypt(en, KeyType.PrivateKey);
+
+//        String en = "EH5BLHO6HQGERUoJGzJxE4rX8SRC5j9fDkgN2lu7sSWHv5fHpIjg9Mct6Qbe3NO9nUlmpjsb0j+veiebK3g5so8EXkM71uUvCiq3zVX0hrLOWFBIi9/ikzrXFkxtFLfUIVhchuRncozQTZOux7QyOTBPFUdR2s3A8A80fWLZkfg=";
+//        String PRIVATE_KEY = "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALwcyvYIGmhk+be320JWWsq1OYjiM0lzv8eHGMgSIOMLxzM/g9X7jguNe8thxJXR/CLqcTgsfZzk8E8Sc9+qnSDxNl5f5tga93vRxd5713zAeAGqLiTQnRffdzRmdbsmu5+0/K8mj056VhKh8FdBNzAj7e4iX9i+uBBG/oDmZbTVAgMBAAECgYEAmgNU5NTDkj9B+Pnt6UU8doSjw3+3j+bV2K2yS3QUOvAUus/Ax7x6ktjWxzCXvDY9IfUil2RNv9vtKEAqYLCWjc+lf8PV/yH1b7NEgyeAPBXtAJRoOnmYL2bdPW92kP9KgxJruF6Dz/C5AmMOncsvq8ABD+9Darn4p8dwj2ZC4O0CQQDf/AHmZsQokEItfCy4mHS9UbxbfIhEUv1ApPh/+Sr7NkJkHWYCtBQo+8jKO6zurAZQgWBPD1XX2UE4R+VIiZazAkEA1wAqtMvGhccyRZr+6kpkpDIa8+9jOE+nGUzqTDvgCID6as8AzOONFVVK6m/UUqkhcJ8Qu1pF36BGojy5BX2KVwJBAJSFpbji0hXXupowqfLp3RcgmNbNWAp+QUJZYhJx5cdYbmO2fssyH+AhPT6knYJR/YnqkDM8hv6vKCkqu2YDHjMCQAOA8TE5EOclM+CGghj3VWSHnIDVKdzFD4gOBNNxNlltIKeU8AJmwunSFgJ0CBXAw9a+ANvMwM7AIeaK7sj0HskCQAvxfDCq7gaNx+pfu0FHG8Gix08A/A6foggBl1fVu+L9sr9ZuOQ3HbXnl28F9ewuB9xdjnLUDjp7W7U0pB+vKoQ=";
+//
+//
+//        // 根据私钥生成新的对象
+//        RSA rsa2 = new RSA(PRIVATE_KEY, null);
+//        byte[] decrypt = rsa2.decrypt(en, KeyType.PrivateKey);
+//
+//        System.out.println("解密后的密文：");
+//        System.out.println(StrUtil.str(decrypt, CharsetUtil.CHARSET_UTF_8));
 
 
     }
@@ -102,7 +116,6 @@ class ISysUserServiceTest {
 //            System.out.println("新增用户失败");
 //        }
 //    }
-
     @Test
     void tokenTest() {
         // 查询value包括1000的所有token，结果集从第0条开始，返回10条

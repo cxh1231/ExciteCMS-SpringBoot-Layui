@@ -29,6 +29,7 @@
     <modules>
         <module>excite-admin</module>
         <module>excite-common</module>
+        <module>excite-component</module>
         <module>excite-system</module>
         <module>excite-framework</module>
         <!-- 如果还有其他，继续增加 -->
@@ -168,6 +169,12 @@
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
             <version>5.7.12</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.tennetcn.free</groupId>
+            <artifactId>think-swagger-ui-starter</artifactId>
+            <version>0.0.5</version>
         </dependency>
 
     </dependencies>

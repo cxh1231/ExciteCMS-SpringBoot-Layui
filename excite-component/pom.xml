@@ -14,12 +14,20 @@
     <description>excite-component</description>
 
     <dependencies>
+        <!-- 加载Common依赖，一些常用的工具包 -->
         <dependency>
             <groupId>com.zxdmy.excite</groupId>
             <artifactId>excite-common</artifactId>
             <version>2.0.0</version>
         </dependency>
 
+        <!-- 七牛云依赖 -->
+        <!-- https://mvnrepository.com/artifact/com.qiniu/qiniu-java-sdk -->
+        <dependency>
+            <groupId>com.qiniu</groupId>
+            <artifactId>qiniu-java-sdk</artifactId>
+            <version>7.8.0</version>
+        </dependency>
 
     </dependencies>
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zxdmy.excite.common.mapper.GlobalConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.zxdmy.excite.common.entity.GlobalConfig">
+        <id column="id" property="id" />
+        <result column="conf_module" property="confModule" />
+        <result column="conf_key" property="confKey" />
+        <result column="conf_value" property="confValue" />
+        <result column="create_time" property="createTime" />
+        <result column="encrypt" property="encrypt" />
+        <result column="update_time" property="updateTime" />
+        <result column="delete_time" property="deleteTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, conf_module, conf_key, conf_value, encrypt, create_time, update_time, delete_time
+    </sql>
+
+</mapper>

@@ -80,7 +80,7 @@ mybatis-plus:
   # 配置Mapper映射文件
   mapper-locations: classpath*:/mapper/**/**Mapper.xml
   # 实体扫描，多个package用逗号或者分号分隔
-  typeAliasesPackage: com.zxdmy.excite.system.entity;
+  typeAliasesPackage: com.zxdmy.excite.system.entity;com.zxdmy.excite.common.entity
   configuration:
     # 自动驼峰命名
     map-underscore-to-camel-case: true

@@ -164,8 +164,29 @@
                         content: $("#dom_generator"),
                         success: function (layero, index) {
                             // 监听提交
-                            form.on('submit(form-table-generator)', function (data) {
-                                console.log(data.field)
+                            form.on('submit(form-table-generator)', function (d) {
+                                d.field.tableName = data.name
+                                console.log(d.field)
+                                // 弹窗确认
+                                layer.confirm("<a style='color: red'>确定要生成表 " + data.name + " 的代码吗？</a>", {
+                                    icon: 3,
+                                    title: '生成代码确认'
+                                }, function (index2) {
+                                    // 执行请求
+                                    $.post("/system/develop/generator/create", d.field, function (data) {
+                                        if (data.code === 200) {
+                                            layer.msg('代码生成成功！', {
+                                                icon: 1, time: 2000
+                                            });
+                                        } else {
+                                            layer.msg(data.msg, {
+                                                icon: 2, time: 3000
+                                            });
+                                        }
+                                        layer.close(index2);
+                                    });
+                                });
+                                // layer.close(index);
                                 return false;
                             });
                         }
