@@ -1,7 +1,9 @@
 package com.zxdmy.excite.component.qiniu;
 
+import cn.hutool.core.util.DesensitizedUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
 import com.qiniu.storage.*;
@@ -77,6 +79,51 @@ public class QiniuOssService {
      */
     public QiniuVO getQiniuConfig() {
         return this.getQiniuConfig(DEFAULT_KEY);
+    }
+
+    /**
+     * 从数据库读取七牛云配置信息，并脱敏（指定key）
+     *
+     * @param confKey 配置文件的key，不同的key对应不同的存储空间
+     * @return 七牛云配置信息实体
+     */
+    public QiniuVO getQiniuConfigHide(String confKey) {
+        QiniuVO qiniuVO = new QiniuVO();
+        qiniuVO = (QiniuVO) configService.get(DEFAULT_SERVICE, confKey, qiniuVO);
+        qiniuVO.setAccessKey(DesensitizedUtil.idCardNum(qiniuVO.getAccessKey(), 2, 2));
+        qiniuVO.setSecretKey(DesensitizedUtil.idCardNum(qiniuVO.getSecretKey(), 2, 2));
+        return qiniuVO;
+    }
+
+    /**
+     * 从数据库读取七牛云配置信息，并脱敏（默认key）
+     *
+     * @return 七牛云配置信息实体
+     */
+    public QiniuVO getQiniuConfigHide() {
+        return this.getQiniuConfigHide(DEFAULT_KEY);
+    }
+
+    /**
+     * 获取全部的七牛云配置信息
+     *
+     * @param desensitized 是否脱敏：true：脱敏， false：不脱敏
+     * @return 读取全部配置信息
+     */
+    public List<QiniuVO> getQiniuConfigList(Boolean desensitized) {
+        QiniuVO qiniuVO = new QiniuVO();
+        List<Object> objectList = configService.getList(DEFAULT_SERVICE, qiniuVO);
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<QiniuVO> qiniuVOList = new ArrayList<>();
+        for (Object o : objectList) {
+            qiniuVO = objectMapper.convertValue(o, qiniuVO.getClass());
+            if (desensitized) {
+                qiniuVO.setAccessKey(DesensitizedUtil.idCardNum(qiniuVO.getAccessKey(), 2, 2));
+                qiniuVO.setSecretKey(DesensitizedUtil.idCardNum(qiniuVO.getSecretKey(), 2, 2));
+            }
+            qiniuVOList.add(qiniuVO);
+        }
+        return qiniuVOList;
     }
 
     /**

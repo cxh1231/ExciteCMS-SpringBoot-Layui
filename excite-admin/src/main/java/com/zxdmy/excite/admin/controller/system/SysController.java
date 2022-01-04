@@ -3,12 +3,16 @@ package com.zxdmy.excite.admin.controller.system;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.zxdmy.excite.common.base.BaseController;
+import com.zxdmy.excite.common.base.BaseResult;
+import com.zxdmy.excite.component.qiniu.QiniuOssService;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.service.ISysUserService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * 系统模块
@@ -21,6 +25,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class SysController extends BaseController {
 
     ISysUserService userService;
+
+    QiniuOssService qiniuOssService;
 
     /**
      * 默认访问域名，跳转至后台主页
@@ -69,4 +75,9 @@ public class SysController extends BaseController {
     }
 
 
+    @GetMapping("system/test")
+    @ResponseBody
+    public BaseResult test() {
+        return success(qiniuOssService.getQiniuConfigList(true));
+    }
 }
