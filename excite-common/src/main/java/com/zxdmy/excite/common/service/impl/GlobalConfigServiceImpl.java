@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -104,5 +106,44 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         }
         // 返回转换后的结果
         return object;
+    }
+
+    /**
+     * 根据服务的名字，获取其所有的配置信息
+     *
+     * @param confService 服务名称
+     * @param object      类别
+     * @return 结果List<Object>
+     */
+    @Override
+    public List<Object> getList(String confService, Object object) {
+        // 根据要求查询指定【服务模块】的【value】
+        QueryWrapper<GlobalConfig> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("conf_service", confService);
+        List<GlobalConfig> globalConfigList = this.list(queryWrapper);
+        if (globalConfigList.size() == 0) {
+            return null;
+        }
+        List<Object> objectList = new ArrayList<>();
+        for (GlobalConfig globalConfig : globalConfigList) {
+            String confValue = globalConfig.getConfValue();
+            // 为空：继续下一个
+            if (null == confValue || "".equals(confValue)) {
+                continue;
+            }
+            // 如果开启了加密：使用私钥进行解密
+            if (1 == globalConfig.getEncrypt()) {
+                RSA rsa = new RSA(exciteConfig.getRsaPrivateKey(), null);
+                confValue = rsa.decryptStr(confValue, KeyType.PrivateKey);
+            }
+            // 尝试转换成指定类型
+            try {
+                objectList.add(objectMapper.readValue(confValue, object.getClass()));
+            } catch (IOException e) {
+                // 转换出错：报错并返回空
+                System.out.println(e.getMessage());
+            }
+        }
+        return objectList;
     }
 }
