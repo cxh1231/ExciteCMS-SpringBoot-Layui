@@ -18,7 +18,7 @@ public class QiniuVO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 主键
+     * 本条七牛云配置信息的key（主键）
      */
     private String key;
 

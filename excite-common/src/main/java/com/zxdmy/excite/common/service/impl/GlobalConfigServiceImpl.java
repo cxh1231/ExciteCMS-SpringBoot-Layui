@@ -70,6 +70,14 @@ public class GlobalConfigServiceImpl extends ServiceImpl<GlobalConfigMapper, Glo
         return this.saveOrUpdate(globalConfig, queryWrapper);
     }
 
+    /**
+     * 从数据库中读取一条配置信息
+     *
+     * @param confService 配置信息服务名
+     * @param confKey     配置信息的key
+     * @param object      配置信息实体
+     * @return 配置信息实体
+     */
     @Override
     public Object get(String confService, String confKey, Object object) {
         // 根据要求查询指定【模块】和【key】的【value】
