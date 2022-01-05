@@ -26,6 +26,7 @@ public class AliyunSmsService {
 
     IGlobalConfigService configService;
 
+    private static final String DEFAULT_SERVICE = "aliyunSms";
 
     /**
      * 保存阿里云短信服务的开发者信息、消息模板相关信息
@@ -37,9 +38,11 @@ public class AliyunSmsService {
      */
     public boolean save(AliyunSmsVO aliyunSmsVO) throws JsonProcessingException {
         // 如果必填项为空，则返回错误信息
-
+        if (null == aliyunSmsVO.getKey() || null == aliyunSmsVO.getAccessKeyId() || null == aliyunSmsVO.getAccessKeySecret() || null == aliyunSmsVO.getSignName() || null == aliyunSmsVO.getTemplateCode()) {
+            throw new ServiceException("部分必填信息为空，请检查！");
+        }
         // 保存
-        return configService.save("aliyunSms", "aliyunSms001", aliyunSmsVO, true);
+        return configService.save(DEFAULT_SERVICE, aliyunSmsVO.getKey(), aliyunSmsVO, true);
     }
 
     /**
@@ -53,7 +56,7 @@ public class AliyunSmsService {
     public boolean sendSmsOne(String smsKey, String phone, String[] templateValue) {
         // 从数据库读取配置信息
         AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-        aliyunSmsVO = (AliyunSmsVO) configService.get("aliyunSms", smsKey, aliyunSmsVO);
+        aliyunSmsVO = (AliyunSmsVO) configService.get(DEFAULT_SERVICE, smsKey, aliyunSmsVO);
         if (null == aliyunSmsVO) {
             throw new ServiceException("阿里云短信服务配置信息有误，请核实");
         }
@@ -87,7 +90,7 @@ public class AliyunSmsService {
     public Map<String, Boolean> sendSmsBatch(String smsKey, Map<String, String[]> smsMap) {
         // 从数据库读取配置信息
         AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-        aliyunSmsVO = (AliyunSmsVO) configService.get("aliyunSms", smsKey, aliyunSmsVO);
+        aliyunSmsVO = (AliyunSmsVO) configService.get(DEFAULT_SERVICE, smsKey, aliyunSmsVO);
         if (null == aliyunSmsVO) {
             throw new ServiceException("阿里云短信服务配置信息有误，请核实");
         }
