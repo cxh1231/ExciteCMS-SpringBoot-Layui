@@ -32,11 +32,11 @@ public class AliyunSmsService {
      * 保存阿里云短信服务的开发者信息、消息模板相关信息
      * 注意：同一个系统的消息模板可能有多个，所以
      *
-     * @param aliyunSmsVO
-     * @return
-     * @throws JsonProcessingException
+     * @param aliyunSmsVO 实体信息，其中KEY必填
+     * @return 保存结果
+     * @throws JsonProcessingException 异常
      */
-    public boolean save(AliyunSmsVO aliyunSmsVO) throws JsonProcessingException {
+    public boolean saveAliyunSmsConfig(AliyunSmsVO aliyunSmsVO) throws JsonProcessingException {
         // 如果必填项为空，则返回错误信息
         if (null == aliyunSmsVO.getKey() || null == aliyunSmsVO.getAccessKeyId() || null == aliyunSmsVO.getAccessKeySecret() || null == aliyunSmsVO.getSignName() || null == aliyunSmsVO.getTemplateCode()) {
             throw new ServiceException("部分必填信息为空，请检查！");
@@ -46,19 +46,29 @@ public class AliyunSmsService {
     }
 
     /**
+     * 通过配置KEY获取短信配置信息
+     *
+     * @param confKey 阿里云短信服务的配置key
+     * @return 阿里云短信服务实体
+     */
+    public AliyunSmsVO getAliyunSmsConfig(String confKey) {
+        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
+        return (AliyunSmsVO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsVO);
+    }
+
+    /**
      * 发送短信服务
      *
-     * @param smsKey        confKey，当前短信模板配置的key
+     * @param confKey       confKey，当前短信模板配置的key
      * @param phone         手机号数组
      * @param templateValue 消息模板中的参数值
      * @return 结果
      */
-    public boolean sendSmsOne(String smsKey, String phone, String[] templateValue) {
+    public boolean sendSmsOne(String confKey, String phone, String[] templateValue) {
         // 从数据库读取配置信息
-        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-        aliyunSmsVO = (AliyunSmsVO) configService.get(DEFAULT_SERVICE, smsKey, aliyunSmsVO);
+        AliyunSmsVO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
         if (null == aliyunSmsVO) {
-            throw new ServiceException("阿里云短信服务配置信息有误，请核实");
+            throw new ServiceException("阿里云短信服务配置信息有误/不存在，请核实");
         }
         // 如果输入的参数个数和配置信息里的参数个数不相等，则返回错误信息
         if (templateValue.length != aliyunSmsVO.getTemplateParam().length) {
@@ -69,10 +79,10 @@ public class AliyunSmsService {
         // 结果不为空，进一步判断
         if (response != null) {
             // 打印结果
-            System.out.println(response.body.code); // 发送成功为OK
-            System.out.println(response.body.message); // 发送成功为OK
-            System.out.println(response.body.requestId); // 请求ID
-            System.out.println(response.body.bizId); // 请求ID
+//            System.out.println(response.body.code); // 发送成功为OK
+//            System.out.println(response.body.message); // 发送成功为OK
+//            System.out.println(response.body.requestId); // 请求ID
+//            System.out.println(response.body.bizId); // 请求ID
             return "OK".equals(response.body.code);
         }
         return false;
@@ -83,14 +93,13 @@ public class AliyunSmsService {
      * 其中官网中有批量发送短信的接口SendBatchSms。
      * 但我们这里还是逐个发送
      *
-     * @param smsKey 短信模板的key
-     * @param smsMap 短信map，其中key为手机号，value为String[]数组，其大小与消息模板参数个数一致，并依次对应
+     * @param confKey 短信模板的key
+     * @param smsMap  短信map，其中key为手机号，value为String[]数组，其大小与消息模板参数个数一致，并依次对应
      * @return 结果map
      */
-    public Map<String, Boolean> sendSmsBatch(String smsKey, Map<String, String[]> smsMap) {
+    public Map<String, Boolean> sendSmsBatch(String confKey, Map<String, String[]> smsMap) {
         // 从数据库读取配置信息
-        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-        aliyunSmsVO = (AliyunSmsVO) configService.get(DEFAULT_SERVICE, smsKey, aliyunSmsVO);
+        AliyunSmsVO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
         if (null == aliyunSmsVO) {
             throw new ServiceException("阿里云短信服务配置信息有误，请核实");
         }
