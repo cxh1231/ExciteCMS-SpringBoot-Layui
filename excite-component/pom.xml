@@ -37,7 +37,11 @@
         </dependency>
 
         <!-- 阿里云OSS服务依赖 -->
-
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.13.2</version>
+        </dependency>
 
     </dependencies>
 

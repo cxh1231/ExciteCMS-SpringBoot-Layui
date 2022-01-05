@@ -7,7 +7,7 @@ import com.aliyun.teaopenapi.models.Config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.component.vo.AliyunSmsVO;
+import com.zxdmy.excite.component.po.AliyunSmsPO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +36,7 @@ public class AliyunSmsService {
      * @return 保存结果
      * @throws JsonProcessingException 异常
      */
-    public boolean saveAliyunSmsConfig(AliyunSmsVO aliyunSmsVO) throws JsonProcessingException {
+    public boolean saveAliyunSmsConfig(AliyunSmsPO aliyunSmsVO) throws JsonProcessingException {
         // 如果必填项为空，则返回错误信息
         if (null == aliyunSmsVO.getKey() || null == aliyunSmsVO.getAccessKeyId() || null == aliyunSmsVO.getAccessKeySecret() || null == aliyunSmsVO.getSignName() || null == aliyunSmsVO.getTemplateCode()) {
             throw new ServiceException("部分必填信息为空，请检查！");
@@ -51,9 +51,9 @@ public class AliyunSmsService {
      * @param confKey 阿里云短信服务的配置key
      * @return 阿里云短信服务实体
      */
-    public AliyunSmsVO getAliyunSmsConfig(String confKey) {
-        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO();
-        return (AliyunSmsVO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsVO);
+    public AliyunSmsPO getAliyunSmsConfig(String confKey) {
+        AliyunSmsPO aliyunSmsVO = new AliyunSmsPO();
+        return (AliyunSmsPO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsVO);
     }
 
     /**
@@ -66,7 +66,7 @@ public class AliyunSmsService {
      */
     public boolean sendSmsOne(String confKey, String phone, String[] templateValue) {
         // 从数据库读取配置信息
-        AliyunSmsVO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
+        AliyunSmsPO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
         if (null == aliyunSmsVO) {
             throw new ServiceException("阿里云短信服务配置信息有误/不存在，请核实");
         }
@@ -99,7 +99,7 @@ public class AliyunSmsService {
      */
     public Map<String, Boolean> sendSmsBatch(String confKey, Map<String, String[]> smsMap) {
         // 从数据库读取配置信息
-        AliyunSmsVO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
+        AliyunSmsPO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
         if (null == aliyunSmsVO) {
             throw new ServiceException("阿里云短信服务配置信息有误，请核实");
         }
@@ -139,7 +139,7 @@ public class AliyunSmsService {
      * @param outId         流水号
      * @return 发送结果
      */
-    private SendSmsResponse sendSms(AliyunSmsVO aliyunSmsVO, String phone, String[] templateValue, String outId) {
+    private SendSmsResponse sendSms(AliyunSmsPO aliyunSmsVO, String phone, String[] templateValue, String outId) {
         // 阿里云短信服务信息配置
         Config config = new Config()
                 // 必填，开发者的 AccessKey ID

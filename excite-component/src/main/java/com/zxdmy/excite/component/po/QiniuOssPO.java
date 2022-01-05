@@ -1,4 +1,4 @@
-package com.zxdmy.excite.component.vo;
+package com.zxdmy.excite.component.po;
 
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
  * @since 2022/1/3 16:07
  */
 @Data
-public class QiniuVO implements Serializable {
+public class QiniuOssPO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

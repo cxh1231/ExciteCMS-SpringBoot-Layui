@@ -1,9 +1,8 @@
 package com.zxdmy.excite.admin.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.qiniu.storage.model.FileInfo;
 import com.zxdmy.excite.component.qiniu.QiniuOssService;
-import com.zxdmy.excite.component.vo.QiniuVO;
+import com.zxdmy.excite.component.po.QiniuOssPO;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +48,9 @@ public class IGlobalConfigServiceTest {
     @Test
     void getTest() {
         // 初始数据定义s
-        QiniuVO qiniuEntity = new QiniuVO();
+        QiniuOssPO qiniuEntity = new QiniuOssPO();
 
-        qiniuEntity = (QiniuVO) componentConfigService.get("qiniu", "qiniuOss", qiniuEntity);
+        qiniuEntity = (QiniuOssPO) componentConfigService.get("qiniu", "qiniuOss", qiniuEntity);
 
         System.out.println(qiniuEntity);
     }

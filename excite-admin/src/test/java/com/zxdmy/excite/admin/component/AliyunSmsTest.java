@@ -2,7 +2,7 @@ package com.zxdmy.excite.admin.component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zxdmy.excite.component.aliyun.AliyunSmsService;
-import com.zxdmy.excite.component.vo.AliyunSmsVO;
+import com.zxdmy.excite.component.po.AliyunSmsPO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,7 +34,7 @@ public class AliyunSmsTest {
     @Test
     void saveTest() throws JsonProcessingException {
         // 初始数据定义
-        AliyunSmsVO aliyunSmsVO = new AliyunSmsVO()
+        AliyunSmsPO aliyunSmsVO = new AliyunSmsPO()
                 .setKey("aliyunSms01")
                 .setAccessKeyId("********")
                 .setAccessKeySecret("*******")
@@ -49,7 +49,7 @@ public class AliyunSmsTest {
      */
     @Test
     void getTest() {
-        AliyunSmsVO aliyunSmsVO = aliyunSmsService.getAliyunSmsConfig("aliyunSms01");
+        AliyunSmsPO aliyunSmsVO = aliyunSmsService.getAliyunSmsConfig("aliyunSms01");
         System.out.println(aliyunSmsVO);
 
     }
