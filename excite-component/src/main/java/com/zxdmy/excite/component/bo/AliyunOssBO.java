@@ -1,4 +1,4 @@
-package com.zxdmy.excite.component.po;
+package com.zxdmy.excite.component.bo;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
@@ -13,7 +13,7 @@ import java.io.Serializable;
  */
 @Data
 @Accessors(chain = true)
-public class AliyunOssPO implements Serializable {
+public class AliyunOssBO implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

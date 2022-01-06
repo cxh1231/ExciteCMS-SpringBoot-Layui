@@ -7,7 +7,7 @@ import com.aliyun.teaopenapi.models.Config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.component.po.AliyunSmsPO;
+import com.zxdmy.excite.component.bo.AliyunSmsBO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -32,17 +32,17 @@ public class AliyunSmsService {
      * 保存阿里云短信服务的开发者信息、消息模板相关信息
      * 注意：同一个系统的消息模板可能有多个，所以
      *
-     * @param aliyunSmsVO 实体信息，其中KEY必填
+     * @param aliyunSmsBO 实体信息，其中KEY必填
      * @return 保存结果
      * @throws JsonProcessingException 异常
      */
-    public boolean saveAliyunSmsConfig(AliyunSmsPO aliyunSmsVO) throws JsonProcessingException {
+    public boolean saveAliyunSmsConfig(AliyunSmsBO aliyunSmsBO) throws JsonProcessingException {
         // 如果必填项为空，则返回错误信息
-        if (null == aliyunSmsVO.getKey() || null == aliyunSmsVO.getAccessKeyId() || null == aliyunSmsVO.getAccessKeySecret() || null == aliyunSmsVO.getSignName() || null == aliyunSmsVO.getTemplateCode()) {
+        if (null == aliyunSmsBO.getKey() || null == aliyunSmsBO.getAccessKeyId() || null == aliyunSmsBO.getAccessKeySecret() || null == aliyunSmsBO.getSignName() || null == aliyunSmsBO.getTemplateCode()) {
             throw new ServiceException("部分必填信息为空，请检查！");
         }
         // 保存
-        return configService.save(DEFAULT_SERVICE, aliyunSmsVO.getKey(), aliyunSmsVO, true);
+        return configService.save(DEFAULT_SERVICE, aliyunSmsBO.getKey(), aliyunSmsBO, true);
     }
 
     /**
@@ -51,9 +51,9 @@ public class AliyunSmsService {
      * @param confKey 阿里云短信服务的配置key
      * @return 阿里云短信服务实体
      */
-    public AliyunSmsPO getAliyunSmsConfig(String confKey) {
-        AliyunSmsPO aliyunSmsVO = new AliyunSmsPO();
-        return (AliyunSmsPO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsVO);
+    public AliyunSmsBO getAliyunSmsConfig(String confKey) {
+        AliyunSmsBO aliyunSmsBO = new AliyunSmsBO();
+        return (AliyunSmsBO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsBO);
     }
 
     /**
@@ -66,16 +66,16 @@ public class AliyunSmsService {
      */
     public boolean sendSmsOne(String confKey, String phone, String[] templateValue) {
         // 从数据库读取配置信息
-        AliyunSmsPO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
-        if (null == aliyunSmsVO) {
+        AliyunSmsBO aliyunSmsBO = this.getAliyunSmsConfig(confKey);
+        if (null == aliyunSmsBO) {
             throw new ServiceException("阿里云短信服务配置信息有误/不存在，请核实");
         }
         // 如果输入的参数个数和配置信息里的参数个数不相等，则返回错误信息
-        if (templateValue.length != aliyunSmsVO.getTemplateParam().length) {
+        if (templateValue.length != aliyunSmsBO.getTemplateParam().length) {
             throw new ServiceException("templateValue个数有误，请核实");
         }
         // 发起短信并获取发送结果
-        SendSmsResponse response = this.sendSms(aliyunSmsVO, phone, templateValue, null);
+        SendSmsResponse response = this.sendSms(aliyunSmsBO, phone, templateValue, null);
         // 结果不为空，进一步判断
         if (response != null) {
             // 打印结果
@@ -99,11 +99,11 @@ public class AliyunSmsService {
      */
     public Map<String, Boolean> sendSmsBatch(String confKey, Map<String, String[]> smsMap) {
         // 从数据库读取配置信息
-        AliyunSmsPO aliyunSmsVO = this.getAliyunSmsConfig(confKey);
-        if (null == aliyunSmsVO) {
+        AliyunSmsBO aliyunSmsBO = this.getAliyunSmsConfig(confKey);
+        if (null == aliyunSmsBO) {
             throw new ServiceException("阿里云短信服务配置信息有误，请核实");
         }
-        int templateLength = aliyunSmsVO.getTemplateParam().length;
+        int templateLength = aliyunSmsBO.getTemplateParam().length;
         // 发起短信并获取发送结果
         SendSmsResponse response;
         // 记录结果的map
@@ -112,7 +112,7 @@ public class AliyunSmsService {
         for (String phone : smsMap.keySet()) {
             // 参数值对等，则可以发送
             if (smsMap.get(phone).length == templateLength) {
-                response = this.sendSms(aliyunSmsVO, phone, smsMap.get(phone), null);
+                response = this.sendSms(aliyunSmsBO, phone, smsMap.get(phone), null);
                 // 发送成功
                 if (response != null && "OK".equals(response.body.code)) {
                     result.put(phone, true);
@@ -133,19 +133,19 @@ public class AliyunSmsService {
     /**
      * 配置并发送短信实现类
      *
-     * @param aliyunSmsVO   配置信息
+     * @param aliyunSmsBO   配置信息
      * @param phone         接收手机号
      * @param templateValue 模板JSON格式的参数
      * @param outId         流水号
      * @return 发送结果
      */
-    private SendSmsResponse sendSms(AliyunSmsPO aliyunSmsVO, String phone, String[] templateValue, String outId) {
+    private SendSmsResponse sendSms(AliyunSmsBO aliyunSmsBO, String phone, String[] templateValue, String outId) {
         // 阿里云短信服务信息配置
         Config config = new Config()
                 // 必填，开发者的 AccessKey ID
-                .setAccessKeyId(aliyunSmsVO.getAccessKeyId())
+                .setAccessKeyId(aliyunSmsBO.getAccessKeyId())
                 // 必填，开发者的 AccessKey Secret
-                .setAccessKeySecret(aliyunSmsVO.getAccessKeySecret())
+                .setAccessKeySecret(aliyunSmsBO.getAccessKeySecret())
                 // 默认，暂时不支持多Region，默认即可
                 .setRegionId("cn-hangzhou")
                 // 默认，产品域名，开发者无需替换
@@ -154,8 +154,8 @@ public class AliyunSmsService {
                 .setProtocol("https");
         // 构造请求参数
         StringBuilder templateParam = new StringBuilder("{");
-        for (int i = 0; i < aliyunSmsVO.getTemplateParam().length; i++) {
-            templateParam.append("\"").append(aliyunSmsVO.getTemplateParam()[i]).append("\":\"").append(templateValue[i]).append("\",");
+        for (int i = 0; i < aliyunSmsBO.getTemplateParam().length; i++) {
+            templateParam.append("\"").append(aliyunSmsBO.getTemplateParam()[i]).append("\":\"").append(templateValue[i]).append("\",");
         }
         templateParam.append("}");
         // 短信请求信息配置
@@ -163,9 +163,9 @@ public class AliyunSmsService {
                 // 必填，接收短信的手机号
                 .setPhoneNumbers(phone)
                 // 必填，设置签名名称，应严格按"签名名称"填写，格式如：阿里云
-                .setSignName(aliyunSmsVO.getSignName())
+                .setSignName(aliyunSmsBO.getSignName())
                 // 必填，设置模板CODE，应严格按"模板CODE"填写，格式：SMS_88888888
-                .setTemplateCode(aliyunSmsVO.getTemplateCode())
+                .setTemplateCode(aliyunSmsBO.getTemplateCode())
                 // 可选，设置模板参数, 假如模板中存在变量需要替换则为必填项
                 .setTemplateParam(templateParam.toString())
                 // 可选，设置流水号

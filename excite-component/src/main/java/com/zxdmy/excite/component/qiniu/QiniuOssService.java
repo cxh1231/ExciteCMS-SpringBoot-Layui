@@ -13,7 +13,7 @@ import com.qiniu.util.Auth;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
 import com.zxdmy.excite.component.vo.QiniuFileVO;
-import com.zxdmy.excite.component.po.QiniuOssPO;
+import com.zxdmy.excite.component.bo.QiniuOssBO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,22 +42,22 @@ public class QiniuOssService {
     /**
      * 将七牛云的信息保存至数据库
      *
-     * @param qiniuVO 七牛云信息实体。如果指定key，则存储的配置信息的key即为所指定
+     * @param qiniuOssBO 七牛云信息实体。如果指定key，则存储的配置信息的key即为所指定
      * @return 结果
      */
-    public boolean saveQiniuConfig(QiniuOssPO qiniuVO) throws JsonProcessingException {
+    public boolean saveQiniuConfig(QiniuOssBO qiniuOssBO) throws JsonProcessingException {
         // 如果必填信息为空，则返回错误
-        if (null == qiniuVO.getSecretKey() || null == qiniuVO.getAccessKey() || null == qiniuVO.getBucket() || null == qiniuVO.getDomain()) {
+        if (null == qiniuOssBO.getSecretKey() || null == qiniuOssBO.getAccessKey() || null == qiniuOssBO.getBucket() || null == qiniuOssBO.getDomain()) {
             throw new ServiceException("AK、SK、空间名称或者域名为空，请核实！");
         }
         // 核实无误，填充数据
-        if (null == qiniuVO.getProtocol()) {
-            qiniuVO.setProtocol("http");
+        if (null == qiniuOssBO.getProtocol()) {
+            qiniuOssBO.setProtocol("http");
         }
-        if (null == qiniuVO.getKey()) {
-            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuVO, false);
+        if (null == qiniuOssBO.getKey()) {
+            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuOssBO, false);
         }
-        return configService.save(DEFAULT_SERVICE, qiniuVO.getKey(), qiniuVO, false);
+        return configService.save(DEFAULT_SERVICE, qiniuOssBO.getKey(), qiniuOssBO, false);
     }
 
     /**
@@ -66,10 +66,10 @@ public class QiniuOssService {
      * @param confKey 配置文件的key，不同的key对应不同的存储空间
      * @return 七牛云配置信息实体
      */
-    public QiniuOssPO getQiniuConfig(String confKey) {
-        QiniuOssPO qiniuVO = new QiniuOssPO();
-        qiniuVO = (QiniuOssPO) configService.get(DEFAULT_SERVICE, confKey, qiniuVO);
-        return qiniuVO;
+    public QiniuOssBO getQiniuConfig(String confKey) {
+        QiniuOssBO qiniuOssBO = new QiniuOssBO();
+        qiniuOssBO = (QiniuOssBO) configService.get(DEFAULT_SERVICE, confKey, qiniuOssBO);
+        return qiniuOssBO;
     }
 
     /**
@@ -77,7 +77,7 @@ public class QiniuOssService {
      *
      * @return 七牛云配置信息实体
      */
-    public QiniuOssPO getQiniuConfig() {
+    public QiniuOssBO getQiniuConfig() {
         return this.getQiniuConfig(DEFAULT_KEY);
     }
 
@@ -87,12 +87,12 @@ public class QiniuOssService {
      * @param confKey 配置文件的key，不同的key对应不同的存储空间
      * @return 七牛云配置信息实体
      */
-    public QiniuOssPO getQiniuConfigHide(String confKey) {
-        QiniuOssPO qiniuVO = new QiniuOssPO();
-        qiniuVO = (QiniuOssPO) configService.get(DEFAULT_SERVICE, confKey, qiniuVO);
-        qiniuVO.setAccessKey(DesensitizedUtil.idCardNum(qiniuVO.getAccessKey(), 2, 2));
-        qiniuVO.setSecretKey(DesensitizedUtil.idCardNum(qiniuVO.getSecretKey(), 2, 2));
-        return qiniuVO;
+    public QiniuOssBO getQiniuConfigHide(String confKey) {
+        QiniuOssBO qiniuOssBO = new QiniuOssBO();
+        qiniuOssBO = (QiniuOssBO) configService.get(DEFAULT_SERVICE, confKey, qiniuOssBO);
+        qiniuOssBO.setAccessKey(DesensitizedUtil.idCardNum(qiniuOssBO.getAccessKey(), 2, 2));
+        qiniuOssBO.setSecretKey(DesensitizedUtil.idCardNum(qiniuOssBO.getSecretKey(), 2, 2));
+        return qiniuOssBO;
     }
 
     /**
@@ -100,7 +100,7 @@ public class QiniuOssService {
      *
      * @return 七牛云配置信息实体
      */
-    public QiniuOssPO getQiniuConfigHide() {
+    public QiniuOssBO getQiniuConfigHide() {
         return this.getQiniuConfigHide(DEFAULT_KEY);
     }
 
@@ -110,20 +110,20 @@ public class QiniuOssService {
      * @param desensitized 是否脱敏：true：脱敏， false：不脱敏
      * @return 读取全部配置信息
      */
-    public List<QiniuOssPO> getQiniuConfigList(Boolean desensitized) {
-        QiniuOssPO qiniuVO = new QiniuOssPO();
-        List<Object> objectList = configService.getList(DEFAULT_SERVICE, qiniuVO);
+    public List<QiniuOssBO> getQiniuConfigList(Boolean desensitized) {
+        QiniuOssBO qiniuOssBO = new QiniuOssBO();
+        List<Object> objectList = configService.getList(DEFAULT_SERVICE, qiniuOssBO);
         ObjectMapper objectMapper = new ObjectMapper();
-        List<QiniuOssPO> qiniuVOList = new ArrayList<>();
+        List<QiniuOssBO> qiniuOssBOList = new ArrayList<>();
         for (Object o : objectList) {
-            qiniuVO = objectMapper.convertValue(o, qiniuVO.getClass());
+            qiniuOssBO = objectMapper.convertValue(o, qiniuOssBO.getClass());
             if (desensitized) {
-                qiniuVO.setAccessKey(DesensitizedUtil.idCardNum(qiniuVO.getAccessKey(), 2, 2));
-                qiniuVO.setSecretKey(DesensitizedUtil.idCardNum(qiniuVO.getSecretKey(), 2, 2));
+                qiniuOssBO.setAccessKey(DesensitizedUtil.idCardNum(qiniuOssBO.getAccessKey(), 2, 2));
+                qiniuOssBO.setSecretKey(DesensitizedUtil.idCardNum(qiniuOssBO.getSecretKey(), 2, 2));
             }
-            qiniuVOList.add(qiniuVO);
+            qiniuOssBOList.add(qiniuOssBO);
         }
-        return qiniuVOList;
+        return qiniuOssBOList;
     }
 
     /**
@@ -134,20 +134,20 @@ public class QiniuOssService {
      * @param expireSeconds 过期时间
      * @return 结果
      */
-    public QiniuOssPO createUploadToken(String confKey, String fileKey, Long expireSeconds) {
+    public QiniuOssBO createUploadToken(String confKey, String fileKey, Long expireSeconds) {
         // 如果必填信息为空，则返回
         if (null == fileKey || "".equals(fileKey)) {
             throw new ServiceException("文件的key为空，请核实！");
         }
         // 读取配置信息
-        QiniuOssPO qiniuVO = new QiniuOssPO();
-        qiniuVO = (QiniuOssPO) configService.get(DEFAULT_SERVICE, confKey, qiniuVO);
+        QiniuOssBO qiniuOssBO = new QiniuOssBO();
+        qiniuOssBO = (QiniuOssBO) configService.get(DEFAULT_SERVICE, confKey, qiniuOssBO);
         // 生成Token
-        Auth auth = Auth.create(qiniuVO.getAccessKey(), qiniuVO.getSecretKey());
-        String upToken = auth.uploadToken(qiniuVO.getBucket(), fileKey, expireSeconds, null);
+        Auth auth = Auth.create(qiniuOssBO.getAccessKey(), qiniuOssBO.getSecretKey());
+        String upToken = auth.uploadToken(qiniuOssBO.getBucket(), fileKey, expireSeconds, null);
         // 写入Token，并返回
-        qiniuVO.setUploadToken(upToken);
-        return qiniuVO;
+        qiniuOssBO.setUploadToken(upToken);
+        return qiniuOssBO;
     }
 
     /**
@@ -157,7 +157,7 @@ public class QiniuOssService {
      * @param expireSeconds 过期时间
      * @return 结果
      */
-    public QiniuOssPO createUploadToken(String fileKey, Long expireSeconds) {
+    public QiniuOssBO createUploadToken(String fileKey, Long expireSeconds) {
         return this.createUploadToken(DEFAULT_KEY, fileKey, expireSeconds);
     }
 
@@ -173,11 +173,11 @@ public class QiniuOssService {
             throw new ServiceException("上传的文件为空，请检查！");
         }
         // 生成Token
-        QiniuOssPO qiniuVO = this.createUploadToken(confKey, file.getName(), 3600L);
+        QiniuOssBO qiniuOssBO = this.createUploadToken(confKey, file.getName(), 3600L);
         // 设置区域：如果不为空
         Region region;
-        if (null != qiniuVO.getRegion() && !"".equals(qiniuVO.getRegion())) {
-            region = new Region.Builder().region(qiniuVO.getRegion()).build();
+        if (null != qiniuOssBO.getRegion() && !"".equals(qiniuOssBO.getRegion())) {
+            region = new Region.Builder().region(qiniuOssBO.getRegion()).build();
         } else {
             region = new Region.Builder().autoRegion("https://uc.qbox.me");
         }
@@ -187,12 +187,12 @@ public class QiniuOssService {
         UploadManager uploadManager = new UploadManager(configuration);
         // 进行上传
         try {
-            Response response = uploadManager.put(file, file.getName(), qiniuVO.getUploadToken());
+            Response response = uploadManager.put(file, file.getName(), qiniuOssBO.getUploadToken());
             if (response.isOK()) {
                 return new QiniuFileVO()
-                        .setProtocol(qiniuVO.getProtocol())
-                        .setDomain(qiniuVO.getDomain())
-                        .setKey(qiniuVO.getKey());
+                        .setProtocol(qiniuOssBO.getProtocol())
+                        .setDomain(qiniuOssBO.getDomain())
+                        .setKey(qiniuOssBO.getKey());
             }
             return null;
         } catch (QiniuException ex) {
@@ -219,17 +219,17 @@ public class QiniuOssService {
      * @return 文件信息
      */
     public QiniuFileVO uploadFileFromUrl(String confKey, String fileKey, String remoteSrcUrl) {
-        QiniuOssPO qiniuVO = this.getQiniuConfig(confKey);
-        if (qiniuVO == null) {
+        QiniuOssBO qiniuOssBO = this.getQiniuConfig(confKey);
+        if (qiniuOssBO == null) {
             throw new ServiceException("key为[" + confKey + "]的配置信息为空，请检查！");
         }
-        BucketManager bucketManager = this.createBucketManager(qiniuVO);
+        BucketManager bucketManager = this.createBucketManager(qiniuOssBO);
         //抓取网络资源到空间
         try {
-            FetchRet fetchRet = bucketManager.fetch(remoteSrcUrl, qiniuVO.getBucket(), fileKey);
+            FetchRet fetchRet = bucketManager.fetch(remoteSrcUrl, qiniuOssBO.getBucket(), fileKey);
             return new QiniuFileVO()
-                    .setProtocol(qiniuVO.getProtocol())
-                    .setDomain(qiniuVO.getDomain())
+                    .setProtocol(qiniuOssBO.getProtocol())
+                    .setDomain(qiniuOssBO.getDomain())
                     .setKey(fetchRet.key)
                     .setHash(fetchRet.hash)
                     .setMimeType(fetchRet.mimeType)
@@ -249,12 +249,12 @@ public class QiniuOssService {
      * @return 文件信息列表
      */
     public List<FileInfo> getQiniuFileListAll(String confKey, String prefix, String delimiter) {
-        QiniuOssPO qiniuVO = this.getQiniuConfig(confKey);
-        if (qiniuVO == null) {
+        QiniuOssBO qiniuOssBO = this.getQiniuConfig(confKey);
+        if (qiniuOssBO == null) {
             throw new ServiceException("key为[" + confKey + "]的配置信息为空，请检查！");
         }
-        BucketManager bucketManager = this.createBucketManager(qiniuVO);
-        BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(qiniuVO.getBucket(), prefix, 1000, delimiter);
+        BucketManager bucketManager = this.createBucketManager(qiniuOssBO);
+        BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(qiniuOssBO.getBucket(), prefix, 1000, delimiter);
         // 记录返回值
         List<FileInfo> fileInfoList = new ArrayList<>();
         while (fileListIterator.hasNext()) {
@@ -288,14 +288,14 @@ public class QiniuOssService {
         // 定义返回Page实体
         Page<FileInfo> fileInfoPage = new Page<>();
         // 获取配置
-        QiniuOssPO qiniuVO = this.getQiniuConfig(confKey);
-        if (qiniuVO == null) {
+        QiniuOssBO qiniuOssBO = this.getQiniuConfig(confKey);
+        if (qiniuOssBO == null) {
             throw new ServiceException("key为[" + confKey + "]的配置信息为空，请检查！");
         }
         // 生成管理器
-        BucketManager bucketManager = this.createBucketManager(qiniuVO);
+        BucketManager bucketManager = this.createBucketManager(qiniuOssBO);
         // 获取列表迭代器
-        BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(qiniuVO.getBucket(), prefix, limit, delimiter);
+        BucketManager.FileListIterator fileListIterator = bucketManager.createFileListIterator(qiniuOssBO.getBucket(), prefix, limit, delimiter);
         // 遍历直至找到指定页数
         long total = 0;
         while (fileListIterator.hasNext()) {
@@ -339,15 +339,15 @@ public class QiniuOssService {
      */
     public String getDownloadUrl(String confKey, String fileKey, String attName, Long expireSeconds) {
         // 获取配置
-        QiniuOssPO qiniuVO = this.getQiniuConfig(confKey);
-        if (qiniuVO == null) {
+        QiniuOssBO qiniuOssBO = this.getQiniuConfig(confKey);
+        if (qiniuOssBO == null) {
             throw new ServiceException("key为[" + confKey + "]的配置信息为空，请检查！");
         }
-        DownloadUrl url = new DownloadUrl(qiniuVO.getDomain(), "https".equals(qiniuVO.getProtocol()), fileKey);
+        DownloadUrl url = new DownloadUrl(qiniuOssBO.getDomain(), "https".equals(qiniuOssBO.getProtocol()), fileKey);
         if (null != attName) {
             url.setAttname(attName);
         }
-        Auth auth = Auth.create(qiniuVO.getAccessKey(), qiniuVO.getSecretKey());
+        Auth auth = Auth.create(qiniuOssBO.getAccessKey(), qiniuOssBO.getSecretKey());
         long deadline = expireSeconds + new Date().getTime();
         String downloadUrl = "";
         try {
@@ -373,19 +373,19 @@ public class QiniuOssService {
     /**
      * 根据配置信息生成空间管理器
      *
-     * @param qiniuVO 配置信息
+     * @param qiniuOssBO 配置信息
      * @return 空间管理器
      */
-    private BucketManager createBucketManager(QiniuOssPO qiniuVO) {
+    private BucketManager createBucketManager(QiniuOssBO qiniuOssBO) {
         // 设置区域：如果不为空
         Region region;
-        if (null != qiniuVO.getRegion() && !"".equals(qiniuVO.getRegion())) {
-            region = new Region.Builder().region(qiniuVO.getRegion()).build();
+        if (null != qiniuOssBO.getRegion() && !"".equals(qiniuOssBO.getRegion())) {
+            region = new Region.Builder().region(qiniuOssBO.getRegion()).build();
         } else {
             region = new Region.Builder().autoRegion("https://uc.qbox.me");
         }
         // 生成Auth授权类
-        Auth auth = Auth.create(qiniuVO.getAccessKey(), qiniuVO.getSecretKey());
+        Auth auth = Auth.create(qiniuOssBO.getAccessKey(), qiniuOssBO.getSecretKey());
         // 配置信息，
         Configuration configuration = new Configuration(region);
         // 返回

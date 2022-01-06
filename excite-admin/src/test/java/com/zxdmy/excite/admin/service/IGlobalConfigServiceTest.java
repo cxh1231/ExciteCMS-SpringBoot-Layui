@@ -2,7 +2,7 @@ package com.zxdmy.excite.admin.service;
 
 import com.qiniu.storage.model.FileInfo;
 import com.zxdmy.excite.component.qiniu.QiniuOssService;
-import com.zxdmy.excite.component.po.QiniuOssPO;
+import com.zxdmy.excite.component.bo.QiniuOssBO;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,9 +48,9 @@ public class IGlobalConfigServiceTest {
     @Test
     void getTest() {
         // 初始数据定义s
-        QiniuOssPO qiniuEntity = new QiniuOssPO();
+        QiniuOssBO qiniuEntity = new QiniuOssBO();
 
-        qiniuEntity = (QiniuOssPO) componentConfigService.get("qiniu", "qiniuOss", qiniuEntity);
+        qiniuEntity = (QiniuOssBO) componentConfigService.get("qiniu", "qiniuOss", qiniuEntity);
 
         System.out.println(qiniuEntity);
     }

@@ -1,17 +1,15 @@
 package com.zxdmy.excite.component.aliyun;
 
 import cn.hutool.core.codec.Base64;
-import cn.hutool.core.util.StrUtil;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 import com.aliyun.oss.model.PolicyConditions;
-import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zxdmy.excite.common.exception.ServiceException;
 import com.zxdmy.excite.common.service.IGlobalConfigService;
-import com.zxdmy.excite.component.po.AliyunOssPO;
-import com.zxdmy.excite.component.po.AliyunSmsPO;
+import com.zxdmy.excite.component.bo.AliyunOssBO;
+import com.zxdmy.excite.component.bo.AliyunSmsBO;
 import com.zxdmy.excite.component.vo.AliyunOssPolicyVO;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,23 +33,23 @@ public class AliyunOssService {
 
     private static final String DEFAULT_KEY = "aliyunOss";
 
-    public boolean saveConfig(AliyunOssPO aliyunOssVO) throws JsonProcessingException {
-        if (null == aliyunOssVO.getBucketName() || null == aliyunOssVO.getBucketDomain() || null == aliyunOssVO.getEndpoint() || null == aliyunOssVO.getAccessKeyId() || null == aliyunOssVO.getAccessKeySecret()) {
+    public boolean saveConfig(AliyunOssBO aliyunOssBO) throws JsonProcessingException {
+        if (null == aliyunOssBO.getBucketName() || null == aliyunOssBO.getBucketDomain() || null == aliyunOssBO.getEndpoint() || null == aliyunOssBO.getAccessKeyId() || null == aliyunOssBO.getAccessKeySecret()) {
             throw new ServiceException("部分参数为空，请检查！");
         }
-        if (null == aliyunOssVO.getKey()) {
-            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, aliyunOssVO, true);
+        if (null == aliyunOssBO.getKey()) {
+            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, aliyunOssBO, true);
         } else {
-            return configService.save(DEFAULT_SERVICE, aliyunOssVO.getKey(), aliyunOssVO, true);
+            return configService.save(DEFAULT_SERVICE, aliyunOssBO.getKey(), aliyunOssBO, true);
         }
     }
 
-    public AliyunOssPO getConfig(String confKey) {
-        AliyunSmsPO aliyunSmsVO = new AliyunSmsPO();
-        return (AliyunOssPO) configService.get(DEFAULT_SERVICE, confKey, aliyunSmsVO);
+    public AliyunOssBO getConfig(String confKey) {
+        AliyunOssBO aliyunOssBO = new AliyunOssBO();
+        return (AliyunOssBO) configService.get(DEFAULT_SERVICE, confKey, aliyunOssBO);
     }
 
-    public AliyunOssPO getConfig() {
+    public AliyunOssBO getConfig() {
         return this.getConfig(DEFAULT_KEY);
     }
 
@@ -64,9 +62,9 @@ public class AliyunOssService {
      */
     public AliyunOssPolicyVO createUploadToken(String confKey, String fileName, Long expireTime) {
         // 读取秘钥等信息
-        AliyunOssPO aliyunOssPO = this.getConfig(confKey);
+        AliyunOssBO aliyunOssBO = this.getConfig(confKey);
         // 创建OSSClient实例。
-        OSS oss = new OSSClientBuilder().build(aliyunOssPO.getEndpoint(), aliyunOssPO.getAccessKeyId(), aliyunOssPO.getAccessKeySecret());
+        OSS oss = new OSSClientBuilder().build(aliyunOssBO.getEndpoint(), aliyunOssBO.getAccessKeyId(), aliyunOssBO.getAccessKeySecret());
 
         PolicyConditions policyConditions = new PolicyConditions();
         // 策略：最大上传文件1G
@@ -84,10 +82,10 @@ public class AliyunOssService {
 
             // 构造返回数据
             return new AliyunOssPolicyVO()
-                    .setAccessKeyId(aliyunOssPO.getAccessKeyId())
+                    .setAccessKeyId(aliyunOssBO.getAccessKeyId())
                     .setPolicy(base64Policy)
                     .setSignature(postSignature)
-                    .setHost(aliyunOssPO.getBucketDomain())
+                    .setHost(aliyunOssBO.getBucketDomain())
                     .setCallback("")
                     .setKey(fileName);
         } catch (Exception e) {
@@ -109,11 +107,11 @@ public class AliyunOssService {
 
     public boolean uploadFile(String confKey, File file) {
         // 读取配置
-        AliyunOssPO aliyunOssPO = this.getConfig(confKey);
+        AliyunOssBO aliyunOssBO = this.getConfig(confKey);
         // 创建OSSClient实例。
-        OSS oss = new OSSClientBuilder().build(aliyunOssPO.getEndpoint(), aliyunOssPO.getAccessKeyId(), aliyunOssPO.getAccessKeySecret());
+        OSS oss = new OSSClientBuilder().build(aliyunOssBO.getEndpoint(), aliyunOssBO.getAccessKeyId(), aliyunOssBO.getAccessKeySecret());
         try {
-            PutObjectResult putObjectRequest = oss.putObject(aliyunOssPO.getBucketName(), file.getName(), file);
+            PutObjectResult putObjectRequest = oss.putObject(aliyunOssBO.getBucketName(), file.getName(), file);
             return putObjectRequest.getResponse().isSuccessful();
         } catch (Exception e) {
             System.out.println(e.getMessage());
