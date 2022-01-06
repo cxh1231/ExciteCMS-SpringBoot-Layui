@@ -37,7 +37,7 @@ public class AliyunOssPolicyVO implements Serializable {
     /**
      * 用户请求的AccessKey ID。
      */
-    private String OSSAccessKeyId;
+    private String accessKeyId;
 
     /**
      * 设置阿里云OSS服务端返回状态码为200，不设置则默认返回状态码204。

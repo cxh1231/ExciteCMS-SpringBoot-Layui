@@ -28,9 +28,14 @@ public class AliyunOssPO implements Serializable {
     private String bucketName;
 
     /**
-     * Bucket的域名，该域名用来访问空间中的文件。
+     * Bucket的域名，由阿里云官方生成，该域名用来访问空间中的文件。
      */
     private String bucketDomain;
+
+    /**
+     * 自己通过CNAME域名解析绑定的域名
+     */
+    private String bindDomain;
 
     /**
      * 访问域名（地域节点），上传使用。
