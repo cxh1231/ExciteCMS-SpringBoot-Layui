@@ -76,6 +76,10 @@ public class JustAuthService {
      * @return 指定KEY的配置信息
      */
     public JustAuthBO getConfig(String confKey) {
+        // 配置信息的key必须存在于当前的库中
+        if (!CONF_KEY_SET.contains(confKey)) {
+            throw new ServiceException("当前输入的配置KEY[" + confKey + "]不在许可范围内，请检查！");
+        }
         JustAuthBO justAuthBO = new JustAuthBO();
         return (JustAuthBO) configService.get(DEFAULT_SERVICE, confKey, justAuthBO);
     }
@@ -110,6 +114,9 @@ public class JustAuthService {
      * @return 登录的链接
      */
     public String createAuthorizeUrl(String confKey, String state) {
+        if (!CONF_KEY_SET.contains(confKey)) {
+            return null;
+        }
         return this.createAuthRequest(confKey).authorize(state);
     }
 
@@ -121,6 +128,9 @@ public class JustAuthService {
      * @return 授权成功后的用户信息，根据授权平台的不同，获取的数据完整性也不同
      */
     public AuthUser getAuthUser(String confKey, AuthCallback callback) {
+        if (!CONF_KEY_SET.contains(confKey)) {
+            return null;
+        }
         AuthRequest authRequest = this.createAuthRequest(confKey);
         // 根据返回的参数，执行登录请求（获取用户信息）
         AuthResponse<AuthUser> response = authRequest.login(callback);
@@ -139,6 +149,9 @@ public class JustAuthService {
      * @return 授权工具类
      */
     public AuthRequest createAuthRequest(String confKey) {
+        if (!CONF_KEY_SET.contains(confKey)) {
+            throw new ServiceException("当前输入的配置KEY[" + confKey + "]不在许可范围内，请检查！");
+        }
         JustAuthBO authBO = this.getConfig(confKey);
         AuthRequest authRequest;
         switch (confKey) {
