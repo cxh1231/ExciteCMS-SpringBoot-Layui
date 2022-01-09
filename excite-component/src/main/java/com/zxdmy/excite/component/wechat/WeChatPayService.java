@@ -1,5 +1,6 @@
 package com.zxdmy.excite.component.wechat;
 
+import com.zxdmy.excite.common.service.IGlobalConfigService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,4 +13,6 @@ import org.springframework.stereotype.Service;
 @Service
 @AllArgsConstructor
 public class WeChatPayService {
+
+    private IGlobalConfigService configService;
 }

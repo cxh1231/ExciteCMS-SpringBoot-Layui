@@ -43,11 +43,25 @@
             <version>3.13.2</version>
         </dependency>
 
-        <!-- 添加依赖 -->
+        <!-- 第三方登录依赖 -->
         <dependency>
             <groupId>me.zhyd.oauth</groupId>
             <artifactId>JustAuth</artifactId>
             <version>1.16.5</version>
+        </dependency>
+
+        <!-- 支付宝支付依赖 -->
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-easysdk</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+
+        <!-- 微信支付依赖 -->
+        <dependency>
+            <groupId>com.github.binarywang</groupId>
+            <artifactId>weixin-java-pay</artifactId>
+            <version>4.1.0</version>
         </dependency>
 
     </dependencies>
