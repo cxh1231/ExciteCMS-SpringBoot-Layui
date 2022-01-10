@@ -61,7 +61,7 @@
         <dependency>
             <groupId>com.github.binarywang</groupId>
             <artifactId>weixin-java-pay</artifactId>
-            <version>4.1.0</version>
+            <version>4.2.2.B</version>
         </dependency>
 
     </dependencies>
