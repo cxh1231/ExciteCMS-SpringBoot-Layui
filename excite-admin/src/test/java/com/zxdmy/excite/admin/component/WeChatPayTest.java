@@ -48,19 +48,17 @@ public class WeChatPayTest {
 
     @Test
     void unifiedOrderTest2() throws WxPayException {
-        WxPayUnifiedOrderV3Result wxPayUnifiedOrderV3Result = weChatPayService.unifiedOrder(
+        String result = weChatPayService.pay(
                 null, "jsapi", "商品标题", IdUtil.simpleUUID(), 1, "od0Pf5yi7sdBXm95fT786tdqtLgA"
         );
-        System.out.println(wxPayUnifiedOrderV3Result.getCodeUrl());
-        System.out.println(wxPayUnifiedOrderV3Result.getPrepayId());
-        System.out.println(wxPayUnifiedOrderV3Result.getH5Url());
+        System.out.println(result);
     }
 
     @Test
     void queryTest() {
 //        375f1b3a8f3f4f2aa6f086575f168096
         // 4200001322202201105842754907
-        System.out.println(weChatPayService.queryOrder(null, "4200001322202201105842754907", null));
+        System.out.println(weChatPayService.query(null, "4200001322202201105842754907", null));
     }
 
     @Test

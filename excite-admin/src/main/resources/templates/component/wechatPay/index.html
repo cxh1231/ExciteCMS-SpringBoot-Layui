@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>微信支付演示</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title">
+                <li>支付配置</li>
+                <li class="layui-this">扫码支付演示</li>
+                <li>交易查询</li>
+                <li>退款演示</li>
+            </ul>
+            <div class="layui-tab-content">
+                <!-- 支付配置 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>微信支付信息配置</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">APPID</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="appId" value="wx112******ad84e2" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">设置微信公众号或者小程序等的appid</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商户号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="mchId" value="153*****91" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">请填写微信支付商户号</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">APIv2密钥</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="mchKey" value="abcdefgh****************abcdefgh" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">设置APIv2密钥(微信支付商户密钥</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">APIv3密钥</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="apiV3Key" value="abcdefgh****************abcdefgh" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">APIv3密钥(微信支付商户密钥</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">cert.p12</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="cert2" value="E:\微信支付\Cert\apiclient_cert.p12" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">apiclient_cert.p12证书文件的绝对路径</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">key.pem</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="key" value="E:\微信支付\Cert\apiclient_key.pem" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">apiclient_key.pem证书文件的绝对路径</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">cert.pem</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="cert" value="E:\微信支付\Cert\apiclient_cert.pem" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">apiclient_cert.pem证书文件绝对路径</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">通知地址</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="notifyUrl" value="https://dev.zxdmy.com/component/wechat/pay/notify" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">必须为外网可访问的url，不能携带参数。公网域名必须为https</div>
+                            </div>
+
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-wechat-save">立即保存</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 扫码支付演示 -->
+                <div class="layui-tab-item layui-show">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>微信扫码支付演示</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="title" autocomplete="off" required value="测试商品名称" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商品名称</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品金额</label>
+                                <div class="layui-input-inline">
+                                    <input type="number" name="price" autocomplete="off" required value="0.01" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付金额</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-wechat-pay">提交支付</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-main">
+                        <div id="qrcode"></div>
+                        <br>
+                        <div id="outTradeNo" style="font-size: 16px"></div>
+                    </div>
+                </div>
+                <!-- 交易查询 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>微信支付结果查询</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商户单号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="outTradeNo" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商户单号</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-wechat-query">立即查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 退款演示 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>微信支付退款操作</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商户单号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="outTradeNo" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商户单号</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">退款金额</label>
+                                <div class="layui-input-inline">
+                                    <input type="number" name="amount" autocomplete="off" required value="0.01" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写退款金额，不能大于实际支付金额</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-wechat-refund">立即退款</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/qrcode/qrcode.min.js" charset="utf-8"></script>
+<script>
+    layui.use(['table'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            laydate = layui.laydate,
+            table = layui.table;
+
+        let qrcode = new QRCode("qrcode");
+
+        //监听提交
+        form.on('submit(form-wechat-pay)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/wechatPay/pay", data.field, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    qrcode.clear()
+                    qrcode.makeCode(data.qrcode)
+                    $("#outTradeNo").html(
+                        "微信扫码体验支付 <br><br> 商户单号：<b style='color: red'>" + data.outTradeNo +
+                        "</b><br><br>注意：支付成功后，不会有任何提示，请通过商户单号，使用【交易查询】功能查询支付结果！（主要是懒得写轮询了.....）")
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+                layer.closeAll('loading');
+            });
+            return false;
+        });
+        // 查询
+        form.on('submit(form-wechat-query)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/wechatPay/query", data.field, function (data) {
+                layer.closeAll('loading');
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1});
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+
+            });
+            return false;
+        });
+        // 退款
+        form.on('submit(form-wechat-refund)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/wechatPay/refund", data.field, function (data) {
+                layer.closeAll('loading');
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1});
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+
+            });
+            return false;
+        });
+        // 保存
+        form.on('submit(form-wechat-save)', function (data) {
+            console.log(JSON.stringify(data.field))
+            // layer.load();
+            // $.post("/component/wechatPay/refund", data.field, function (data) {
+            //     layer.closeAll('loading');
+            //     // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+            //     if (data.code === 200) {
+            //         layer.alert(data.msg, {offset: 't', icon: 1});
+            //     } else {
+            //         layer.alert(data.msg, {offset: 't', icon: 2});
+            //     }
+            //
+            // });
+            layer.msg("没写...")
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>支付宝支付演示</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta http-equiv="Access-Control-Allow-Origin" content="*">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-tab layui-tab-brief" lay-filter="docDemoTabBrief">
+            <ul class="layui-tab-title">
+                <li>支付配置</li>
+                <li class="layui-this">扫码支付演示</li>
+                <li>交易查询</li>
+                <li>退款演示</li>
+            </ul>
+            <div class="layui-tab-content">
+                <!-- 支付配置 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>基本信息配置（必填）</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">APPID</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="appId" value="20210058" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">设置支付宝应用的appid</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">APPID</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="appName" value="沙箱测试应用" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">设置支付宝应用的名称</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">应用私钥</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="mchId" value="MIIEvAUpFY8wf6zJVf22u2kNomfr6*****" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付宝应用私钥（Java语言）</div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>公钥模式（与证书模式二选一）</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">支付宝公钥</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="dssd" value="MIIEvAUpFY8wf6zJVf22u2kNomfr6*****" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付宝公钥</div>
+                            </div>
+
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>证书模式（与公钥模式二选一）</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">应用公钥证书</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="mchKey" value="E:\支付宝支付\appCertPublicKey_20210*****8.crt" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付宝的应用公钥证书文件路径</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">支付宝公钥证书</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="apiV3Key" value="E:\支付宝支付\alipayCertPublicKey_RSA2.crt" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付宝公钥证书文件路径</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">支付宝根证书</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="cert2" value="E:\支付宝支付\alipayRootCert.crt" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付宝根证书文件路径</div>
+                            </div>
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>其他信息配置</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">AES密钥</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="key" value="cAikHtKWeT***vw==" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">AES密钥（接口内容加密方式）</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">通知地址</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="notifyUrl" value="https://dev.zxdmy.com/component/alipay/pay/notify" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">必须为外网可访问的url，不能携带参数。公网域名必须为https</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">支付宝网关域名</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="notifyUrl" value="openapi.alipay.com" autocomplete="off" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">证书模式填写：openapi.alipay.com 沙箱环境填写：openapi.alipaydev.com</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-alipay-save">立即保存</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!-- 扫码支付演示 -->
+                <div class="layui-tab-item layui-show">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>支付宝支付演示</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="title" autocomplete="off" required value="测试商品名称" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商品名称</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商品金额</label>
+                                <div class="layui-input-inline">
+                                    <input type="number" name="price" autocomplete="off" required value="0.01" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写支付金额</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-alipay-pay">提交支付</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-main">
+                        <div id="qrcode"></div>
+                        <br>
+                        <div id="outTradeNo" style="font-size: 16px"></div>
+                    </div>
+                </div>
+                <!-- 交易查询 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>交易结果查询</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商户单号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="outTradeNo" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商户单号</div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-alipay-query">立即查询</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-main">
+                        <div>商户单号在哪里？① 【扫码支付演示】页面有显示 ② 支付宝订单页面有显示</div>
+                    </div>
+                </div>
+                <!-- 退款演示 -->
+                <div class="layui-tab-item">
+                    <div class="layui-main">
+                        <!-- 表单 -->
+                        <form class="layui-form" action="">
+                            <fieldset class="layui-elem-field layui-field-title">
+                                <legend>退款操作</legend>
+                            </fieldset>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">商户单号</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="outTradeNo" autocomplete="off" required class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">输入商户单号</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">退款金额</label>
+                                <div class="layui-input-inline">
+                                    <input type="number" name="amount" autocomplete="off" required value="0.01" class="layui-input">
+                                </div>
+                                <div class="layui-form-mid layui-word-aux">填写退款金额，不能大于实际支付金额</div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button type="submit" class="layui-btn" lay-submit="#" lay-filter="form-alipay-refund">立即退款</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-main">
+                        <div>商户单号在哪里？① 【扫码支付演示】页面有显示 ② 支付宝订单页面有显示</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/qrcode/qrcode.min.js" charset="utf-8"></script>
+<script>
+    layui.use(['table'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            laydate = layui.laydate,
+            table = layui.table;
+
+        let qrcode = new QRCode("qrcode");
+
+        //监听提交
+        form.on('submit(form-alipay-pay)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/alipay/pay", data.field, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    qrcode.clear()
+                    qrcode.makeCode(data.qrcode)
+                    $("#outTradeNo").html(
+                        "支付宝扫码体验支付 <br><br> 商户单号：<b style='color: red'>" + data.outTradeNo +
+                        "</b><br><br>注意：支付成功后，不会有任何提示，请通过商户单号，使用【交易查询】功能查询支付结果！（主要是懒得写轮询了.....）")
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+                layer.closeAll('loading');
+            });
+            return false;
+        });
+        // 查询
+        form.on('submit(form-alipay-query)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/alipay/query", data.field, function (data) {
+                layer.closeAll('loading');
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1});
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+
+            });
+            return false;
+        });
+        // 退款
+        form.on('submit(form-alipay-refund)', function (data) {
+            console.log(JSON.stringify(data.field))
+            layer.load();
+            $.post("/component/alipay/refund", data.field, function (data) {
+                layer.closeAll('loading');
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1});
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+
+            });
+            return false;
+        });
+        // 保存
+        form.on('submit(form-alipay-save)', function (data) {
+            console.log(JSON.stringify(data.field))
+            // layer.load();
+            // $.post("/component/alipayPay/refund", data.field, function (data) {
+            //     layer.closeAll('loading');
+            //     // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+            //     if (data.code === 200) {
+            //         layer.alert(data.msg, {offset: 't', icon: 1});
+            //     } else {
+            //         layer.alert(data.msg, {offset: 't', icon: 2});
+            //     }
+            //
+            // });
+            layer.msg("没写...")
+            return false;
+        });
+    });
+</script>
+</body>
+</html>

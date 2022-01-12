@@ -91,7 +91,7 @@ public class AlipayService {
      * @param totalAmount 总金额（单位：元），实例：12.34
      * @param returnUrl   支付成功后跳转页面（只针对网站支付有效）
      * @param quitUrl     支付取消跳转页面（只针对手机网站支付有效）
-     * @return 返回结果：
+     * @return 返回结果：当面付为二维码链接，其他均为网站Body代码
      */
     public String pay(String confKey, String payType, String subject, String outTradeNo, String totalAmount, String returnUrl, String quitUrl) {
         // 必填信息不能为空
@@ -156,7 +156,7 @@ public class AlipayService {
      * @param confKey    可选：支付宝配置信息的KEY。如果加载默认的KEY，输入null
      * @param tradeNo    特殊可选：支付宝交易号（订单号）
      * @param outTradeNo 特殊可选：商家订单号
-     * @return 查询成功：{ Y，支付宝交易号，商家订单号，交易状态，订单金额，买家ID，买家支付宝账号 } <br> 查询失败：{ E，错误代码，错误描述 }
+     * @return 查询成功：{ 0:Y，1:支付宝交易号，2:商家订单号，3:交易状态，4:订单金额，5:买家ID，6:买家支付宝账号 } <br> 查询失败：{ E，错误代码，错误描述 }
      * @apiNote tradeNo 和 outTradeNo 不能同时为空。同时存在优先取 tradeNo。
      */
     public String[] queryPay(String confKey, String tradeNo, String outTradeNo) {
@@ -197,7 +197,9 @@ public class AlipayService {
      * @param outTradeNo   特殊可选：商户订单号
      * @param refundAmount 必填：退款金额
      * @param reason       可选：退款原因
-     * @return 本次请求退款成功：{ Y，支付宝交易号，商家订单号，退款请求号，总退款金额 } <br> 历史请求退款成功：{ N，支付宝交易号，商家订单号，退款请求号，退款金额 } <br> 退款发生错误：{ E，错误代码，错误描述 }
+     * @return 本次请求退款成功：{ 0:Y，1:支付宝交易号，2:商家订单号，3:退款请求号，4:总退款金额 } <br>
+     * 历史请求退款成功：{ 0:N，1:支付宝交易号，2:商家订单号，3:退款请求号，4:退款金额 } <br>
+     * 退款发生错误：{ 0:E，1:错误代码，2:错误描述 }
      * @apiNote tradeNo 和 outTradeNo 不能同时为空。同时存在优先取 tradeNo。
      */
     public String[] refund(String confKey, String tradeNo, String outTradeNo, String refundAmount, String reason) {
