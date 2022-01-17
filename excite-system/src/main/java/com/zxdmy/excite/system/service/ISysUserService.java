@@ -31,7 +31,7 @@ public interface ISysUserService extends IService<SysUser> {
      * @param size     当前页大小
      * @param username 检索用户名
      * @param account  检索邮箱/手机号
-     * @return Page
+     * @return 用户页面信息
      */
     public Page<SysUser> getPage(Integer current, Integer size, String username, String account);
 
@@ -43,4 +43,12 @@ public interface ISysUserService extends IService<SysUser> {
      * @return 修改的行数 >0：成功 | <=0：失败
      */
     public int save(SysUser user, Integer[] roleIds);
+
+    /**
+     * 接口：根据ID删除用户
+     *
+     * @param userId 用户ID
+     * @return 删除结果：>0 表示成功
+     */
+    int deleteUserById(Integer userId);
 }

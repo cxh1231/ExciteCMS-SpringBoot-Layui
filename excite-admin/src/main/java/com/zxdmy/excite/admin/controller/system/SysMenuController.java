@@ -1,5 +1,6 @@
 package com.zxdmy.excite.admin.controller.system;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.framework.aop.AnnotationSaveReLog;
@@ -27,9 +28,7 @@ public class SysMenuController extends BaseController {
     private ISysMenuService menuService;
 
     /**
-     * 菜单管理 列表页面
-     *
-     * @return 菜单管理页面
+     * @return 页面：【菜单管理】页面入口
      */
     @RequestMapping("index")
     public String index() {
@@ -37,9 +36,7 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 菜单管理 添加菜单页
-     *
-     * @return 添加菜单页面
+     * @return 页面：【菜单管理-添加菜单】页面入口
      */
     @RequestMapping("goAdd")
     public String goAdd() {
@@ -47,35 +44,39 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 菜单管理 编辑页
+     * 页面：【菜单管理-编辑菜单】页面入口
      *
      * @param id  菜单ID
      * @param map Map
-     * @return 菜单编辑页面
+     * @return 【菜单管理-编辑菜单】页面入口
      */
     @RequestMapping("goEdit/{id}")
     public String goEdit(@PathVariable String id, ModelMap map) {
         try {
+            // 尝试获取菜单信息，并返回前端
             SysMenu menu = menuService.getMenu(Integer.parseInt(id));
             if (null != menu) {
+                // 此处是为了适应前端的图标选择器，将"fa "截掉
                 if ("".equals(menu.getIcon()) && null != menu.getIcon()) {
                     menu.setIcon(menu.getIcon().substring(3));
                 }
                 map.put("menu", menu);
+                return "system/menu/edit";
             } else {
                 return "error/404";
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            // 发生异常，一般就是数字转换出错
+            System.err.println(e.getMessage());
+            return "error/500";
         }
-        return "system/menu/edit";
     }
 
     /**
-     * 菜单管理接口：添加单个菜单
+     * 接口功能：菜单管理-添加菜单 接口
      *
-     * @param menu 菜单实体
-     * @return 结果
+     * @param menu 菜单信息
+     * @return 菜单添加结果
      */
     @PostMapping("/add")
     @ResponseBody
@@ -89,10 +90,10 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 根据ID获取一个菜单
+     * 接口功能：根据菜单ID查询菜单并返回结果
      *
      * @param id 菜单ID
-     * @return 结果
+     * @return 查询结果
      */
     @GetMapping("/get/{id}")
     @ResponseBody
@@ -104,60 +105,39 @@ public class SysMenuController extends BaseController {
             }
             return error(400, "获取菜单失败");
         } catch (Exception e) {
-            return error(400, "error：" + e.getMessage());
-        }
-    }
-
-
-    /**
-     * 根据ID获取一个菜单
-     *
-     * @param roleId 菜单ID
-     * @return 结果
-     */
-    @GetMapping("/listForRoleEdit/{roleId}")
-    @ResponseBody
-    public BaseResult getMenuListForRoleEdit(@PathVariable String roleId) {
-        try {
-            List<SysMenu> menus = menuService.getMenuListForRoleEdit(Integer.parseInt(roleId));
-            if (null != menus) {
-                return success("获取菜单成功", menus);
-            }
-            return error(400, "获取菜单失败");
-        } catch (Exception e) {
-            return error(400, "error：" + e.getMessage());
+            return error(400, "发生错误：" + e.getMessage());
         }
     }
 
     /**
-     * 获取菜单列表
+     * 接口功能：查询菜单列表，并组合后台首页的其他信息
      *
-     * @return 菜单/权限列表
+     * @return 菜单列表，以及后台标题等信息
      */
     @GetMapping("/indexList")
     @ResponseBody
     public BaseResult getMenuListIndex() {
-
-        List<SysMenu> menus = menuService.getMenuList(false);
+        List<SysMenu> menus = menuService.getMenuListByUserId(StpUtil.getLoginIdAsInt(),true);
         if (null != menus) {
             // 如果是【tree】，则需要将菜单初始化成树状结构
             menus = this.initMenu(menus);
+            // 首页信息
             HashMap<String, String> map = new HashMap<>();
             map.put("title", "首页");
             map.put("href", "/system/welcome");
+            // logo信息
             HashMap<String, String> map2 = new HashMap<>();
             map2.put("title", "ExciteCMS");
             map2.put("image", "/images/logo.png");
             map2.put("href", "/system/index");
             // 转换成相应的格式
             return success("获取菜单成功").put("homeInfo", map).put("logoInfo", map2).put("menuInfo", menus);
-
         }
         return error(400, "获取菜单失败");
     }
 
     /**
-     * 获取菜单列表
+     * 接口功能：根据类型获取菜单列表
      *
      * @param type all:查询全部数据 | menu:查询除了按钮的全部数据 | tree:查询树状菜单（不含按钮）
      * @return 菜单/权限列表
@@ -180,40 +160,64 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 根据角色ID获取菜单/权限
+     * 接口功能：获取菜单列表，其中该角色拥有的菜单的checkArr字段为"1"
+     *
+     * @param roleId 角色ID。0表示获取所有的状态正常的菜单
+     * @return 全部角色列表，其中指定角色拥有的菜单的checkArr字段为"1"
+     */
+    @GetMapping("/listForRole/{roleId}")
+    @ResponseBody
+    public BaseResult getMenuListForRole(@PathVariable String roleId) {
+        try {
+            List<SysMenu> menus = menuService.getMenuListForRole(Integer.parseInt(roleId));
+            if (null != menus) {
+                return success("获取菜单列表成功", menus);
+            }
+            return error(400, "获取菜单失败");
+        } catch (Exception e) {
+            return error(400, "发生错误：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 接口功能：根据角色ID获取菜单/权限
      *
      * @param roleId 角色ID
-     * @return 菜单/权限列表
+     * @return 该角色具有的菜单/权限列表
      */
     @GetMapping("/listByRoleId/{roleId}")
     @ResponseBody
     public BaseResult getMenuListByRoleId(@PathVariable String roleId) {
         try {
             List<SysMenu> menus = menuService.getMenuListByRoleId(Integer.parseInt(roleId));
-            return success("获取菜单成功", menus, menus.size());
+            return success("角色[" + roleId + "]拥有的菜单获取成功！", menus, menus.size());
         } catch (Exception e) {
             return error(400, "error：" + e.getMessage());
         }
     }
 
     /**
-     * 根据用户ID获取菜单/权限
+     * 接口功能：根据用户ID获取菜单/权限
      *
-     * @return 结果
+     * @param userId 用户ID
+     * @return 该用户具有的菜单/权限列表
      */
-    @GetMapping("/listByUserId/")
+    @GetMapping("/listByUserId/{userId}")
     @ResponseBody
-    public BaseResult getMenuListByUserId() {
-
-
-        return error(400, "获取菜单失败");
+    public BaseResult getMenuListByUserId(@PathVariable String userId) {
+        try {
+            List<SysMenu> menus = menuService.getMenuListByUserId(Integer.parseInt(userId),false);
+            return success("用户[" + userId + "]拥有的菜单获取成功！", menus, menus.size());
+        } catch (Exception e) {
+            return error(400, "发生错误：" + e.getMessage());
+        }
     }
 
     /**
-     * 更新菜单
+     * 接口功能：更新菜单
      *
      * @param menu 菜单实体
-     * @return 结果
+     * @return 菜单更新结果
      */
     @PostMapping("/update")
     @ResponseBody
@@ -228,17 +232,16 @@ public class SysMenuController extends BaseController {
 
 
     /**
-     * 根据ID删除一个菜单
+     * 接口功能：根据ID修改菜单状态
      *
-     * @param status  修改后的状态：0-正常 1-禁用
+     * @param status  菜单新状态：1-正常 0-禁用
      * @param menuIds 需要修改状态的菜单ID数组
-     * @return BaseResult JSON
+     * @return 菜单状态修改结果
      */
     @PostMapping("/changeStatus/{status}")
     @ResponseBody
     @AnnotationSaveReLog
     public BaseResult changeMenuStatus(@PathVariable String status, Integer[] menuIds) {
-        // System.out.println(menuIds.length);
         try {
             int[] result = menuService.changeStatus(Integer.parseInt(status), menuIds);
             if (result[0] > 0) {
@@ -251,10 +254,10 @@ public class SysMenuController extends BaseController {
     }
 
     /**
-     * 根据ID删除一个菜单
+     * 接口功能：根据ID删除菜单
      *
      * @param id 菜单ID
-     * @return BaseResult JSON
+     * @return 删除结果
      */
     @PostMapping("/remove/{id}")
     @ResponseBody
@@ -266,7 +269,7 @@ public class SysMenuController extends BaseController {
             }
             return error(400, "菜单删除失败");
         } catch (Exception e) {
-            return error(400, "error：" + e.getMessage());
+            return error(400, "发生错误：" + e.getMessage());
         }
     }
 

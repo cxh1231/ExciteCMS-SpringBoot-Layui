@@ -64,10 +64,10 @@ public interface ISysMenuService extends IService<SysMenu> {
      * 通过角色ID查询全部菜单列表
      * 使用接口：角色管理---编辑角色，用于加载当前角色已经选中的菜单权限
      *
-     * @param roleId 角色ID
+     * @param roleId 角色ID。若为0，表示不指定角色ID。
      * @return 全部菜单列表
      */
-    public List<SysMenu> getMenuListForRoleEdit(int roleId);
+    public List<SysMenu> getMenuListForRole(int roleId);
 
     /**
      * 权限管理模块使用到的获取权限列表
@@ -80,9 +80,10 @@ public interface ISysMenuService extends IService<SysMenu> {
      * 通过用户的ID获取权限列表
      *
      * @param userId 用户ID
-     * @return
+     * @param userId 用户ID     * @param isOnlyMenu 是否只获取菜单（不含按钮）
+     * @return 菜单/权限列表
      */
-    public List<SysMenu> getMenuListByUserId(Integer userId);
+    public List<SysMenu> getMenuListByUserId(Integer userId, boolean isOnlyMenu);
 
     /**
      * 通过角色的ID查询该角色拥有的菜单/权限

@@ -18,7 +18,7 @@ import java.util.List;
 public interface ISysRoleService extends IService<SysRole> {
 
     /**
-     * 添加|更新角色
+     * 接口：添加|更新角色
      *
      * @param role     角色实体，ID为空表示添加
      * @param menusIds 为当前角色添加的菜单/权限ID列表
@@ -27,7 +27,7 @@ public interface ISysRoleService extends IService<SysRole> {
     public int saveRole(SysRole role, Integer[] menusIds);
 
     /**
-     * 根据ID查询某个角色详情
+     * 接口：根据ID查询某个角色详情
      *
      * @param id 角色的ID
      * @return 角色实体
@@ -35,16 +35,25 @@ public interface ISysRoleService extends IService<SysRole> {
     public SysRole getRole(Integer id);
 
     /**
-     * 查询状态正常的角色列表
+     * 接口：查询状态正常的角色列表
      *
      * @return 角色列表
      */
     public List<SysRole> getListByUserId(Integer userId);
 
-
-    public Page<SysRole> getPage(Integer current, Integer size, String name, String permission);
     /**
-     * 修改角色状态
+     * 接口：分页查询接口列表
+     *
+     * @param current    当前页
+     * @param size       页大小
+     * @param name       检索：名称
+     * @param permission 检索：权限字符
+     * @return 结果页面
+     */
+    public Page<SysRole> getPage(Integer current, Integer size, String name, String permission);
+
+    /**
+     * 接口：修改角色状态
      *
      * @param newStatus 新状态
      * @param roleIds   角色ID列表
@@ -53,7 +62,7 @@ public interface ISysRoleService extends IService<SysRole> {
     public int[] changeStatus(Integer newStatus, Integer[] roleIds);
 
     /**
-     * 删除角色
+     * 接口：删除角色
      *
      * @param id 角色ID
      * @return 影响的行数 0-失败 | 1-成功

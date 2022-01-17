@@ -199,21 +199,28 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     @Override
-    public List<SysMenu> getMenuListForRoleEdit(int roleId) {
-        // 先获取当前角色拥有的权限
-        QueryWrapper<SysRoleMenu> wrapper = new QueryWrapper<>();
-        wrapper.eq("role_id", roleId);
-        List<Integer> roleMenuList = roleMenuMapper.selectList(wrapper).stream().map(SysRoleMenu::getMenuId).collect(Collectors.toList());
+    public List<SysMenu> getMenuListForRole(int roleId) {
         // 获取全部的菜单
-        QueryWrapper<SysMenu> wrapper2 = new QueryWrapper<>();
-        wrapper.ne("status", SystemCode.STATUS_N.getCode())
+        QueryWrapper<SysMenu> sysMenuQueryWrapper = new QueryWrapper<>();
+        sysMenuQueryWrapper.ne("status", SystemCode.STATUS_N.getCode())
                 .orderByDesc("sort");
-        List<SysMenu> menuList = menuMapper.selectList(wrapper2);
-        // 使用lambda表达式，直接在菜单列表上修改checkArr字段
-        return menuList.stream().peek(menu -> {
-            if (roleMenuList.contains(menu.getId()))
-                menu.setCheckArr("1");
-        }).collect(Collectors.toList());
+        List<SysMenu> menuList = menuMapper.selectList(sysMenuQueryWrapper);
+        // 如果为roleId=0，表示获取全部正常的菜单
+        if (0 == roleId) {
+            return menuList;
+        }
+        // 否则，获取全部菜单后，将该角色拥有的菜单的CheckArr字段标记为1
+        else {
+            // 获取当前角色拥有的权限
+            QueryWrapper<SysRoleMenu> roleMenuQueryWrapper = new QueryWrapper<>();
+            roleMenuQueryWrapper.eq("role_id", roleId);
+            List<Integer> roleMenuList = roleMenuMapper.selectList(roleMenuQueryWrapper).stream().map(SysRoleMenu::getMenuId).collect(Collectors.toList());
+            // 使用lambda表达式，直接在菜单列表上修改checkArr字段
+            return menuList.stream().peek(menu -> {
+                if (roleMenuList.contains(menu.getId()))
+                    menu.setCheckArr("1");
+            }).collect(Collectors.toList());
+        }
     }
 
     /**
@@ -238,20 +245,32 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     /**
-     * 通过用户ID查询该用户所拥有的菜单/权限
+     * 接口实现：通过用户ID查询该用户所拥有的菜单（含按钮，控制权限使用）
      *
-     * @param userId 用户ID
+     * @param userId     用户ID
+     * @param isOnlyMenu 是否只获取菜单（不含按钮）
      * @return 菜单列表
      */
     @Override
-    public List<SysMenu> getMenuListByUserId(Integer userId) {
-
-        //return menuMapper.selectMenusByUserId(userId, 0);
-        return this.getUserMenu4Redis(userId);
+    public List<SysMenu> getMenuListByUserId(Integer userId, boolean isOnlyMenu) {
+        // 如果只获取菜单列表，则从数据库查询返回
+        if (isOnlyMenu) {
+            return menuMapper.selectMenusByUserId(userId, 1);
+        } else {
+            // 先尝试从redis中读取 该用户的权限列表
+            List<SysMenu> menuList = this.getUserMenu4Redis(userId);
+            // 从redis读的不为空，则直接返回
+            if (null != menuList) {
+                return menuList;
+            } else {
+                // 则尝试从数据库读
+                return menuMapper.selectMenusByUserId(userId, 0);
+            }
+        }
     }
 
     /**
-     * 通过角色的ID查询该角色拥有的菜单/权限
+     * 接口实现：通过角色的ID查询该角色拥有的菜单/权限
      *
      * @param roleId 角色ID
      * @return 菜单/权限列表
@@ -309,8 +328,13 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         return null;
     }
 
-    // 从redis中读取：保存当前用户的权限菜单列表只redis
-    // 同时将已经保存至redis的用户集合更新
+    /**
+     * 私有方法：从redis中读取 保存当前用户的权限菜单列表至redis
+     * 同时将已经保存至redis的用户集合更新
+     *
+     * @param userId 用户ID
+     * @return 当前用户的权限列表
+     */
     private List<SysMenu> getUserMenu4Redis(Integer userId) {
         // 如果开启Redis，则从redis中读取
         if (exciteConfig.getAllowRedis()) {

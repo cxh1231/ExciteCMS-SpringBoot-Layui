@@ -51,7 +51,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     ExciteConfig exciteConfig;
 
     /**
-     * 添加|更新角色
+     * 接口实现：添加|更新角色
      *
      * @param role     角色实体，ID为空表示添加
      * @param menusIds 为当前角色添加的菜单/权限ID列表
@@ -97,12 +97,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 insertRoleMenu(role.getId(), menusIds);
             }
         }
+        // 删除缓存
         this.deleteRedisUserMenuCache(result);
         return result;
     }
 
     /**
-     * 根据ID查询某个角色详情
+     * 接口实现：根据ID查询某个角色详情
      *
      * @param id 角色的ID
      * @return 角色实体
@@ -119,8 +120,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     /**
-     * 查询状态正常的角色列表
+     * 接口实现：根据用户ID，查询状态正常的角色列表，其中该用户拥有的角色的checkArr字段为1
      *
+     * @param userId 用户的ID
      * @return 角色列表
      */
     @Override
@@ -150,6 +152,15 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         }
     }
 
+    /**
+     * 接口实现：分页查询接口列表
+     *
+     * @param current    当前页
+     * @param size       页大小
+     * @param name       检索：名称
+     * @param permission 检索：权限字符
+     * @return 结果页面
+     */
     @Override
     public Page<SysRole> getPage(Integer current, Integer size, String name, String permission) {
         current = null == current ? 1 : current;
@@ -161,7 +172,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     /**
-     * 改变角色状态
+     * 接口实现：改变角色状态
      *
      * @param newStatus 新状态
      * @param roleIds   角色ID列表
@@ -184,12 +195,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 result[0]++;
             else result[1]++;
         }
+        // 删除缓存
         this.deleteRedisUserMenuCache(result[0]);
         return result;
     }
 
     /**
-     * 通过ID删除角色
+     * 接口实现：通过ID删除角色
      *
      * @param id 角色ID
      * @return 影响的行数 0-失败 | 1-成功
@@ -201,19 +213,26 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             throw new ServiceException("角色ID不能为null");
         }
         // 当该角色已经分配给用户，则禁止删除
-        if (null != userRoleService.getListByRoleId(id)) {
-            throw new ServiceException("当前角色已分配给用户，禁止删除！");
-        }
-        // 删除角色-权限关联表中的数据
-        QueryWrapper<SysRoleMenu> wrapper1 = new QueryWrapper<>();
-        wrapper1.eq("role_id", id);
-        roleMenuService.remove(wrapper1);
+        // if (null != userRoleService.getListByRoleId(id)) {
+        //   throw new ServiceException("当前角色已分配给用户，禁止删除！");
+        // }
+        // 删除 用户-角色关联表 中的数据
+        QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
+        userRoleQueryWrapper.eq("role_id", id);
+        userRoleService.remove(userRoleQueryWrapper);
+        // 删除 角色-权限关联表 中的数据
+        QueryWrapper<SysRoleMenu> roleMenuQueryWrapper = new QueryWrapper<>();
+        roleMenuQueryWrapper.eq("role_id", id);
+        roleMenuService.remove(roleMenuQueryWrapper);
         // 删除该角色
-        return roleMapper.deleteById(id);
+        int result = roleMapper.deleteById(id);
+        // 删除缓存
+        this.deleteRedisUserMenuCache(result);
+        return result;
     }
 
     /**
-     * 将角色和菜单/权限的关联，写入关联表
+     * 私有方法：将指定角色拥有的菜单/权限，写入角色-菜单关联表
      *
      * @param roleId   角色ID
      * @param menusIds 菜单ID
@@ -234,7 +253,10 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     /**
-     * 如果角色信息有改动，则需要情况Redis里的用户权限缓存
+     * 私有方法：删除 已缓存的用户列表和权限表 的缓存（详情请见 权限缓存策略）
+     * 前提条件：result > 0 & 开启redis
+     *
+     * @param result 条件：>0 才执行
      */
     private void deleteRedisUserMenuCache(int result) {
         if (exciteConfig.getAllowRedis() && result > 0) {
@@ -248,6 +270,5 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 redisService.remove("menu:userList");
             }
         }
-
     }
 }

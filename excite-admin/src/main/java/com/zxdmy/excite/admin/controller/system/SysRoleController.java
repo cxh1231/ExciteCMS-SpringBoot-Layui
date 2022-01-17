@@ -32,9 +32,7 @@ public class SysRoleController extends BaseController {
     ISysUserRoleService userRoleService;
 
     /**
-     * 角色管理 列表页面
-     *
-     * @return
+     * @return 页面：【角色管理】页面入口
      */
     @RequestMapping("index")
     public String index() {
@@ -42,9 +40,7 @@ public class SysRoleController extends BaseController {
     }
 
     /**
-     * 添加角色 页面
-     *
-     * @return
+     * @return 页面：【角色管理-添加角色】页面入口
      */
     @RequestMapping("goAdd")
     public String goAdd() {
@@ -52,9 +48,9 @@ public class SysRoleController extends BaseController {
     }
 
     /**
-     * 编辑角色 页面
-     *
-     * @return
+     * @param id  角色ID
+     * @param map map
+     * @return 页面：【角色管理-编辑角色】页面入口
      */
     @RequestMapping("goEdit/{id}")
     public String goEdit(@PathVariable String id, ModelMap map) {
@@ -62,42 +58,44 @@ public class SysRoleController extends BaseController {
             SysRole role = roleService.getRole(Integer.parseInt(id));
             if (null != role) {
                 map.put("role", role);
+                return "system/role/edit";
             } else {
                 return "error/404";
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            // 发生异常，一般就是数字转换出错
+            System.err.println(e.getMessage());
+            return "error/500";
         }
-        return "system/role/edit";
     }
 
 
     /**
-     * 添加角色接口
+     * 接口功能：添加角色，并支持同时分配权限
      *
      * @param role    角色实体
-     * @param menuIds 该角色拥有的菜单ID，数组类型：[1,2,3,4,5,6]
-     * @return 结果
+     * @param menuIds 该角色拥有的菜单ID，数组类型：[1,2,3,4,5,6]，前端传递字符串格式：1,2,3,4
+     * @return 添加结果
      */
     @PostMapping("/add")
     @ResponseBody
     @AnnotationSaveReLog
     public BaseResult addRole(@Validated SysRole role, Integer[] menuIds) {
         try {
-            if (roleService.saveRole(null, menuIds) > 0) {
+            if (roleService.saveRole(role, menuIds) > 0) {
                 return success("菜单角色成功");
             }
             return error(400, "菜单角色失败");
         } catch (Exception e) {
-            return error(500, "error:" + e.getMessage());
+            return error(500, "发生错误:" + e.getMessage());
         }
     }
 
     /**
-     * 通过ID获取一个角色
+     * 接口功能：通过角色ID获取角色信息
      *
      * @param id 角色ID
-     * @return 结果
+     * @return 指定角色的信息
      */
     @GetMapping("/get/{id}")
     @ResponseBody
@@ -109,16 +107,19 @@ public class SysRoleController extends BaseController {
                 return success("获取角色成功", role);
             }
             return error(400, "获取角色失败");
-
         } catch (Exception e) {
-            return error(500, "error:" + e.getMessage());
+            return error(500, "发生错误:" + e.getMessage());
         }
     }
 
     /**
-     * 获取所有角色
+     * 接口功能：获取所有角色，支持条件搜索
      *
-     * @return 结果
+     * @param page       页号
+     * @param limit      当前页数目
+     * @param name       搜索字段：名称
+     * @param permission 搜索字段：权限字符
+     * @return 符合要求的角色列表
      */
     @GetMapping("/list")
     @ResponseBody
@@ -127,15 +128,15 @@ public class SysRoleController extends BaseController {
             Page<SysRole> rolePage = roleService.getPage(page, limit, name, permission);
             return success("获取角色列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
-            return error(500, "error:" + e.getMessage());
+            return error(500, "发生错误:" + e.getMessage());
         }
     }
 
     /**
-     * 获取获取所有正常的角色，为用户模块所用（添加、编辑用户）
+     * 接口功能：获取获取所有正常的角色，为用户模块所用（添加、编辑用户）
      * 其中：如果指定ID（即ID不为0），则该用户的角色列表中，已分配的角色属性中的checkArr=1
      *
-     * @param userId 用户ID，如果为0，则表示获取所有列表
+     * @param userId 用户ID。如果为0，则表示获取所有列表
      * @return JSON结果
      */
     @GetMapping("/listForUser/{userId}")
@@ -150,10 +151,10 @@ public class SysRoleController extends BaseController {
     }
 
     /**
-     * 更新角色接口
+     * 接口功能：更新角色接口
      *
      * @param role    角色实体
-     * @param menuIds 该角色拥有的菜单ID，数组类型：[1,2,3,4,5,6]
+     * @param menuIds 该角色拥有的菜单ID，数组类型：[1,2,3,4,5,6]，前端发送数据格式为字符串：1,2,3,4
      * @return 结果
      */
     @PostMapping("/update")
@@ -171,11 +172,11 @@ public class SysRoleController extends BaseController {
     }
 
     /**
-     * 更新角色状态
+     * 接口功能：更新角色状态
      *
-     * @param status  角色新状态
+     * @param status  角色新状态：1-正常 0-禁用
      * @param roleIds 角色ID列表，数组类型：[1,2,3,4,5,6]
-     * @return 结果
+     * @return 修改结果
      */
     @PostMapping("/changeStatus/{status}")
     @ResponseBody
@@ -186,14 +187,14 @@ public class SysRoleController extends BaseController {
             if (result[0] > 0) {
                 return success(result[0] + "个角色状态更新成功，" + result[1] + "个失败！");
             } else
-                return error(400, "更新角色失败，请重试");
+                return error(400, "更新角色状态失败，请重试");
         } catch (Exception e) {
-            return error(500, "error:" + e.getMessage());
+            return error(500, "发生错误:" + e.getMessage());
         }
     }
 
     /**
-     * 删除指定角色（包含该角色的权限信息，但是已经分配给用户的角色不允许删除）
+     * 接口功能：删除指定角色，包含该角色的权限信息，以及撤销分配给某些用户的角色
      *
      * @param id 角色ID
      * @return 结果

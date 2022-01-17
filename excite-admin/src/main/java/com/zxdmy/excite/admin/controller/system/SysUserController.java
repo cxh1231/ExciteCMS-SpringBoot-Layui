@@ -54,7 +54,7 @@ public class SysUserController extends BaseController {
     private ExciteConfig exciteConfig;
 
     /**
-     * 用户管理 - 列表页面
+     * 访问页面：用户管理 - 列表页面
      *
      * @return 跳转至列表页面
      */
@@ -64,7 +64,7 @@ public class SysUserController extends BaseController {
     }
 
     /**
-     * 用户管理 - 添加用户页面
+     * 访问页面：用户管理 - 添加用户页面
      *
      * @return 跳转至添加用户页面
      */
@@ -74,7 +74,7 @@ public class SysUserController extends BaseController {
     }
 
     /**
-     * 用户管理 - 编辑用户信息页面
+     * 访问页面：用户管理 - 编辑用户信息页面
      *
      * @return 跳转至编辑用户页面
      */
@@ -84,43 +84,13 @@ public class SysUserController extends BaseController {
     }
 
     /**
-     * 用户管理 - 编辑用户信息页面
+     * 访问页面：用户管理 - 为用户分配角色页面
      *
      * @return 跳转至编辑用户页面
      */
     @RequestMapping("goAuthRole/{id}")
     public String goAuthRole(@PathVariable String id) {
         return "system/user/authRole";
-    }
-
-    /**
-     * 用户个人信息管理 - 修改用户信息
-     *
-     * @return 跳转至编辑用户页面
-     */
-    @RequestMapping("center/setting")
-    public String goSetting() {
-        return "system/userCenter/setting";
-    }
-
-    /**
-     * 用户管理 - 编辑用户信息页面
-     *
-     * @return 跳转至编辑用户页面
-     */
-    @RequestMapping("center/password")
-    public String goChangePassword() {
-        return "system/userCenter/changePassword";
-    }
-
-    /**
-     * 用户管理 - 编辑用户信息页面
-     *
-     * @return 跳转至编辑用户页面
-     */
-    @RequestMapping("goSetRole/{id}")
-    public String goSetRole(@PathVariable String id) {
-        return "system/user/setRole";
     }
 
 
@@ -267,7 +237,7 @@ public class SysUserController extends BaseController {
 
     /**
      * 接口功能：删除用户
-     * 基本逻辑：用户踢下线-->删除该用户的角色信息[用户-角色关联表]-->删除用户
+     * 基本逻辑：删除该用户的角色信息[用户-角色关联表]-->删除用户
      *
      * @param id 用户ID
      * @return JSON：成败
@@ -277,27 +247,63 @@ public class SysUserController extends BaseController {
     @ResponseBody
     @AnnotationSaveReLog
     public BaseResult delete(@PathVariable String id) {
-        // TODO 删除用户的同时，从用户-角色关联表中删除相关信息，同时把该用户踢下线，清除Redis缓存
-//        StpUtil.kickout(id);
-//
-//        if (userService.removeById(id)) {
-//            return success("用户删除成功");
-//        }
-        return error("用户删除失败");
+        try {
+            if (userService.deleteUserById(Integer.parseInt(id)) > 0) {
+                return success("用户删除成功");
+            }
+            return error("用户删除失败");
+        } catch (Exception e) {
+            return error("发生错误：" + e.getMessage());
+        }
     }
 
-    @PostMapping(value = "/setRole")
+    /**
+     * 接口功能：给指定用户分配角色
+     *
+     * @param id      用户ID
+     * @param roleIds 角色信息列表
+     * @return 分配结果
+     */
+    @PostMapping(value = "/setRole/{id}")
     @ResponseBody
-    public BaseResult setRole() {
-        return error("添加失败，请重试！");
+    public BaseResult setRole(@PathVariable String id, Integer[] roleIds) {
+        try {
+            // TODO 给指定用户分配角色
+
+            return error("添加失败，请重试！");
+        } catch (Exception e) {
+            return error("发生错误：" + e.getMessage());
+        }
+
     }
 
+    /**
+     * 接口功能：改变用户的状态
+     *
+     * @param status  新状态：1-正常 0-禁用
+     * @param userIds 用户ID列表
+     * @return 修改结果
+     */
     @PostMapping(value = "/changeStatus/{status}")
     @ResponseBody
-    public BaseResult changeStatus(@PathVariable String status) {
-        return error("添加失败，请重试！");
+    public BaseResult changeStatus(@PathVariable String status, Integer[] userIds) {
+        try {
+            // TODO 修改用户状态
+
+            return error(400, "更新用户状态，请重试");
+        } catch (Exception e) {
+            return error(500, "发生错误:" + e.getMessage());
+        }
     }
 
+    /**
+     * 接口功能：重置密码
+     *
+     * @param userId       用户ID
+     * @param newPassword  新密码
+     * @param newPassword2 新密码
+     * @return 重置结果
+     */
     @PostMapping(value = "/resetPassword")
     @ResponseBody
     @AnnotationSaveReLog
@@ -334,6 +340,48 @@ public class SysUserController extends BaseController {
         List<String> tokenList2 = StpUtil.searchTokenSessionId("", -1, 100);
         List<String> tokenList3 = StpUtil.searchSessionId("", -1, 10000);
         return success(tokenList2);
+    }
+
+    /**
+     * 访问页面：用户个人信息管理 - 修改用户信息
+     *
+     * @return 跳转至编辑用户页面
+     */
+    @RequestMapping("center/setting")
+    public String goSetting() {
+        return "system/userCenter/setting";
+    }
+
+    /**
+     * 访问页面：用户管理 - 编辑用户信息页面
+     *
+     * @return 跳转至编辑用户页面
+     */
+    @RequestMapping("center/password")
+    public String goChangePassword() {
+        return "system/userCenter/changePassword";
+    }
+
+    /**
+     * 接口功能：个人中心保存用户信息接口
+     *
+     * @return 结果
+     */
+    @PostMapping(value = "/center/saveSetting")
+    @ResponseBody
+    public BaseResult saveSetting() {
+        return error("修改失败");
+    }
+
+    /**
+     * 接口功能：个人中心修改用户密码接口
+     *
+     * @return 结果
+     */
+    @PostMapping(value = "/center/changePassword")
+    @ResponseBody
+    public BaseResult changePassword() {
+        return error("修改失败");
     }
 
     /**

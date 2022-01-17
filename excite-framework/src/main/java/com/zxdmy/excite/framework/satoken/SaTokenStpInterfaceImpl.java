@@ -28,7 +28,7 @@ public class SaTokenStpInterfaceImpl implements StpInterface {
 
     @Override
     public List<String> getPermissionList(Object userId, String userType) {
-        List<SysMenu> menuList = menuService.getMenuListByUserId(Integer.valueOf(userId.toString()));
+        List<SysMenu> menuList = menuService.getMenuListByUserId(Integer.valueOf(userId.toString()), false);
         if (null == menuList) {
             return null;
         }
