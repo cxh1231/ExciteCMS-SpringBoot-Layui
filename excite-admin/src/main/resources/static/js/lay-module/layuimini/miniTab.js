@@ -21,7 +21,7 @@ layui.define(["element", "layer", "jquery"], function (exports) {
             options.multiModule = options.multiModule || false;
             options.urlHashLocation = options.urlHashLocation || false;
             options.maxTabNum = options.maxTabNum || 20;
-            options.menuList = options.menuList || [];  // todo 后期菜单想改为不操作dom, 而是直接操作初始化传过来的数据
+            options.menuList = options.menuList || [];  //  后期菜单想改为不操作dom, 而是直接操作初始化传过来的数据
             options.homeInfo = options.homeInfo || {};
             options.listenSwichCallback = options.listenSwichCallback || function () {
             };
@@ -75,7 +75,7 @@ layui.define(["element", "layer", "jquery"], function (exports) {
          * @param isParent
          */
         delete: function (tabId, isParent) {
-            // todo 未知BUG，不知道是不是layui问题，必须先删除元素
+            // 未知BUG，不知道是不是layui问题，必须先删除元素
             $(".layuimini-tab .layui-tab-title .layui-unselect.layui-tab-bar").remove();
 
             if (isParent === true) {

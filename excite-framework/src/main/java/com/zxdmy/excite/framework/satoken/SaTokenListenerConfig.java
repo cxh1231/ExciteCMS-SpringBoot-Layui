@@ -22,7 +22,6 @@ public class SaTokenListenerConfig implements SaTokenListener {
     @Override
     public void doLogin(String loginType, Object loginId, SaLoginModel loginModel) {
         System.out.println(loginType + loginId + loginModel);
-        // TODO 登录日志保存至数据集
     }
 
     /**

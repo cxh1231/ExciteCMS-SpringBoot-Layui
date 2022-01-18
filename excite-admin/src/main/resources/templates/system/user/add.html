@@ -172,12 +172,17 @@
                 if (value.length <= 0) {
                     return '请输入用户邮箱！';
                 }
+                let pattern = /^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$/g;
+                if (!pattern.test(value)) {
+                    return '邮箱格式错误！';
+                }
             },
             // 手机号
             userPhoneVerify: function (value) {
-                // if (value.length <= 0) {
-                //     return '请输入角色显示顺序！';
-                // }
+                let pattern = /^(13[0-9]|14[5|7]|15[0-9]|18[0-9]|19[4|5])\d{8}$/g;
+                if (value.length > 0 && !pattern.test(value)) {
+                    return '手机号码格式错误！';
+                }
             },
             // 密码
             userPasswordVerify: function (value) {
@@ -189,12 +194,11 @@
 
         //监听提交
         form.on('submit(form-user-add)', function (data) {
-            // layer.alert(JSON.stringify(data.field));
             // console.log(JSON.stringify(data.field))
             // 密码加密
             let encrypt = new JSEncrypt()
             encrypt.setPublicKey(PUBLIC_KEY)
-            data.password = encrypt.encrypt(data.password)
+            data.field.password = encrypt.encrypt(data.field.password)
             // 提交角色
             $.post("/system/user/add", data.field, function (data) {
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败

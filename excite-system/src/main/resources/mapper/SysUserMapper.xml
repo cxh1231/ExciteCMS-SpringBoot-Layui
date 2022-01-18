@@ -4,26 +4,46 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.zxdmy.excite.system.entity.SysUser">
-        <id column="id" property="id" />
-        <result column="username" property="username" />
-        <result column="avatar" property="avatar" />
-        <result column="sex" property="sex" />
-        <result column="email" property="email" />
-        <result column="phone" property="phone" />
-        <result column="password" property="password" />
-        <result column="remark" property="remark" />
-        <result column="status" property="status" />
-        <result column="login_ip" property="loginIp" />
-        <result column="login_date" property="loginDate" />
-        <result column="is_delete" property="isDelete" />
-        <result column="create_time" property="createTime" />
-        <result column="update_time" property="updateTime" />
-        <result column="delete_time" property="deleteTime" />
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="avatar" property="avatar"/>
+        <result column="sex" property="sex"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="password" property="password"/>
+        <result column="remark" property="remark"/>
+        <result column="status" property="status"/>
+        <result column="login_ip" property="loginIp"/>
+        <result column="login_date" property="loginDate"/>
+        <result column="is_delete" property="isDelete"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="delete_time" property="deleteTime"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, username, avatar, sex, email, phone, password, remark, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
+        id
+        , username, avatar, sex, email, phone, password, remark, status, login_ip, login_date, is_delete, create_time, update_time, delete_time
     </sql>
 
+    <!-- 通过角色ID查询用户列表（即某个角色，分配的用户信息） -->
+    <select id="selectUsersByRoleId" parameterType="int" resultType="com.zxdmy.excite.system.entity.SysUser">
+        SELECT u.*
+        FROM sys_user_role ur,
+             sys_user u
+        WHERE ur.role_id = #{roleId}
+          AND ur.user_id = u.id
+        ORDER BY u.id
+    </select>
+
+    <!-- 通过角色ID查询不拥有此角色的用户列表 -->
+    <select id="selectUsersByRoleIdNotIn" parameterType="int" resultType="com.zxdmy.excite.system.entity.SysUser">
+        SELECT u.*
+        FROM sys_user u
+                 LEFT JOIN sys_user_role ur ON u.id = ur.user_id
+            AND ur.role_id = #{roleId}
+        WHERE ur.user_id IS NULL
+        ORDER BY u.id
+    </select>
 </mapper>

@@ -30,9 +30,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,7 +81,16 @@ public class SysUserController extends BaseController {
      * @return 跳转至编辑用户页面
      */
     @RequestMapping("goEdit/{id}")
-    public String goEdit(@PathVariable String id) {
+    public String goEdit(@PathVariable String id, ModelMap map) {
+        // 获取该用户的信息
+        SysUser user = userService.getById(id);
+        // 加载至前端
+        if (user == null) {
+            map.put("code", 404);
+            map.put("msg", "用户不存在！");
+            return "error/error";
+        }
+        map.put("user", user);
         return "system/user/edit";
     }
 
@@ -89,7 +100,16 @@ public class SysUserController extends BaseController {
      * @return 跳转至编辑用户页面
      */
     @RequestMapping("goAuthRole/{id}")
-    public String goAuthRole(@PathVariable String id) {
+    public String goAuthRole(@PathVariable String id, ModelMap map) {
+        // 获取该用户的信息
+        SysUser user = userService.getById(id);
+        // 加载至前端
+        if (user == null) {
+            map.put("code", 404);
+            map.put("msg", "用户不存在！");
+            return "error/error";
+        }
+        map.put("user", user);
         return "system/user/authRole";
     }
 
@@ -173,7 +193,6 @@ public class SysUserController extends BaseController {
     @GetMapping(value = "/list")
     @ResponseBody
     public BaseResult getUserList(Integer page, Integer limit, String username, String account) {
-        // TODO 加入功能：当前是否在线
         Page<SysUser> userPage = userService.getPage(page, limit, username, account);
         if (null != userPage) {
             return success("查询成功", userPage.getRecords(), (int) userPage.getTotal());
@@ -220,7 +239,7 @@ public class SysUserController extends BaseController {
     public BaseResult update(SysUser user) {
         // 编辑用户基本信息：用户名、头像、性别、邮箱和手机号。
         if (null != user && null != user.getId()) {
-            // 其他信息（状态、密码）不能通过此接口修改，故其为null.
+            // 其他信息（状态、密码）不能通过此接口修改，故其应为null.
             if (null == user.getStatus() && null == user.getPassword()) {
                 if (userService.save(user, null) > 0) {
                     return success("用户信息编辑成功！");
@@ -264,13 +283,14 @@ public class SysUserController extends BaseController {
      * @param roleIds 角色信息列表
      * @return 分配结果
      */
-    @PostMapping(value = "/setRole/{id}")
+    @PostMapping(value = "/setRole")
     @ResponseBody
-    public BaseResult setRole(@PathVariable String id, Integer[] roleIds) {
+    public BaseResult setRole(String id, Integer[] roleIds) {
         try {
-            // TODO 给指定用户分配角色
-
-            return error("添加失败，请重试！");
+            if (userService.setRoleForUser(Integer.parseInt(id), roleIds)) {
+                return success(200, "分配角色成功！");
+            }
+            return success("分配角色失败，请重试！");
         } catch (Exception e) {
             return error("发生错误：" + e.getMessage());
         }
@@ -288,9 +308,17 @@ public class SysUserController extends BaseController {
     @ResponseBody
     public BaseResult changeStatus(@PathVariable String status, Integer[] userIds) {
         try {
-            // TODO 修改用户状态
-
-            return error(400, "更新用户状态，请重试");
+            int[] result = userService.changeStatus(Integer.parseInt(status), userIds);
+            // 没有失败
+            if (result[0] != 0 && result[1] == 0) {
+                return success(200, "用户状态修改成功！");
+            }
+            // 有成功的
+            else if (result[0] != 0) {
+                return success(200, result[0] + "个角色状态更新成功，" + result[1] + "个失败！");
+            } else {
+                return success(500, "用户状态修改失败，请重试！");
+            }
         } catch (Exception e) {
             return error(500, "发生错误:" + e.getMessage());
         }
@@ -333,13 +361,30 @@ public class SysUserController extends BaseController {
         return error("密码重置失败，新密码不一致！");
     }
 
-    @GetMapping(value = "/token")
+    /**
+     * 接口功能：获取指定角色所分配的用户列表（拥有/不拥有此角色）
+     *
+     * @param roleId 角色ID
+     * @param have   是否用于此角色：0-不拥有 | 1-拥有
+     * @return 用户列表
+     */
+    @GetMapping("/listForRole/{have}/{roleId}")
     @ResponseBody
-    public BaseResult testToken() {
-        List<String> tokenList = StpUtil.searchTokenValue("", 0, 10);
-        List<String> tokenList2 = StpUtil.searchTokenSessionId("", -1, 100);
-        List<String> tokenList3 = StpUtil.searchSessionId("", -1, 10000);
-        return success(tokenList2);
+    public BaseResult getUserListForRole(@PathVariable("have") String have, @PathVariable("roleId") String roleId) {
+        try {
+            // 拥有 此角色
+            List<SysUser> userList;
+            if (have.equals("1")) {
+                userList = userService.getUserListByRoleId(Integer.parseInt(roleId));
+            }
+            // 不拥有 此角色
+            else {
+                userList = userService.getUserListByRoleIdNotIn(Integer.parseInt(roleId));
+            }
+            return success(200, "获取成功", userList);
+        } catch (Exception e) {
+            return error(e.getMessage());
+        }
     }
 
     /**
@@ -348,8 +393,15 @@ public class SysUserController extends BaseController {
      * @return 跳转至编辑用户页面
      */
     @RequestMapping("center/setting")
-    public String goSetting() {
-        return "system/userCenter/setting";
+    public String goSetting(ModelMap map) {
+        SysUser user = userService.getById(StpUtil.getLoginIdAsInt());
+        if (user != null) {
+            map.put("user", user);
+            return "system/userCenter/setting";
+        }
+        map.put("code", 404);
+        map.put("msg", "访问错误！");
+        return "error/error";
     }
 
     /**
@@ -359,7 +411,7 @@ public class SysUserController extends BaseController {
      */
     @RequestMapping("center/password")
     public String goChangePassword() {
-        return "system/userCenter/changePassword";
+        return "system/userCenter/password";
     }
 
     /**
@@ -369,19 +421,29 @@ public class SysUserController extends BaseController {
      */
     @PostMapping(value = "/center/saveSetting")
     @ResponseBody
-    public BaseResult saveSetting() {
-        return error("修改失败");
+    public BaseResult saveSetting(SysUser user) {
+        user.setId(StpUtil.getLoginIdAsInt());
+//        if (userService.save(user, null) > 0) {
+//            return success(200, "修改成功");
+//        }
+        return error("修改失败，此接口暂不开放！");
     }
 
     /**
      * 接口功能：个人中心修改用户密码接口
      *
-     * @return 结果
+     * @param oldPassword  旧密码
+     * @param newPassword1 新密码
+     * @param newPassword2 新密码
+     * @return 修改结果
      */
     @PostMapping(value = "/center/changePassword")
     @ResponseBody
-    public BaseResult changePassword() {
-        return error("修改失败");
+    public BaseResult changePassword(String oldPassword, String newPassword1, String newPassword2) {
+        if (!newPassword1.equals(newPassword2)) {
+            return error("新密码不一致！");
+        }
+        return error("修改失败，此接口暂不开放！");
     }
 
     /**

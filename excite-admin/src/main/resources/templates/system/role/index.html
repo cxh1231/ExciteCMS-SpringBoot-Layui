@@ -65,6 +65,7 @@
 <!--表格每行末尾的操作按钮-->
 <script type="text/html" id="tool-table-role">
     <a class="layui-btn layui-btn-xs" lay-event="role-edit">编辑</a>
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="role-showUser">授权用户</a>
     <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="role-delete">删除</a>
 </script>
 <!--引入JS文件-->
@@ -91,8 +92,8 @@
             cols: [
                 [
                     {type: "checkbox", width: 50, fixed: 'left'},
-                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true,fixed: 'left'},
-                    {field: 'name', title: '角色名称', align: 'center', width: 150,fixed: 'left'},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true, fixed: 'left'},
+                    {field: 'name', title: '角色名称', align: 'center', width: 150, fixed: 'left'},
                     {field: 'permission', title: '权限字符', width: 150, align: 'center'},
                     {field: 'sort', title: '显示顺序', align: 'center', sort: true},
                     {
@@ -108,7 +109,7 @@
                     },
                     {field: 'remark', title: '备注', align: 'center'},
                     {field: 'updateTime', title: '更新时间', align: 'center'},
-                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-role',width: 150}
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-role', width: 200}
                 ]
             ],
             page: true
@@ -254,6 +255,19 @@
                     });
                     parent.layer.iframeAuto(role_edit_index);
                     break;
+                case "role-showUser":
+                    let user_list_index = layer.open({
+                        title: '角色已授权用户列表',
+                        type: 2,
+                        shade: 0.2,
+                        maxmin: true,
+                        shadeClose: false,
+                        area: ['700px', '500px'],
+                        content: '/system/role/goShowUser/' + data.id
+                    });
+                    layer.full(user_list_index);
+                    parent.layer.iframeAuto(user_list_index);
+                    break;
                 // 【删除】按钮
                 case "role-delete":
                     // TODO 执行删除的POST操作
@@ -270,7 +284,6 @@
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "1" : "0"
             let roleId = data.value;
-            // console.log(roleId)
             layer.confirm('确认要 ' + actionText + ' 此角色？', {
                 title: false,
                 btn: ['确定', '取消'],
@@ -282,8 +295,6 @@
                             layer.msg(data2.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
                             form.render();
-                            // 更新表格
-                            table_role.update(roleId, {status: isChecked ? 0 : 1});
                         } else {
                             layer.msg(data2.msg, {time: 3000, icon: 2});
                             data.elem.checked = !isChecked;

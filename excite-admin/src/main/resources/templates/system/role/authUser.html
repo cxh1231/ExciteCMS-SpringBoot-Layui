@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>授权角色</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-form layuimini-form">
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend style="font-size: 17px">角色信息</legend>
+            </fieldset>
+            <!-- 【用户名称】和【性别】 -->
+            <div class="layui-form-item">
+                <!--【ID】-->
+                <div class="layui-inline">
+                    <label class="layui-form-label" style="width: 70px">ID</label>
+                    <div class="layui-input-inline" style="width: 100px">
+                        <input type="text" name="id" th:value="${role.id}" value="101" autocomplete="off" disabled class="layui-input">
+                    </div>
+                </div>
+                <!-- 【用户名称】 -->
+                <div class="layui-inline">
+                    <label class="layui-form-label">角色名称</label>
+                    <div class="layui-input-inline" style="width: 200px">
+                        <input type="text" name="username" th:value="${role.name}" value="管理员" autocomplete="off" disabled class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <fieldset class="layui-elem-field layui-field-title">
+                <legend style="font-size: 17px">已授权用户列表</legend>
+            </fieldset>
+            <!-- 表格 -->
+            <table class="layui-hide" id="table-system-userForRole" lay-filter="table-system-userForRole"></table>
+            <!-- 放在底部按钮 -->
+            <div class="layer-footer">
+                <button type="button" class="layui-btn" lay-submit lay-filter="form-role-cancelAuth">取消授权</button>
+                <button type="button" class="layui-btn layui-btn-normal" lay-submit lay-filter="form-role-showUser">添加用户</button>
+                <button type="button" class="layui-btn layui-btn-danger" lay-submit lay-filter="form-role-close">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 点击【添加用户】按钮有的弹窗内容 -->
+<div id="dom_role_addUser" style="display: none;">
+    <!-- 表格 -->
+    <table class="layui-hide" id="table-system-user" lay-filter="table-system-user"></table>
+    <br>
+    <!-- 放在底部按钮 -->
+    <div class="layer-footer">
+        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" lay-submit lay-filter="form-role-authUser">立即授权</button>
+    </div>
+</div>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'table'], function () {
+        let $ = layui.jquery;
+        let form = layui.form,
+            layer = layui.layer,
+            table = layui.table;
+
+        // 已授权的用户列表
+        let table_role_user = table.render({
+            elem: '#table-system-userForRole',
+            url: '/system/user/listForRole/1/' + [[${role.id}]],
+            response: {
+                statusCode: 200,
+            },
+            height: 'full-260', //高度最大化减去差值
+            title: '用户数据表',
+            cols: [
+                [
+                    {type: "checkbox", width: 50},
+                    {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                    {field: 'username', title: '用户名称', align: 'center'},
+                    {field: 'email', title: '邮箱', align: 'center'},
+                    {field: 'phone', title: '手机', align: 'center'},
+                    {
+                        field: 'status', title: '状态', align: 'center', width: 95, templet: function (d) {
+                            let checkStr = "";
+                            if (d.status === 1) {
+                                checkStr += " checked "
+                            } else if (d.status === 2) {
+                                checkStr += " checked disabled "
+                            }
+                            return '<input type="checkbox" lay-filter="check-user-status" value="' + d.id + '" lay-skin="switch" lay-text="正常|禁用" ' + checkStr + '/>'
+                        }
+                    },
+                    {field: 'remark', title: '备注', align: 'center'},
+                ]
+            ],
+        });
+
+        // 【添加用户】响应按钮事件
+        form.on('submit(form-role-showUser)', function (data) {
+            layer.open({
+                type: 1,
+                shade: 0.2,
+                title: '授权用户 - 请勾选需要授权的用户',
+                maxmin: true,
+                skin: 'layui-layer-prompt',
+                shadeClose: false,
+                area: ['700px', '500px'],
+                content: $("#dom_role_addUser"),
+                // 窗口加载完毕，加载载入表格
+                success: function (layero, index) {
+                    table.render({
+                        elem: '#table-system-user',
+                        url: '/system/user/listForRole/0/' + [[${role.id}]],
+                        response: {
+                            statusCode: 200,
+                        },
+                        height: 'full-390', //高度最大化减去差值
+                        title: '用户数据表',
+                        cols: [
+                            [
+                                {type: "checkbox", width: 50},
+                                {field: 'id', title: 'ID', width: 80, align: 'center', sort: true},
+                                {field: 'username', title: '用户名称', align: 'center'},
+                                {field: 'email', title: '邮箱', align: 'center'},
+                                {field: 'phone', title: '手机', align: 'center'},
+                                {field: 'remark', title: '备注', align: 'center'},
+                            ]
+                        ],
+                    });
+                },
+                // 窗口关闭：刷新已授权的列表
+                end: function () {
+                    table_role_user.reload();
+                }
+            });
+            return false;
+        });
+
+        // 【取消授权】按钮响应事件
+        form.on('submit(form-role-cancelAuth)', function (data) {
+            // 获取全部选中的角色
+            let checkUserList = table.checkStatus('table-system-userForRole').data
+            // 如果选择为空，则不用执行
+            if (checkUserList.length === 0) {
+                layer.msg("请选择需要取消授权的用户！", {icon: 2});
+                return false;
+            }
+            // 遍历，并格式化为类似 101,102,103 的格式
+            let userIds = "";
+            for (let i = 0; i < checkUserList.length; i++) {
+                userIds += (checkUserList[i].id + ",")
+            }
+            userIds = userIds.substring(0, userIds.lastIndexOf(','));
+            // 提交角色
+            $.post("/system/role/setUser", {id: data.field.id, userIds: userIds}, function (data) {
+                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                if (data.code === 200) {
+                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
+                        // 关闭弹窗
+                        layer.close();
+                        // 先得到当前iframe层的索引
+                        let index22 = parent.layer.getFrameIndex(window.name);
+                        // 关闭当前弹窗
+                        parent.layer.close(index22);
+                    });
+                } else {
+                    layer.alert(data.msg, {offset: 't', icon: 2});
+                }
+            });
+            return false;
+        });
+
+        // 【关闭弹窗】按钮响应事件
+        form.on('submit(form-role-close)', function (data) {
+            //获取窗口索引
+            let index = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(index);
+        });
+
+        // 【切换状态】操作：修改用户状态（用户行的switch开关切换事件）
+        form.on('switch(check-user-status)', function (data) {
+            // isChecked是操作之后的值
+            let isChecked = data.elem.checked;
+            let actionText = isChecked ? "开启" : "禁用"
+            let newStatus = isChecked ? "1" : "0"
+            let userId = data.value;
+            layer.confirm('确认要 ' + actionText + ' ID为 ' + data.value + ' 的用户吗？', {
+                title: false,
+                btn: ['确定', '取消'],
+                // 按钮【按钮1】的回调
+                btn1: function (index) {
+                    $.post("/system/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
+                        // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                        if (d.code === 200) {
+                            layer.msg(d.msg, {time: 3000, icon: 1});
+                            data.elem.checked = isChecked;
+                            form.render();
+                        } else {
+                            layer.msg(d.msg, {time: 3000, icon: 2});
+                            data.elem.checked = !isChecked;
+                            form.render();
+                        }
+                    });
+                },
+                // 按钮【按钮二】的回调
+                btn2: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                },
+                // 按钮【X】的回调
+                cancel: function (index) {
+                    data.elem.checked = !isChecked;
+                    form.render();
+                    layer.close(index);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

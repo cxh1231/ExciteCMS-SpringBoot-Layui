@@ -24,14 +24,14 @@
                 <div class="layui-inline">
                     <label class="layui-form-label" style="width: 70px">ID</label>
                     <div class="layui-input-inline" style="width: 100px">
-                        <input type="text" name="id" value="1000" autocomplete="off" disabled class="layui-input">
+                        <input type="text" name="id" th:value="${user.id}" value="1000" autocomplete="off" disabled class="layui-input">
                     </div>
                 </div>
                 <!-- 【用户名称】 -->
                 <div class="layui-inline">
                     <label class="layui-form-label">用户名称</label>
                     <div class="layui-input-inline" style="width: 200px">
-                        <input type="text" name="username" value="张三" autocomplete="off" disabled class="layui-input">
+                        <input type="text" name="username" th:value="${user.username}" value="张三" autocomplete="off" disabled class="layui-input">
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
             <table class="layui-hide" id="table-system-roleForUser" lay-filter="table-system-roleForUser"></table>
             <!-- 放在底部按钮 -->
             <div class="layer-footer" style="z-index: 10; position: fixed; text-align: right; margin-left: -9%; bottom: 0; width:100%; height:50px">
-                <button type="button" class="layui-btn" lay-submit="" lay-filter="formDemo">保存</button>
+                <button type="button" class="layui-btn" lay-submit="" lay-filter="form-user-auth">保存</button>
             </div>
         </form>
     </div>
@@ -60,7 +60,7 @@
 
         table.render({
             elem: '#table-system-roleForUser',
-            url: '/system/role/listForUser/10000',
+            url: '/system/role/listForUser/' + [[${user.id}]],
             response: {
                 statusCode: 200,
             },
@@ -75,34 +75,18 @@
             ],
         });
 
-        //自定义验证规则
-        form.verify({
-            // 角色名称
-            roleNameVerify: function (value) {
-                if (value.length <= 0) {
-                    return '请输入角色名称！';
-                }
-            },
-            // 角色权限标识
-            rolePermissionVerify: function (value) {
-                if (value.length <= 0) {
-                    return '请输入角色权限标识！';
-                }
-            },
-            // 角色排序
-            roleSortVerify: function (value) {
-                if (value.length <= 0) {
-                    return '请输入角色显示顺序！';
-                }
-            },
-        });
-
-        //监听提交
-        form.on('submit(form-menu-add)', function (data) {
-            // layer.alert(JSON.stringify(data.field));
-            console.log(JSON.stringify(data.field))
+        // 【保存】按钮响应事件
+        form.on('submit(form-user-auth)', function (data) {
+            // console.log(JSON.stringify(data.field))
+            // 获取全部选中的角色，遍历，并格式化为类似 101,102,103 的格式
+            let checkRoleList = table.checkStatus('table-system-roleForUser').data
+            let roleIds = "";
+            for (let i = 0; i < checkRoleList.length; i++) {
+                roleIds += (checkRoleList[i].id + ",")
+            }
+            roleIds = roleIds.substring(0, roleIds.lastIndexOf(','));
             // 提交角色
-            $.post("/system/role/update", data.field, function (data) {
+            $.post("/system/user/setRole", {id: data.field.id, roleIds: roleIds}, function (data) {
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
                     layer.alert(data.msg, {offset: 't', icon: 1}, function () {

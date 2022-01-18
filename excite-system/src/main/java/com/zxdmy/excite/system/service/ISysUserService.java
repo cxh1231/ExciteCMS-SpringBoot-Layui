@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.zxdmy.excite.system.entity.SysUser;
 
+import java.util.List;
+
 /**
  * <p>
  * 系统用户表 服务类
@@ -45,10 +47,44 @@ public interface ISysUserService extends IService<SysUser> {
     public int save(SysUser user, Integer[] roleIds);
 
     /**
+     * 接口：修改用户状态
+     *
+     * @param newStatus 新状态
+     * @param userIds   用户ID列表
+     * @return 修改结果数组 0:成功个数 1:失败个数
+     */
+    public int[] changeStatus(Integer newStatus, Integer[] userIds);
+
+    /**
+     * 接口：给用户分配角色
+     *
+     * @param userId  用户ID
+     * @param roleIds 角色ID数组
+     * @return 修改结果数组 0:分配个数 1:失败个数
+     */
+    public boolean setRoleForUser(Integer userId, Integer[] roleIds);
+
+    /**
      * 接口：根据ID删除用户
      *
      * @param userId 用户ID
      * @return 删除结果：>0 表示成功
      */
     int deleteUserById(Integer userId);
+
+    /**
+     * 接口：通过角色ID查询用户列表
+     *
+     * @param roleId 角色ID
+     * @return 用户列表
+     */
+    List<SysUser> getUserListByRoleId(Integer roleId);
+
+    /**
+     * 接口：通过角色ID查询不包含此角色的用户列表
+     *
+     * @param roleId 角色ID
+     * @return 不包含此角色的用户列表
+     */
+    List<SysUser> getUserListByRoleIdNotIn(Integer roleId);
 }

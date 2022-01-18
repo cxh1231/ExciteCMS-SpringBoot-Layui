@@ -60,7 +60,9 @@ public class SysRoleController extends BaseController {
                 map.put("role", role);
                 return "system/role/edit";
             } else {
-                return "error/404";
+                map.put("code", 500);
+                map.put("msg", "可能原因：该角色禁止编辑，该角色已被禁用！");
+                return "error/error";
             }
         } catch (Exception e) {
             // 发生异常，一般就是数字转换出错
@@ -69,6 +71,24 @@ public class SysRoleController extends BaseController {
         }
     }
 
+    @RequestMapping("goShowUser/{id}")
+    public String showUser(@PathVariable String id, ModelMap map) {
+        try {
+            SysRole role = roleService.getRole(Integer.parseInt(id));
+            if (null == role) {
+                map.put("code", 500);
+                map.put("msg", "可能原因：该角色禁止编辑，该角色已被禁用！");
+                return "error/error";
+            } else {
+                map.put("role", role);
+                return "system/role/authUser";
+            }
+        } catch (Exception e) {
+            // 发生异常，一般就是数字转换出错
+            System.err.println(e.getMessage());
+            return "error/500";
+        }
+    }
 
     /**
      * 接口功能：添加角色，并支持同时分配权限
