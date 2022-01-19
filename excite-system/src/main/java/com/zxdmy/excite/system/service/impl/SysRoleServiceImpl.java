@@ -232,6 +232,58 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     }
 
     /**
+     * 接口：将指定角色，授权分配给系列用户
+     *
+     * @param roleId  角色ID
+     * @param userIds 用户ID列表
+     * @return 授权结果
+     */
+    @Override
+    public boolean authRoleForUsers(Integer roleId, Integer[] userIds) {
+        // 如果用户列表为空，则直接返回真即可
+        if (null == userIds || userIds.length == 0) {
+            return true;
+        }
+        // 存储列表
+        List<SysUserRole> userRoleList = new ArrayList<>();
+        for (Integer userId : userIds) {
+            // 构造数据，并添加至列表
+            SysUserRole userRole = new SysUserRole();
+            userRole.setRoleId(roleId);
+            userRole.setUserId(userId);
+            userRoleList.add(userRole);
+        }
+        // 执行插入
+        return userRoleService.saveBatch(userRoleList);
+    }
+
+    /**
+     * 接口：取消指定角色已授权的系列用户
+     *
+     * @param roleId  角色ID
+     * @param userIds 用户ID列表
+     * @return 取消授权结果
+     */
+    @Override
+    public int[] revokeRoleForUsers(Integer roleId, Integer[] userIds) {
+        if (null == userIds || userIds.length == 0) {
+            return new int[]{0, 0};
+        }
+        int[] result = new int[2];
+        // 遍历用户列表，逐个删除
+        for (Integer userId : userIds) {
+            QueryWrapper<SysUserRole> wrapper = new QueryWrapper<>();
+            wrapper.eq("role_id", roleId).eq("user_id", userId);
+            if (userRoleService.remove(wrapper)) {
+                result[0]++;
+            } else
+                result[1]++;
+        }
+        return result;
+    }
+
+
+    /**
      * 私有方法：将指定角色拥有的菜单/权限，写入角色-菜单关联表
      *
      * @param roleId   角色ID

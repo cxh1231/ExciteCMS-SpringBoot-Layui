@@ -15,13 +15,12 @@
             <fieldset class="layui-elem-field layui-field-title">
                 <legend style="font-size: 17px">角色信息</legend>
             </fieldset>
-            <!-- 【用户名称】和【性别】 -->
             <div class="layui-form-item">
-                <!--【ID】-->
+                <!--【角色ID】-->
                 <div class="layui-inline">
                     <label class="layui-form-label" style="width: 70px">ID</label>
                     <div class="layui-input-inline" style="width: 100px">
-                        <input type="text" name="id" th:value="${role.id}" value="101" autocomplete="off" disabled class="layui-input">
+                        <input type="text" name="id" th:value="${role.id}" id="roleId" value="101" autocomplete="off" disabled class="layui-input">
                     </div>
                 </div>
                 <!-- 【用户名称】 -->
@@ -51,8 +50,7 @@
 <div id="dom_role_addUser" style="display: none;">
     <!-- 表格 -->
     <table class="layui-hide" id="table-system-user" lay-filter="table-system-user"></table>
-    <br>
-    <!-- 放在底部按钮 -->
+    <!-- 按钮 -->
     <div class="layer-footer">
         <button type="button" class="layui-btn layui-btn-sm layui-btn-normal" lay-submit lay-filter="form-role-authUser">立即授权</button>
     </div>
@@ -66,13 +64,11 @@
             layer = layui.layer,
             table = layui.table;
 
-        // 已授权的用户列表
+        // 【表格】已授权该角色的用户列表
         let table_role_user = table.render({
             elem: '#table-system-userForRole',
             url: '/system/user/listForRole/1/' + [[${role.id}]],
-            response: {
-                statusCode: 200,
-            },
+            response: {statusCode: 200},
             height: 'full-260', //高度最大化减去差值
             title: '用户数据表',
             cols: [
@@ -109,15 +105,13 @@
                 shadeClose: false,
                 area: ['700px', '500px'],
                 content: $("#dom_role_addUser"),
-                // 窗口加载完毕，加载载入表格
                 success: function (layero, index) {
-                    table.render({
+                    // 【表格】未授权该角色的用户列表
+                    let table_role_user_unAuth = table.render({
                         elem: '#table-system-user',
                         url: '/system/user/listForRole/0/' + [[${role.id}]],
-                        response: {
-                            statusCode: 200,
-                        },
-                        height: 'full-390', //高度最大化减去差值
+                        response: {statusCode: 200},
+                        height: 'full-390', // 高度最大化减去差值
                         title: '用户数据表',
                         cols: [
                             [
@@ -130,11 +124,43 @@
                             ]
                         ],
                     });
+                    // 【立即授权】按钮响应事件
+                    form.on('submit(form-role-authUser)', function (data) {
+                        // 获取全部选中的用户
+                        let checkUserList = table.checkStatus('table-system-user').data
+                        if (checkUserList.length === 0) { // 如果选择为空，则不用执行
+                            layer.msg("请选择需要添加授权的用户！", {icon: 7});
+                            return false;
+                        }
+                        // 弹窗确认
+                        layer.confirm('确认要为选中的用户授权该角色吗？', {
+                            title: false,
+                            btn: ['确定', '取消'],
+                            // 按钮【确定】的回调（其他回调省略即可）
+                            btn1: function (index) {
+                                // 遍历，并格式化为类似 101,102,103 的格式
+                                let userIds = "";
+                                for (let i = 0; i < checkUserList.length; i++) {
+                                    userIds += (checkUserList[i].id + ",")
+                                }
+                                userIds = userIds.substring(0, userIds.lastIndexOf(','));
+                                // 提交取消授权
+                                $.post("/system/role/authUser/auth", {
+                                    roleId: $("#roleId").val(),     // 角色ID，从form里读取
+                                    userIds: userIds                // 用户角色列表，字符串格式
+                                }, function (data) {
+                                    if (data.code === 200) {
+                                        layer.alert(data.msg, {icon: 1})
+                                        table_role_user_unAuth.reload()
+                                        table_role_user.reload();
+                                    } else {
+                                        layer.alert(data.msg, {icon: 2});
+                                    }
+                                });
+                            }
+                        });
+                    });
                 },
-                // 窗口关闭：刷新已授权的列表
-                end: function () {
-                    table_role_user.reload();
-                }
             });
             return false;
         });
@@ -143,35 +169,39 @@
         form.on('submit(form-role-cancelAuth)', function (data) {
             // 获取全部选中的角色
             let checkUserList = table.checkStatus('table-system-userForRole').data
-            // 如果选择为空，则不用执行
-            if (checkUserList.length === 0) {
-                layer.msg("请选择需要取消授权的用户！", {icon: 2});
+            if (checkUserList.length === 0) { // 如果选择为空，则不用执行
+                layer.msg("请选择需要取消授权的用户！", {icon: 7});
                 return false;
             }
-            // 遍历，并格式化为类似 101,102,103 的格式
-            let userIds = "";
-            for (let i = 0; i < checkUserList.length; i++) {
-                userIds += (checkUserList[i].id + ",")
-            }
-            userIds = userIds.substring(0, userIds.lastIndexOf(','));
-            // 提交角色
-            $.post("/system/role/setUser", {id: data.field.id, userIds: userIds}, function (data) {
-                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                if (data.code === 200) {
-                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
-                        // 关闭弹窗
-                        layer.close();
-                        // 先得到当前iframe层的索引
-                        let index22 = parent.layer.getFrameIndex(window.name);
-                        // 关闭当前弹窗
-                        parent.layer.close(index22);
+            // 弹窗确认
+            layer.confirm('确认要取消选中用户的权限吗？', {
+                title: false,
+                btn: ['确定', '取消'],
+                // 按钮【确定】的响应事件（其他省略即可）
+                btn1: function (index) {
+                    // 遍历，并格式化为类似 101,102,103 的格式
+                    let userIds = "";
+                    for (let i = 0; i < checkUserList.length; i++) {
+                        userIds += (checkUserList[i].id + ",")
+                    }
+                    userIds = userIds.substring(0, userIds.lastIndexOf(','));
+                    // 提交取消授权
+                    $.post("/system/role/authUser/revoke", {
+                        roleId: data.field.id,  // 角色ID，从form里读取
+                        userIds: userIds        // 用户角色列表，字符串格式
+                    }, function (data) {
+                        if (data.code === 200) {
+                            layer.alert(data.msg, {icon: 1})
+                            table_role_user.reload();
+                        } else {
+                            layer.alert(data.msg, {icon: 2});
+                        }
                     });
-                } else {
-                    layer.alert(data.msg, {offset: 't', icon: 2});
                 }
             });
             return false;
         });
+
 
         // 【关闭弹窗】按钮响应事件
         form.on('submit(form-role-close)', function (data) {

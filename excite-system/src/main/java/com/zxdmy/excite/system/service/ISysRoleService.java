@@ -69,4 +69,22 @@ public interface ISysRoleService extends IService<SysRole> {
      */
     public int deleteRoleById(Integer id);
 
+
+    /**
+     * 接口：将指定角色，授权分配给系列用户
+     *
+     * @param roleId  角色ID
+     * @param userIds 用户ID列表
+     * @return 授权结果
+     */
+    public boolean authRoleForUsers(Integer roleId, Integer[] userIds);
+
+    /**
+     * 接口：取消指定角色已授权的系列用户
+     *
+     * @param roleId  角色ID
+     * @param userIds 用户ID列表
+     * @return 取消授权结果
+     */
+    public int[] revokeRoleForUsers(Integer roleId, Integer[] userIds);
 }

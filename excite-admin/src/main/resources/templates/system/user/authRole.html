@@ -86,7 +86,7 @@
             }
             roleIds = roleIds.substring(0, roleIds.lastIndexOf(','));
             // 提交角色
-            $.post("/system/user/setRole", {id: data.field.id, roleIds: roleIds}, function (data) {
+            $.post("/system/user/authRole", {id: data.field.id, roleIds: roleIds}, function (data) {
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
                     layer.alert(data.msg, {offset: 't', icon: 1}, function () {

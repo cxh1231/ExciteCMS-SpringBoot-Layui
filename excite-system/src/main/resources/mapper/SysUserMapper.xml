@@ -34,6 +34,7 @@
              sys_user u
         WHERE ur.role_id = #{roleId}
           AND ur.user_id = u.id
+          AND u.is_delete = 0
         ORDER BY u.id
     </select>
 
@@ -43,6 +44,7 @@
         FROM sys_user u
                  LEFT JOIN sys_user_role ur ON u.id = ur.user_id
             AND ur.role_id = #{roleId}
+            AND u.is_delete = 0
         WHERE ur.user_id IS NULL
         ORDER BY u.id
     </select>

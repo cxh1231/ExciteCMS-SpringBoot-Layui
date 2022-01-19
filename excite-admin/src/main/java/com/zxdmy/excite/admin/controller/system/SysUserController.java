@@ -283,7 +283,7 @@ public class SysUserController extends BaseController {
      * @param roleIds 角色信息列表
      * @return 分配结果
      */
-    @PostMapping(value = "/setRole")
+    @PostMapping(value = "/authRole")
     @ResponseBody
     public BaseResult setRole(String id, Integer[] roleIds) {
         try {

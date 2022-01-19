@@ -267,6 +267,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
      * @param roleIds 角色ID数组
      */
     private boolean insertUserRole(Integer userId, Integer[] roleIds) {
+        // 如果角色列表为空，直接返回真
+        if (null == roleIds || roleIds.length == 0) {
+            return true;
+        }
         // 获取所有状态正常的角色集合
         QueryWrapper<SysRole> wrapper = new QueryWrapper<>();
         wrapper.ne("status", SystemCode.STATUS_N);

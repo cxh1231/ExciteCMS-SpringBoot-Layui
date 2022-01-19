@@ -233,5 +233,41 @@ public class SysRoleController extends BaseController {
         }
     }
 
+    /**
+     * 接口功能：将指定角色分配给系列用户，或者取消某角色分配给的用户
+     *
+     * @param type    操作类型：auth-添加授权 | revoke-取消授权
+     * @param roleId  用户ID
+     * @param userIds 角色信息列表
+     * @return 分配结果
+     */
+    @PostMapping("/authUser/{type}")
+    @ResponseBody
+    @AnnotationSaveReLog
+    public BaseResult authForUser(@PathVariable("type") String type, String roleId, Integer[] userIds) {
+        try {
+            // 添加授权
+            if (type.equals("auth")) {
+                if (roleService.authRoleForUsers(Integer.parseInt(roleId), userIds))
+                    return success(200, "添加授权成功！");
+                else
+                    return error("授权失败，请重试！");
+            }
+            // 取消授权
+            else if (type.equals("revoke")) {
+                int[] result = roleService.revokeRoleForUsers(Integer.parseInt(roleId), userIds);
+                if (result[1] == 0)
+                    return success(200, "取消授权成功！");
+                else if (result[0] == 0)
+                    return error("取消授权失败，请重试！");
+                else
+                    return success(result[0] + "个用户取消授权成功，" + result[1] + "个失败！");
+            }
+            return error("访问错误！");
+        } catch (Exception e) {
+            return error("发生错误：" + e.getMessage());
+        }
+    }
+
 
 }
