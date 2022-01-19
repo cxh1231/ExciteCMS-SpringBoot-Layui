@@ -171,9 +171,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 // 修改成功
                 if (userMapper.update(user, wrapper) > 0) {
                     result[0]++;
-                    // 如果新状态是禁用，则清缓存
-                    if (newStatus == 0)
-                        this.deleteUserMenuCache(1, userId);
+                    // 清除该用户的权限缓存
+                    this.deleteUserMenuCache(1, userId);
                 } else result[1]++;
             }
             // 返回结果

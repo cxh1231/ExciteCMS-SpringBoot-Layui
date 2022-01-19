@@ -254,7 +254,13 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             userRoleList.add(userRole);
         }
         // 执行插入
-        return userRoleService.saveBatch(userRoleList);
+        if (userRoleService.saveBatch(userRoleList)) {
+            // 删除这些用户的权限缓存
+            this.deleteUserMenuCache(1, userIds);
+            return true;
+        } else
+            return false;
+
     }
 
     /**
@@ -279,6 +285,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
             } else
                 result[1]++;
         }
+        // 删除这些用户的权限缓存
+        this.deleteUserMenuCache(result[0], userIds);
         return result;
     }
 
@@ -320,6 +328,20 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                     redisService.remove("menu:userMenuList:" + userId);
                 }
                 redisService.remove("menu:userList");
+            }
+        }
+    }
+
+    /**
+     * 私有方法：删除指定用户的缓存权限信息
+     *
+     * @param result  条件
+     * @param userIds 用户ID
+     */
+    private void deleteUserMenuCache(int result, Integer[] userIds) {
+        if (result > 0 && exciteConfig.getAllowRedis()) {
+            for (int userId : userIds) {
+                redisService.remove("menu:userMenuList:" + userId);
             }
         }
     }
