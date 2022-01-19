@@ -39,7 +39,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 邮箱账号 -->
+            <!-- 【邮箱账号】 -->
             <div class="layui-form-item">
                 <label class="layui-form-label">邮箱账号<span style="color:red"> *</span></label>
                 <div class="layui-input-inline" style="width: 300px">
@@ -47,20 +47,13 @@
                 </div>
                 <div class="layui-form-mid layui-word-aux">后台登录账号</div>
             </div>
-            <!-- 手机账号 -->
+            <!-- 【手机账号】-->
             <div class="layui-form-item">
                 <label class="layui-form-label">手机号码</label>
                 <div class="layui-input-inline" style="width: 300px">
                     <input type="text" th:value="${user.phone}" name="phone" lay-verify="userPhoneVerify" placeholder="请输入手机号码" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">后台登录账号</div>
-            </div>
-            <!-- 用户角色 -->
-            <div class="layui-form-item">
-                <label class="layui-form-label">用户角色</label>
-                <div class="layui-input-block" style="width: 300px">
-                    <ul id="roleListForUser" class="dtree" data-id="-1"></ul>
-                </div>
             </div>
             <!-- 【备注】 -->
             <div class="layui-form-item">
@@ -78,46 +71,12 @@
 </div>
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
-<script src="/lib/jsencrypt/jsencrypt.min.js" charset="utf-8"></script>
-<script src="/lib/jsencrypt/rsa.js" charset="utf-8"></script>
 <script>
     layui.use(['form', 'dtree', 'iconPickerFa'], function () {
         let $ = layui.jquery;
         let form = layui.form,
-            layer = layui.layer,
-            dtree = layui.dtree;
+            layer = layui.layer;
         window.form = layui.form;
-
-        // 树状下拉角色选择器
-        dtree.render({
-            elem: "#roleListForUser",       // 绑定的菜单
-            width: "100%",                  // 宽度百分百
-            select: true,                   // 指定下拉树模式
-            url: "/system/role/listForUser/" + [[${user.id}]],   // 请求的URL
-            none: "暂无角色",
-            method: "GET",                  // 请求方式
-            checkbar: true,                 // 设置复选框
-            dataStyle: "layuiStyle",        // 使用layui风格的数据格式
-            dataFormat: "list",             // 配置data的风格为list
-            // 修改response中返回数据的定义，消息主键为msg，成功代码为200
-            response: {
-                message: "msg",
-                statusCode: 200,
-                checkArr: "checkArr",
-                title: "name"
-            },
-            selectCardHeight: "180",        // 卡片高度
-            ficon: ["1", "-1"],             // 修改一级图标样式（展开与否的按钮，最后一级不显示）
-            icon: "2",                      // 修改二级图标样式
-            // 点提交后，选中参数的隐藏form表单输入框名称
-            selectInputName: {
-                nodeId: "roleIds",         // 上级菜单的input的name
-                context: "roleNames"
-            },
-            done: function () {
-                dtree.selectVal("roleListForUser"); // 指定默认选中的值，至input框。填入的值绑定的菜单
-            }
-        });
 
         //自定义验证规则
         form.verify({
@@ -139,8 +98,8 @@
             },
             // 手机号
             userPhoneVerify: function (value) {
-                let  pattern = /^(13[0-9]|14[5|7]|15[0-9]|18[0-9]|19[4|5])\d{8}$/g;
-                if (!pattern.test(value)) {
+                let pattern = /^(13[0-9]|14[5|7]|15[0-9]|18[0-9]|19[4|5])\d{8}$/g;
+                if (value.length > 0 && !pattern.test(value)) {
                     return '手机号码格式错误！';
                 }
             }
@@ -148,30 +107,21 @@
 
         //监听提交
         form.on('submit(form-user-save)', function (data) {
-            // console.log(JSON.stringify(data.field))
             // 提交角色
             $.post("/system/user/update", data.field, function (data) {
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
-                    layer.alert(data.msg, {offset: 't', icon: 1}, function () {
-                        // 关闭弹窗
-                        layer.close();
+                    layer.alert(data.msg, {icon: 1}, function () {
                         // 先得到当前iframe层的索引
                         let index22 = parent.layer.getFrameIndex(window.name);
                         // 关闭当前弹窗
                         parent.layer.close(index22);
                     });
                 } else {
-                    layer.alert(data.msg, {offset: 't', icon: 2});
+                    layer.alert(data.msg, {icon: 2});
                 }
             });
             return false;
-        });
-
-        // 点击任何地方关闭下拉树
-        $("body").on("click", function (event) {
-            $("div[dtree-id][dtree-select]").removeClass("layui-form-selected");
-            $("div[dtree-id][dtree-card]").removeClass("dtree-select-show layui-anim layui-anim-upbit");
         });
 
     });

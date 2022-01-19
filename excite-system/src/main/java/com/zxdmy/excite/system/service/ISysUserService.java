@@ -70,7 +70,7 @@ public interface ISysUserService extends IService<SysUser> {
      * @param userId 用户ID
      * @return 删除结果：>0 表示成功
      */
-    int deleteUserById(Integer userId);
+    int[] deleteUserById(Integer[] userId);
 
     /**
      * 接口：通过角色ID查询用户列表

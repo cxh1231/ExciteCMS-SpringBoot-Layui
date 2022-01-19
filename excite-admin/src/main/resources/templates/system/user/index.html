@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>用户管理</title>
@@ -25,25 +25,27 @@
                             <input type="text" id="inputUserAccount" autocomplete="off" class="layui-input" placeholder="输入电话/邮箱"/>
                         </div>
                     </div>
-                    <!-- 搜索按钮 -->
+                    <!-- 搜索、清除按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-user-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-user-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary btn-user-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 除
                         </button>
                     </div>
                 </div>
             </div>
         </fieldset>
-
         <!-- 表格 -->
         <table class="layui-hide" id="table-system-user" lay-filter="table-system-user"></table>
-
     </div>
 </div>
 <!--表格头部工具类（左上）-->
 <script type="text/html" id="toolbar-table-user">
     <div class="layui-btn-container">
         <!-- 【刷新】-->
-        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-user-refresh"><i class="fa fa-refresh"></i></button>
+        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-user-reload"><i class="fa fa-refresh"></i></button>
         <!-- 【添加】-->
         <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="btn-user-add"><i class="fa fa-plus"></i> 添加</button>
         <!-- 【修改状态】下拉菜单：禁用与否 -->
@@ -73,17 +75,16 @@
             dropdown = layui.dropdown,
             table = layui.table;
 
+        let currPage = 1                    // 定义全局变量：记录当前页码
         // 表格
         let table_user = table.render({
-            elem: '#table-system-user',
-            url: '/system/user/list',
-            response: {
-                statusCode: 200
-            },
-            height: 'full-158', //高度最大化减去差值
+            elem: '#table-system-user',     // 绑定的表格ID
+            url: '/system/user/list',       // 表格数据请求URL
+            response: {statusCode: 200},    // 请求成功的返回码
+            height: 'full-158',             // 表格高度：高度最大化减去差值
             toolbar: '#toolbar-table-user', //开启头部工具栏，并为其绑定左侧模板
-            defaultToolbar: ['filter', 'exports'],
-            title: '系统用户数据表',
+            defaultToolbar: ['filter', 'exports'],  // 工具栏
+            title: '系统用户数据表',           // 表名，导出数据的时候有用
             cols: [
                 [
                     {type: "checkbox", width: 50},
@@ -107,129 +108,160 @@
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-user', width: 150}
                 ]
             ],
-            page: true
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_user.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
         });
 
-        // 表格重载
+        // 表格的搜索加载与刷新，几个参数的定义，详见如下注释！
         let active = {
-            reload: function () {
+            // 重载：刷新本页数据，检索等数据不变 （直接使用表格的table_user.reload() 即可）
+            // reload: function () {
+            //     //执行重载
+            //     table.reload('table-system-user', {
+            //         page: {curr: currPage},     // 页码
+            //         where: {                    // 检索数据
+            //             username: $('#inputUserName').val(),
+            //             account: $('#inputUserAccount').val()
+            //         }
+            //     });
+            // },
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
                 //执行重载
                 table.reload('table-system-user', {
-                    page: {
-                        curr: 1
-                    }, where: {
-                        // 几个搜索栏的数据
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
                         username: $('#inputUserName').val(),
                         account: $('#inputUserAccount').val()
                     }
                 });
             },
+            // 刷新：从第一页开始，检索数据清空
             refresh: function () {
                 //执行刷新
                 table.reload('table-system-user', {
-                    page: {
-                        curr: 1
-                    }, where: {
-                        // 几个搜索栏的数据
-                        username: "",
-                        account: ""
-                    }
+                    page: {curr: 1},                    // 页码
+                    where: {username: "", account: ""}  // 检索数据清空
                 });
+                $('#inputUserName').val('')             // 检索栏输入的数据清空
+                $('#inputUserAccount').val('')
             }
         };
-        // 【搜索】按钮响应事件
-        $('#btn-user-search').on('click', function () {
+        // 【搜索】【清除】按钮的响应事件
+        $('.btn-user-action').on('click', function () {
             let type = $(this).data('type');
             active[type] ? active[type].call(this) : '';
         });
 
-        // 监听头部按钮
+        // 【左上】操作按钮
         table.on('toolbar(table-system-user)', function (obj) {
             let that = this;
             switch (obj.event) {
-                // 上方【刷新】按钮
-                case "btn-user-refresh":
-                    active['refresh'].call(this)
+                // 【刷新】按钮
+                case "btn-user-reload":
+                    table_user.reload()
                     break;
-                // 上方【添加】角色按钮
+                // 【添加】按钮
                 case "btn-user-add":
-                    let role_add_index = layer.open({
-                        title: '添加新用户',
-                        type: 2,
-                        shade: 0.2,
-                        maxmin: true,
-                        shadeClose: false,
-                        area: ['600px', '500px'],
-                        content: '/system/user/goAdd',
+                    layer.open({
+                        title: '添加新用户',             // 添加用户 窗口的标题
+                        type: 2,                        // 窗口类型：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
+                        shade: 0.2,                     // 遮罩透明度
+                        maxmin: true,                   // 是否允许最大最小化
+                        shadeClose: false,              // 是否点击遮罩关闭
+                        area: ['600px', '500px'],       // 弹窗大小
+                        content: '/system/user/goAdd',  // 窗口显示的内容
                         end: function () {
-                            table_user.reload();
+                            table_user.reload();        // 添加结束后，窗口关闭，刷新表格
                         }
                     });
-                    parent.layer.iframeAuto(role_add_index);
                     break;
-                // 上方批量【修改状态】按钮
+                // 【修改状态】按钮（批量修改状态）
                 case "btn-user-changeStatus":
-                    // 操作：批量修改用户状态（修改状态按钮下拉菜单的按钮响应事件）
+                    // 下拉菜单
                     dropdown.render({
                         elem: that,
-                        data: [{
-                            title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
-                        }, {
-                            title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
-                        }],
+                        show: true,         // 外部事件触发即显示
+                        data: [
+                            {title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'},
+                            {title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'}
+                        ],
                         click: function (obj) {
-                            // 选中菜单的ID即为新的status
-                            let newStatus = obj.id;
-                            // 读取所有选中的按钮
-                            let userIds = "";
+                            let newStatus = obj.id;     // 选中菜单的ID即为新的status
+                            let userIds = "";           // 读取所有选中的按钮
                             let checkRoleList = table.checkStatus('table-system-user').data
-                            for (let i = 0; i < checkRoleList.length; i++) {
+                            for (let i = 0; i < checkRoleList.length; i++)
                                 userIds += (checkRoleList[i].id + ",")
-                            }
                             // 去掉末尾的逗号
                             userIds = userIds.substring(0, userIds.lastIndexOf(','));
                             // 选中才响应
                             if (userIds.length > 0) {
                                 let actionText = newStatus === 1 ? "启用" : "禁用"
-                                // 二次询问框
-                                layer.confirm('确认要 ' + actionText + ' 选中的用户吗？', {
-                                    title: false,
-                                    btn: ['确定', '取消'],
-                                    // 按钮【按钮1】的回调
-                                    btn1: function (index) {
-                                        // 执行ajax请求
-                                        $.post("/system/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
-                                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
-                                            if (d.code === 200) {
-                                                layer.msg(d.msg, {time: 3000, icon: 1});
-                                                table_user.reload()
-                                            } else {
-                                                layer.msg(d.msg, {time: 3000, icon: 2});
-                                            }
-                                        });
-                                    },
+                                // 确认对话框
+                                layer.confirm('确认要<b> ' + actionText + ' </b>选中的用户吗', {
+                                    icon: 3, title: '修改用户状态提示'
+                                }, function (index) {
+                                    // 执行修改状态操作
+                                    $.post("/system/user/changeStatus/" + newStatus, {userIds: userIds}, function (d) {
+                                        if (d.code === 200) {       // 状态码 200 表示成功，其他表示失败
+                                            layer.msg(d.msg, {time: 3000, icon: 1});
+                                            table_user.reload()
+                                        } else {
+                                            layer.msg(d.msg, {time: 3000, icon: 2});
+                                        }
+                                    });
                                 });
                             } else {
-                                layer.msg('请先选择用户！', {time: 2000, icon: 7});
+                                layer.msg('请勾选需要修改状态的用户！', {time: 2000, icon: 7});
                             }
                         }
                     });
                     break;
-                // 上方批量【删除】按钮
+                // 【删除】按钮（批量删除）
                 case "btn-user-delete":
+                    // 获取选中的数据（以下的操作，逻辑基本同 修改状态 部分）
                     let checkRoleList = table.checkStatus('table-system-user').data
                     let userIds = "";
                     for (let i = 0; i < checkRoleList.length; i++) {
                         userIds += (checkRoleList[i].id + ",")
                     }
-                    // 去掉末尾的逗号
                     userIds = userIds.substring(0, userIds.lastIndexOf(','));
-                    layer.msg('删除接口未对接...删除用户：' + userIds)
+                    if (userIds.length > 0) {
+                        // 删除用户 - 第 1 次确认
+                        layer.confirm("<a style='color: red'>确认要 删除 选中的用户吗？</a>", {
+                            icon: 3, title: '删除用户确认【1/2】'
+                        }, function (index) {
+                            layer.close(index);
+                            // 删除用户 - 第 2 次确认
+                            layer.confirm("<a style='color: red'>真的要删除用户 选中 的用户吗？删除后不可恢复，请三思而后行！</a>", {
+                                icon: 3, title: '删除用户确认【2/2】'
+                            }, function (index) {
+                                // 发起 删除用户 请求
+                                $.post("/system/user/delete", {userIds: userIds}, function (d) {
+                                    // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                    if (d.code === 200) {
+                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                        table_user.reload()
+                                    } else {
+                                        layer.msg(d.msg, {time: 3000, icon: 2});
+                                    }
+                                });
+                            });
+                        });
+                    } else {
+                        layer.msg('请勾选需要删除的用户！', {time: 2000, icon: 7});
+                    }
                     break;
             }
         });
 
-        // 监听表格行末按钮
+        // 【行操作】监听表格行末按钮
         table.on('tool(table-system-user)', function (obj) {
             let that = this;
             let data = obj.data;
@@ -237,54 +269,45 @@
             switch (layEvent) {
                 // 【编辑】按钮
                 case "user-edit":
-                    let role_edit_index = layer.open({
+                    layer.open({
                         title: '更新用户信息',
                         type: 2,
                         shade: 0.2,
                         maxmin: true,
                         shadeClose: false,
-                        area: ['600px', '450px'],
+                        area: ['600px', '400px'],
                         content: '/system/user/goEdit/' + data.id,
                         end: function () {
-                            table_user.reload();
+                            table_user.reload()
                         }
                     });
-                    parent.layer.iframeAuto(role_edit_index);
                     break;
                 // 【更多】按钮
                 case "user-more":
-                    //更多下拉菜单
-                    dropdown.render({
+                    dropdown.render({       // 下拉菜单
                         elem: that,
-                        show: true, //外部事件触发即显示
-                        data: [{
-                            title: '分配角色', id: 'set-role'
-                        }, {
-                            title: '重置密码', id: 'reset-password'
-                        }, {
-                            title: '<a style="color: red">删除</a>', id: 'delete'
-                        }], click: function (d, othis) {
+                        show: true,
+                        data: [
+                            {title: '分配角色', id: 'set-role'},
+                            {title: '重置密码', id: 'reset-password'},
+                            {title: '<a style="color: red">删除</a>', id: 'delete'}],
+                        click: function (d, othis) {
                             // 【分配角色】
                             if (d.id === 'set-role') {
-                                // layer.msg("还没写...分配角色")
-                                let role_edit_index = layer.open({
+                                layer.open({
                                     title: '更新用户角色',
                                     type: 2,
                                     shade: 0.2,
                                     maxmin: true,
                                     shadeClose: false,
                                     area: ['600px', '500px'],
-                                    content: '/system/user/goAuthRole/' + data.id,
-                                    end: function () {
-                                        table_user.reload();
-                                    }
+                                    content: '/system/user/goAuthRole/' + data.id
                                 });
-                                parent.layer.iframeAuto(role_edit_index);
                             }
                             // 【重置密码】
                             else if (d.id === 'reset-password') {
-                                layer.open({
-                                    type: 1, //Page层类型
+                                let layer_resetPassword = layer.open({
+                                    type: 1,
                                     btn: ["确定", "取消"],
                                     title: '重置用户【' + obj.data.username + '】的密码',
                                     skin: 'layui-layer-prompt',
@@ -293,26 +316,24 @@
                                         "<input id='newPassword2' type='password' class='layui-layer-input' value='' placeholder='请再次输入新密码' style='margin-top:10px;' autocomplete='off'>" +
                                         "</form></div>",
                                     yes: function (index, l) {
-                                        //按钮【按钮一】的回调
                                         let newPassword1 = $(l).find("#newPassword1").val()
                                         let newPassword2 = $(l).find("#newPassword2").val()
                                         if (newPassword1 !== '' && newPassword2 !== '') {
                                             if (newPassword1 === newPassword2) {
-                                                // 密码加密传输
+                                                // 密码加密
                                                 let encrypt = new JSEncrypt()
                                                 encrypt.setPublicKey(PUBLIC_KEY)
                                                 newPassword1 = encrypt.encrypt(newPassword1)
                                                 newPassword2 = encrypt.encrypt(newPassword2)
-                                                // 执行ajax请求，修改该用户的密码
+                                                // 发起 重置密码 请求
                                                 $.post("/system/user/resetPassword/", {
                                                     userId: obj.data.id,
                                                     newPassword: newPassword1,
                                                     newPassword2: newPassword2
                                                 }, function (d) {
-                                                    // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                                     if (d.code === 200) {
+                                                        layer.close(layer_resetPassword)
                                                         layer.msg(d.msg, {time: 3000, icon: 1});
-                                                        layer.close(index);
                                                     } else {
                                                         layer.msg(d.msg, {time: 3000, icon: 2});
                                                     }
@@ -330,17 +351,15 @@
                             else if (d.id === 'delete') {
                                 // 删除用户 - 第 1 次确认
                                 layer.confirm("<a style='color: red'>确认要删除用户 " + data.username + "(" + data.id + ") 吗？</a>", {
-                                    icon: 3,
-                                    title: '删除用户确认【1/2】'
+                                    icon: 3, title: '删除用户确认【1/2】'
                                 }, function (index) {
                                     layer.close(index);
                                     // 删除用户 - 第 2 次确认
                                     layer.confirm("<a style='color: red'>真的要删除用户 " + data.username + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
-                                        icon: 3,
-                                        title: '删除用户确认【2/2】'
+                                        icon: 3, title: '删除用户确认【2/2】'
                                     }, function (index) {
-                                        // 执行删除用户的ajax请求
-                                        $.post("/system/user/delete/" + data.id, function (d) {
+                                        // 发起 删除用户 请求
+                                        $.post("/system/user/delete", {userIds: data.id}, function (d) {
                                             // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                             if (d.code === 200) {
                                                 layer.msg(d.msg, {time: 3000, icon: 1});
@@ -349,9 +368,7 @@
                                                 layer.msg(d.msg, {time: 3000, icon: 2});
                                             }
                                         });
-                                        layer.close(index);
                                     });
-
                                 });
                             }
                         },
@@ -360,9 +377,9 @@
             }
         });
 
-        // 操作：修改用户状态（用户行的switch开关切换事件）
+        // 【行操作】修改用户状态（用户行的switch开关切换事件）
         form.on('switch(check-user-status)', function (data) {
-            // isChecked是操作之后的值
+            // 注意：isChecked是操作之后的值
             let isChecked = data.elem.checked;
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "1" : "0"
@@ -370,10 +387,9 @@
             layer.confirm('确认要 ' + actionText + ' ID为 ' + data.value + ' 的用户吗？', {
                 title: false,
                 btn: ['确定', '取消'],
-                // 按钮【按钮1】的回调
+                // 按钮【确定】的回调
                 btn1: function (index) {
                     $.post("/system/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
-                        // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                         if (d.code === 200) {
                             layer.msg(d.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
@@ -385,7 +401,7 @@
                         }
                     });
                 },
-                // 按钮【按钮二】的回调
+                // 按钮【取消】的回调
                 btn2: function (index) {
                     data.elem.checked = !isChecked;
                     form.render();
@@ -399,7 +415,6 @@
                 }
             });
         });
-
 
     });
 </script>

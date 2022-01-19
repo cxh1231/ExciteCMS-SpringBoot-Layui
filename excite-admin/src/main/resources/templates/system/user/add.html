@@ -17,7 +17,6 @@
 <div class="layuimini-container">
     <div class="layuimini-main">
         <form class="layui-form layui-form-pane" action="">
-
             <!-- 【用户名称】和【性别】 -->
             <div class="layui-form-item">
                 <!-- 【用户名称】 -->
@@ -39,30 +38,25 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 邮箱账号 -->
+            <!-- 【邮箱账号】 -->
             <div class="layui-form-item">
-                <!--                <div class="layui-inline">-->
                 <label class="layui-form-label">邮箱账号<span style="color:red"> *</span></label>
                 <div class="layui-input-inline" style="width: 300px">
                     <input type="text" name="email" lay-verify="userEmailVerify" placeholder="请输入邮箱账号" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">后台登录账号</div>
-                <!--                </div>-->
             </div>
-            <!-- 手机账号 -->
+            <!-- 【手机账号】 -->
             <div class="layui-form-item">
-                <!--                <div class="layui-inline">-->
                 <label class="layui-form-label">手机号码</label>
                 <div class="layui-input-inline" style="width: 300px">
                     <input type="text" name="phone" lay-verify="userPhoneVerify" placeholder="请输入手机号码" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">后台登录账号</div>
             </div>
-
-            <!-- 登录密码 -->
+            <!-- 【登录密码】和【用户状态】 -->
             <div class="layui-form-item">
-                <!-- 登录密码 -->
+                <!-- 【登录密码】 -->
                 <div class="layui-inline">
                     <label class="layui-form-label">登录密码<span style="color:red"> *</span></label>
                     <div class="layui-input-inline" style="width: 200px">
@@ -72,7 +66,7 @@
                         <a href="javascript:void(0);" style="text-decoration:none;"><i id="show-password" class="fa fa-eye-slash"></i></a>
                     </div>
                 </div>
-                <!--用户状态-->
+                <!--【用户状态】-->
                 <div class="layui-inline">
                     <label class="layui-form-label" style="width: 70px">状态</label>
                     <div class="layui-input-inline" style="width: 70px">
@@ -83,15 +77,13 @@
                     </div>
                 </div>
             </div>
-
-            <!-- 用户角色 -->
+            <!-- 【用户角色】  -->
             <div class="layui-form-item">
                 <label class="layui-form-label">用户角色</label>
                 <div class="layui-input-block" style="width: 300px">
                     <ul id="roleListForUser" class="dtree" data-id="-1"></ul>
                 </div>
             </div>
-
             <!-- 【备注】 -->
             <div class="layui-form-item">
                 <label class="layui-form-label">备　　注</label>
@@ -101,7 +93,7 @@
             </div>
             <!-- 提交按钮 -->
             <div class="layui-form-item">
-                <button class="layui-btn" lay-submit="#" lay-filter="form-user-add">立即添加</button>
+                <button class="layui-btn" lay-submit lay-filter="form-user-add">立即添加</button>
             </div>
         </form>
     </div>
@@ -116,9 +108,8 @@
         let form = layui.form,
             layer = layui.layer,
             dtree = layui.dtree;
-        window.form = layui.form;
 
-        // 树状下拉角色选择器
+        // 【用户角色】选择器：树状下拉角色选择器
         dtree.render({
             elem: "#roleListForUser",       // 绑定的菜单
             width: "100%",                  // 宽度百分百
@@ -194,34 +185,25 @@
 
         //监听提交
         form.on('submit(form-user-add)', function (data) {
-            // console.log(JSON.stringify(data.field))
             // 密码加密
             let encrypt = new JSEncrypt()
             encrypt.setPublicKey(PUBLIC_KEY)
             data.field.password = encrypt.encrypt(data.field.password)
-            // 提交角色
+            // 发起 添加用户 请求
             $.post("/system/user/add", data.field, function (data) {
-                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
                     // 弹窗确认下一步操作
                     layer.open({
-                        title: data.msg,
                         type: 0,
+                        title: data.msg,
                         btn: ["继续添加", "关闭"],
-                        area: ['200px', '200px'],
-                        content: '添加成功。是否继续添加？',
-                        // 弹出层弹出后回调
-                        success: function () {
-                        },
-                        // 点击第一个按钮的响应事件
+                        content: '是否继续添加？',
+                        // 【继续添加】按钮响应事件
                         btn1: function (index) {
-                            // 关闭弹窗
-                            layer.close(index);
+                            layer.close(index)
                         },
-                        // 点击第二个按钮的响应事件
+                        // 【关闭】按钮响应事件
                         btn2: function (index) {
-                            // 关闭弹窗
-                            layer.close(index);
                             // 先得到当前iframe层的索引
                             let index2 = parent.layer.getFrameIndex(window.name);
                             // 关闭当前弹窗
@@ -229,7 +211,7 @@
                         }
                     });
                 } else {
-                    layer.alert(data.msg, {offset: 't', icon: 2});
+                    layer.alert(data.msg, {icon: 2});
                 }
             });
             return false;

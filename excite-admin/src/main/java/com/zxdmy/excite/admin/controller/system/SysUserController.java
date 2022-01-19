@@ -8,6 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zxdmy.excite.common.base.BaseController;
 import com.zxdmy.excite.common.base.BaseResult;
@@ -216,7 +217,9 @@ public class SysUserController extends BaseController {
     public BaseResult add(SysUser user, Integer[] roleIds) {
         // 新建用户：其邮箱或手机号、密码不能为空，因为这是登录凭证.
         if (null != user && null != user.getPassword() && (null != user.getEmail() || null != user.getPhone())) {
+            // 解密
             user.setPassword(SecureUtil.md5(this.decrypt(user.getPassword())));
+            // 添加
             if (userService.save(user, roleIds) > 0) {
                 return success("新用户添加成功！");
             } else {
@@ -227,7 +230,7 @@ public class SysUserController extends BaseController {
     }
 
     /**
-     * 接口功能：更新用户基本信息
+     * 接口功能：更新用户基本信息（不含角色信息）
      *
      * @param user 用户信息
      * @return JSON：成败结果
@@ -258,16 +261,16 @@ public class SysUserController extends BaseController {
      * 接口功能：删除用户
      * 基本逻辑：删除该用户的角色信息[用户-角色关联表]-->删除用户
      *
-     * @param id 用户ID
+     * @param userIds 用户ID列表
      * @return JSON：成败
      * @apiNote 启用注解[@AnnotationSaveReLog]保存请求日志
      */
-    @PostMapping(value = "/delete/{id}")
+    @PostMapping(value = "/delete")
     @ResponseBody
     @AnnotationSaveReLog
-    public BaseResult delete(@PathVariable String id) {
+    public BaseResult delete(Integer[] userIds) {
         try {
-            if (userService.deleteUserById(Integer.parseInt(id)) > 0) {
+            if (userService.deleteUserById(userIds)[0] > 0) {
                 return success("用户删除成功");
             }
             return error("用户删除失败");

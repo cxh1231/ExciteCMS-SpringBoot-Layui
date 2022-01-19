@@ -1,6 +1,8 @@
 package com.zxdmy.excite.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.lang.Validator;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -105,6 +108,17 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
     public int save(SysUser user, Integer[] roleIds) {
+        // 新添加的用户，邮箱号和手机号，不能重复！只有输入的数据，有手机或邮箱的时候，才核实！
+        if (StrUtil.isNotEmpty(user.getPhone()) || StrUtil.isNotEmpty(user.getEmail())) {
+            QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+            wrapper.ne(null != user.getId(), "id", user.getId())
+                    .and(wrapper1 -> wrapper1.eq(StrUtil.isNotEmpty(user.getEmail()), "email", user.getEmail())
+                            .or(StrUtil.isNotEmpty(user.getPhone()))
+                            .eq(StrUtil.isNotEmpty(user.getPhone()), "phone", user.getPhone())
+                    );
+            if (this.list(wrapper).size() != 0)
+                throw new ServiceException("输入的邮箱或者手机号已存在，请修改！");
+        }
         int result = 0;
         // 新建用户：其ID为空
         if (null == user.getId()) {
@@ -125,8 +139,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 更新信息用户：其ID不为空
         else {
             user.setUpdateTime(LocalDateTime.now());
+            // 先更新用户的基本
+            result = userMapper.updateById(user);
             // 如果当前新用户分配的角色ID不为空
-            if (null != roleIds) {
+            if (null != roleIds && roleIds.length != 0) {
                 // 先把该用户已有的角色关联信息删除
                 QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
                 userRoleQueryWrapper.eq("user_id", user.getId());
@@ -134,8 +150,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 // 插入新的角色
                 this.insertUserRole(user.getId(), roleIds);
             }
-            // 更新用户信息
-            result = userMapper.updateById(user);
             // 清除缓存
             this.deleteUserMenuCache(result, user.getId());
         }
@@ -217,23 +231,36 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     /**
      * 接口：根据ID删除用户
      *
-     * @param userId 用户ID
+     * @param userIds 用户ID
      * @return 删除结果：>0 表示成功
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int deleteUserById(Integer userId) {
-        if (null == userId) {
+    public int[] deleteUserById(Integer[] userIds) {
+        if (null == userIds || userIds.length == 0) {
             throw new SecurityException("用户ID不能为空！");
         }
-        // 从 用户-角色关联表 中，删除包含该用户的关联信息
-        QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
-        userRoleQueryWrapper.eq("user_id", userId);
-        userRoleService.remove(userRoleQueryWrapper);
-        // 删除用户
-        int result = userMapper.deleteById(userId);
-        // 清除缓存
-        this.deleteUserMenuCache(result, userId);
+        int[] result = new int[2];
+        for (int userId : userIds) {
+            // TMD 不能删除自己！！！
+            if (userId == StpUtil.getLoginIdAsInt()) {
+                continue;
+            }
+            // 如果用户删除成功
+            QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+            wrapper.eq("id", userId).ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
+            if (userMapper.delete(wrapper) > 0) {
+                // 从 用户-角色关联表 中，删除包含该用户的关联信息
+                QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
+                userRoleQueryWrapper.eq("user_id", userId);
+                userRoleService.remove(userRoleQueryWrapper);
+                // 删除结果自增
+                result[0]++;
+                // 清除缓存
+                this.deleteUserMenuCache(1, userId);
+            } else
+                result[1]++;
+        }
         return result;
     }
 

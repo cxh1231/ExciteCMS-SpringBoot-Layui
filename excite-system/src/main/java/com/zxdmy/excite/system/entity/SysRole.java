@@ -3,7 +3,9 @@ package com.zxdmy.excite.system.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -62,6 +64,8 @@ public class SysRole implements Serializable {
     /**
      * 是否删除：0-未删除 | 1-已删除
      */
+    @TableLogic
+    @JsonIgnore
     private Integer isDelete;
 
     /**
