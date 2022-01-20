@@ -41,7 +41,6 @@ public class ExciteConfig {
         this.name = name;
     }
 
-
     public Boolean getAllowRedis() {
         return allowRedis;
     }

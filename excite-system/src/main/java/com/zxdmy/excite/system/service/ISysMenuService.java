@@ -69,12 +69,6 @@ public interface ISysMenuService extends IService<SysMenu> {
      */
     public List<SysMenu> getMenuListForRole(int roleId);
 
-    /**
-     * 权限管理模块使用到的获取权限列表
-     *
-     * @return
-     */
-    public List<SysMenu> getMenuListForSaToken();
 
     /**
      * 通过用户的ID获取权限列表
@@ -92,6 +86,22 @@ public interface ISysMenuService extends IService<SysMenu> {
      * @return 菜单/权限列表
      */
     public List<SysMenu> getMenuListByRoleId(Integer roleId);
+
+
+    /**
+     * 认证框架使用：权限管理模块使用到的获取权限列表
+     *
+     * @return 菜单权限列表
+     */
+    public List<SysMenu> getMenuListForSaToken();
+
+    /**
+     * 认证框架使用：通过用户ID获取该用户所拥有的权限
+     *
+     * @param userId 用户ID
+     * @return 菜单权限列表
+     */
+    public List<SysMenu> getMenuListByUserIdForSaToken(Integer userId);
 
 
 }

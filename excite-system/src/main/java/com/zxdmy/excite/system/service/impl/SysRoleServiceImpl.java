@@ -17,6 +17,7 @@ import com.zxdmy.excite.system.service.ISysRoleService;
 import com.zxdmy.excite.system.service.ISysUserRoleService;
 
 
+import com.zxdmy.excite.system.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -76,6 +77,7 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         // 新增
         if (null == role.getId()) {
             role.setCreateTime(localDateTime);
+            role.setIsDelete(SystemCode.DELETE_N.getCode());
             // 先插入角色，以便获取角色的ID
             result = roleMapper.insert(role);
             if (result > 0) {
@@ -96,9 +98,9 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 // 再添加新数据
                 insertRoleMenu(role.getId(), menusIds);
             }
+            // 清除缓存
+            AuthUtils.clearUserMenuListCache(result != 0);
         }
-        // 删除缓存
-        this.deleteRedisUserMenuCache(result);
         return result;
     }
 
@@ -195,39 +197,48 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
                 result[0]++;
             else result[1]++;
         }
-        // 删除缓存
-        this.deleteRedisUserMenuCache(result[0]);
+        // 清除缓存
+        AuthUtils.clearUserMenuListCache(result[0] != 0);
         return result;
     }
 
     /**
-     * 接口实现：通过ID删除角色
+     * 接口实现：通过ID删除角色（注意：已经分配给用户的角色，不允许删除！）
      *
-     * @param id 角色ID
-     * @return 影响的行数 0-失败 | 1-成功
+     * @param roleIds 角色ID
+     * @return 删除结果：0:成功个数 1:删除失败个数 2:因已分配用户，禁止删除数
      */
     @Override
     @Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-    public int deleteRoleById(Integer id) {
-        if (null == id) {
-            throw new ServiceException("角色ID不能为null");
+    public int[] deleteRoleById(Integer[] roleIds) {
+        if (null == roleIds || roleIds.length == 0) {
+            throw new ServiceException("删除的角色ID不能为空！");
         }
-        // 当该角色已经分配给用户，则禁止删除
-        // if (null != userRoleService.getListByRoleId(id)) {
-        //   throw new ServiceException("当前角色已分配给用户，禁止删除！");
-        // }
-        // 删除 用户-角色关联表 中的数据
-        QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
-        userRoleQueryWrapper.eq("role_id", id);
-        userRoleService.remove(userRoleQueryWrapper);
-        // 删除 角色-权限关联表 中的数据
-        QueryWrapper<SysRoleMenu> roleMenuQueryWrapper = new QueryWrapper<>();
-        roleMenuQueryWrapper.eq("role_id", id);
-        roleMenuService.remove(roleMenuQueryWrapper);
-        // 删除该角色
-        int result = roleMapper.deleteById(id);
-        // 删除缓存
-        this.deleteRedisUserMenuCache(result);
+        int[] result = new int[3];
+        for (int roleId : roleIds) {
+            // 已经分配用户的角色，不允许删除！
+            QueryWrapper<SysUserRole> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("role_id", roleId);
+            if (userRoleService.count(queryWrapper) > 0) {
+                // throw new ServiceException("当前角色已分配给用户，禁止删除！");
+                result[2]++;
+            } else {
+                // 删除 用户-角色关联表 中的数据
+                QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
+                userRoleQueryWrapper.eq("role_id", roleId);
+                userRoleService.remove(userRoleQueryWrapper);
+                // 删除 角色-权限关联表 中的数据
+                QueryWrapper<SysRoleMenu> roleMenuQueryWrapper = new QueryWrapper<>();
+                roleMenuQueryWrapper.eq("role_id", roleId);
+                roleMenuService.remove(roleMenuQueryWrapper);
+                // 删除该角色
+                if (roleMapper.deleteById(roleId) > 0) {
+                    result[0]++;
+                } else {
+                    result[1]++;
+                }
+            }
+        }
         return result;
     }
 
@@ -255,8 +266,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         }
         // 执行插入
         if (userRoleService.saveBatch(userRoleList)) {
-            // 删除这些用户的权限缓存
-            this.deleteUserMenuCache(1, userIds);
+            // 清除缓存
+            AuthUtils.clearUserMenuListCacheById(true, userIds);
             return true;
         } else
             return false;
@@ -280,13 +291,14 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         for (Integer userId : userIds) {
             QueryWrapper<SysUserRole> wrapper = new QueryWrapper<>();
             wrapper.eq("role_id", roleId).eq("user_id", userId);
+            // TODO 完善：超级管理员不允许取消授权！
             if (userRoleService.remove(wrapper)) {
                 result[0]++;
             } else
                 result[1]++;
         }
-        // 删除这些用户的权限缓存
-        this.deleteUserMenuCache(result[0], userIds);
+        // 删除缓存
+        AuthUtils.clearUserMenuListCacheById(result[0] != 0, userIds);
         return result;
     }
 
@@ -312,37 +324,37 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         }
     }
 
-    /**
-     * 私有方法：删除 已缓存的用户列表和权限表 的缓存（详情请见 权限缓存策略）
-     * 前提条件：result > 0 & 开启redis
-     *
-     * @param result 条件：>0 才执行
-     */
-    private void deleteRedisUserMenuCache(int result) {
-        if (exciteConfig.getAllowRedis() && result > 0) {
-            // 获取已缓存的用户列表
-            Set<Integer> userSet = (Set<Integer>) redisService.get("menu:userList");
-            // 统统清空
-            if (userSet != null) {
-                for (Integer userId : userSet) {
-                    redisService.remove("menu:userMenuList:" + userId);
-                }
-                redisService.remove("menu:userList");
-            }
-        }
-    }
-
-    /**
-     * 私有方法：删除指定用户的缓存权限信息
-     *
-     * @param result  条件
-     * @param userIds 用户ID
-     */
-    private void deleteUserMenuCache(int result, Integer[] userIds) {
-        if (result > 0 && exciteConfig.getAllowRedis()) {
-            for (int userId : userIds) {
-                redisService.remove("menu:userMenuList:" + userId);
-            }
-        }
-    }
+//    /**
+//     * 私有方法：删除 已缓存的用户列表和权限表 的缓存（详情请见 权限缓存策略）
+//     * 前提条件：result > 0 & 开启redis
+//     *
+//     * @param result 条件：>0 才执行
+//     */
+//    private void deleteRedisUserMenuCache(int result) {
+//        if (exciteConfig.getAllowRedis() && result > 0) {
+//            // 获取已缓存的用户列表
+//            Set<Integer> userSet = (Set<Integer>) redisService.get("menu:userList");
+//            // 统统清空
+//            if (userSet != null) {
+//                for (Integer userId : userSet) {
+//                    redisService.remove("menu:userMenuList:" + userId);
+//                }
+//                redisService.remove("menu:userList");
+//            }
+//        }
+//    }
+//
+//    /**
+//     * 私有方法：删除指定用户的缓存权限信息
+//     *
+//     * @param result  条件
+//     * @param userIds 用户ID
+//     */
+//    private void deleteUserMenuCache(int result, Integer[] userIds) {
+//        if (result > 0 && exciteConfig.getAllowRedis()) {
+//            for (int userId : userIds) {
+//                redisService.remove("menu:userMenuList:" + userId);
+//            }
+//        }
+//    }
 }

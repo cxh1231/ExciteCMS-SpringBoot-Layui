@@ -27,7 +27,6 @@
                     </div>
                 </div>
             </div>
-
             <!-- 【菜单权限】 -->
             <div class="layui-form-item">
                 <label class="layui-form-label">菜单权限</label>
@@ -35,18 +34,14 @@
                     <ul id="menuTreeForRole" class="dtree" data-id="-1"></ul>
                 </div>
             </div>
-
             <!-- 【权限标识】 -->
             <div class="layui-form-item">
                 <label class="layui-form-label">权限标识<span style="color:red"> *</span></label>
                 <div class="layui-input-inline" style="width: 300px">
                     <input type="text" name="permission" lay-verify="rolePermissionVerify" placeholder="控制器中定义的权限标识" autocomplete="off" class="layui-input">
                 </div>
-                <div class="layui-form-mid layui-word-aux">
-                    如：admin
-                </div>
+                <div class="layui-form-mid layui-word-aux"> 如：admin</div>
             </div>
-
             <!-- 【顺序】 -->
             <div class="layui-form-item">
                 <!--【排序】-->
@@ -58,18 +53,14 @@
                     <div class="layui-form-mid layui-word-aux">数值越大越靠前</div>
                 </div>
             </div>
-
             <!--【角色状态】-->
             <div class="layui-form-item" pane="">
                 <label class="layui-form-label">角色状态</label>
                 <div class="layui-input-inline">
                     <input type="checkbox" name="status" value="2" lay-skin="switch" lay-text="启用且不可禁用|允许启用与禁用">
                 </div>
-                <div class="layui-form-mid layui-word-aux">
-                    <span style="color:red;font-size: 12px">注：此操作设置点亮后不可逆！</span>
-                </div>
+                <div class="layui-form-mid layui-word-aux"><span style="color:red;font-size: 12px">注：此操作设置点亮后不可逆！</span></div>
             </div>
-
             <!-- 【备注】 -->
             <div class="layui-form-item">
                 <label class="layui-form-label">备　　注</label>
@@ -92,7 +83,6 @@
         let form = layui.form,
             layer = layui.layer,
             dtree = layui.dtree;
-        window.form = layui.form;
 
         // 树状菜单选择器
         dtree.render({
@@ -106,10 +96,9 @@
             checkbarType: "all",            // 复选框选中形式: all：子集选中父级也选中，no-all：子集选中父级半选中，子集全选父级选中，
             dataStyle: "layuiStyle",        // 使用layui风格的数据格式
             dataFormat: "list",             // 配置data的风格为list
-            //修改response中返回数据的定义，消息主键为msg，成功代码为200
             response: {
                 message: "msg",
-                statusCode: 200,
+                statusCode: 200,            //修改response中返回数据的定义，消息主键为msg，成功代码为200
                 checkArr: "checkArr",
             },
             initLevel: 8,                   // 初始化层级，一般到不了这么高
@@ -118,12 +107,12 @@
             ficon: ["1", "-1"],             // 修改一级图标样式（展开与否的按钮，最后一级不显示）
             icon: "7",                      // 修改二级图标样式
             selectInputName: {              // 给隐藏的表单输入框指定名称
-                nodeId: "menuIds",         // 上级菜单的input的name
+                nodeId: "menuIds",          // 上级菜单的input的name
                 context: "parentName"
             }
         });
 
-        //自定义验证规则
+        // 自定义验证规则
         form.verify({
             // 角色名称
             roleNameVerify: function (value) {
@@ -137,7 +126,7 @@
                     return '请输入角色权限标识！';
                 }
             },
-            // 角色排序
+            // 角色顺序
             roleSortVerify: function (value) {
                 if (value.length <= 0) {
                     return '请输入角色显示顺序！';
@@ -145,24 +134,20 @@
             },
         });
 
-        //监听提交
+        // 【立即添加】按钮响应事件
         form.on('submit(form-menu-add)', function (data) {
             // layer.alert(JSON.stringify(data.field));
             console.log(JSON.stringify(data.field))
             // 提交角色
             $.post("/system/role/add", data.field, function (data) {
-                // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
                     // 弹窗确认下一步操作
                     layer.open({
-                        title: data.msg,
                         type: 0,
+                        title: data.msg,
+                        closeBtn: 0,        // 不显示右上角的关闭按钮
                         btn: ["继续添加", "关闭"],
-                        area: ['200px', '200px'],
                         content: '添加成功。是否继续添加？',
-                        // 弹出层弹出后回调
-                        success: function () {
-                        },
                         // 点击第一个按钮的响应事件
                         btn1: function (index) {
                             // 关闭弹窗

@@ -70,17 +70,17 @@ public class CaptchaController extends BaseController {
      * @param type 类型，char - 字符(默认) | math - 一位数算式 | math2 - 两位数算式
      */
     @GetMapping("/get/image")
-    public void getCaptchaImage(@RequestParam(value = "type", required = false, defaultValue = "char") String type) {
+    public void getCaptchaImage(@RequestParam(value = "type", required = false, defaultValue = "math") String type) {
         ServletOutputStream out = null;
         Random random = new SecureRandom();
-        int rand = random.nextInt(2);
-        CaptchaDomain captchaDomain = null;
-        if (rand == 0) {
+//        int rand = random.nextInt(2);
+        CaptchaDomain captchaDomain;
+//        if (rand == 0) {
             // 生成验证码实体
             captchaDomain = captchaService.createGoogleCaptcha(type);
-        } else {
-            captchaDomain = captchaService.createHutoolCaptcha(160, 60);
-        }
+//        } else {
+//            captchaDomain = captchaService.createHutoolCaptcha(160, 60);
+//        }
         // 将验证码保存至session
         HttpSession session = request.getSession();
         session.setAttribute("captcha",captchaDomain.getCode());

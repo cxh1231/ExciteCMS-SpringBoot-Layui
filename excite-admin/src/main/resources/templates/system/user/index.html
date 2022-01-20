@@ -195,9 +195,9 @@
                         click: function (obj) {
                             let newStatus = obj.id;     // 选中菜单的ID即为新的status
                             let userIds = "";           // 读取所有选中的按钮
-                            let checkRoleList = table.checkStatus('table-system-user').data
-                            for (let i = 0; i < checkRoleList.length; i++)
-                                userIds += (checkRoleList[i].id + ",")
+                            let checkUserList = table.checkStatus('table-system-user').data
+                            for (let i = 0; i < checkUserList.length; i++)
+                                userIds += (checkUserList[i].id + ",")
                             // 去掉末尾的逗号
                             userIds = userIds.substring(0, userIds.lastIndexOf(','));
                             // 选中才响应
@@ -226,10 +226,10 @@
                 // 【删除】按钮（批量删除）
                 case "btn-user-delete":
                     // 获取选中的数据（以下的操作，逻辑基本同 修改状态 部分）
-                    let checkRoleList = table.checkStatus('table-system-user').data
+                    let checkUserList = table.checkStatus('table-system-user').data
                     let userIds = "";
-                    for (let i = 0; i < checkRoleList.length; i++) {
-                        userIds += (checkRoleList[i].id + ",")
+                    for (let i = 0; i < checkUserList.length; i++) {
+                        userIds += (checkUserList[i].id + ",")
                     }
                     userIds = userIds.substring(0, userIds.lastIndexOf(','));
                     if (userIds.length > 0) {
@@ -387,6 +387,7 @@
             layer.confirm('确认要 ' + actionText + ' ID为 ' + data.value + ' 的用户吗？', {
                 title: false,
                 btn: ['确定', '取消'],
+                closeBtn: 0,        // 不显示右上角的关闭（X）按钮
                 // 按钮【确定】的回调
                 btn1: function (index) {
                     $.post("/system/user/changeStatus/" + newStatus, {userIds: userId}, function (d) {
@@ -403,12 +404,6 @@
                 },
                 // 按钮【取消】的回调
                 btn2: function (index) {
-                    data.elem.checked = !isChecked;
-                    form.render();
-                    layer.close(index);
-                },
-                // 按钮【X】的回调
-                cancel: function (index) {
                     data.elem.checked = !isChecked;
                     form.render();
                     layer.close(index);

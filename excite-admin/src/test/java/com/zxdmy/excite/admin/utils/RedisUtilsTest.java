@@ -4,6 +4,7 @@ package com.zxdmy.excite.admin.utils;
 import com.zxdmy.excite.common.config.ExciteConfig;
 import com.zxdmy.excite.common.service.RedisService;
 import com.zxdmy.excite.system.entity.SysUser;
+import com.zxdmy.excite.system.utils.AuthUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,6 +35,11 @@ class RedisUtilsTest {
         System.out.println(exciteConfig.getRsaPrivateKey());
     }
 
+    @Test
+    void testPrefixDelete(){
+//        redisUtils.removeByPrefix("menu");
+        AuthUtils.clearSystemMenuListCache(true);
+    }
     @Test
     void redisTest() {
         // 写入Redis：普通测试

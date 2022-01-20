@@ -44,8 +44,8 @@
         FROM sys_user u
                  LEFT JOIN sys_user_role ur ON u.id = ur.user_id
             AND ur.role_id = #{roleId}
-            AND u.is_delete = 0
         WHERE ur.user_id IS NULL
+          AND u.is_delete = 0
         ORDER BY u.id
     </select>
 </mapper>

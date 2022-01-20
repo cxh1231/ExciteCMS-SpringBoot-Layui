@@ -64,10 +64,10 @@ public interface ISysRoleService extends IService<SysRole> {
     /**
      * 接口：删除角色
      *
-     * @param id 角色ID
-     * @return 影响的行数 0-失败 | 1-成功
+     * @param roleIds 角色ID数组
+     * @return 删除结果：0:成功个数 1:删除失败个数 2:因已分配用户，禁止删除数
      */
-    public int deleteRoleById(Integer id);
+    public int[] deleteRoleById(Integer[] roleIds);
 
 
     /**

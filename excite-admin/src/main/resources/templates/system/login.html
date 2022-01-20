@@ -132,11 +132,16 @@
             let encrypt = new JSEncrypt()
             encrypt.setPublicKey(PUBLIC_KEY)
             data.password = encrypt.encrypt(data.password)
+            // 加载层
+            //loading层
+            let index = layer.load(1, {
+                shade: [0.2, '#fff'] //0.1透明度的白色背景
+            });
             // 执行请求
             $.post("/system/user/login", data, function (data) {
                 if (data.code === 200) {
                     layer.msg('登录成功！', {
-                        icon: 1, time: 2000
+                        icon: 1, time: 1000
                     }, function () {
                         window.location = '/system/index';
                     });
@@ -147,6 +152,7 @@
                         document.getElementById("refreshCaptcha").src = captchaUrl + '?t=' + (new Date).getTime();
                     });
                 }
+                layer.close(index)
             });
             return false;
         });

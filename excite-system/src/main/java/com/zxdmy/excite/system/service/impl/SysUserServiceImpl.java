@@ -17,6 +17,7 @@ import com.zxdmy.excite.system.mapper.SysUserMapper;
 import com.zxdmy.excite.system.service.ISysRoleService;
 import com.zxdmy.excite.system.service.ISysUserRoleService;
 import com.zxdmy.excite.system.service.ISysUserService;
+import com.zxdmy.excite.system.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -141,17 +142,21 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             user.setUpdateTime(LocalDateTime.now());
             // 先更新用户的基本
             result = userMapper.updateById(user);
-            // 如果当前新用户分配的角色ID不为空
-            if (null != roleIds && roleIds.length != 0) {
-                // 先把该用户已有的角色关联信息删除
-                QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
-                userRoleQueryWrapper.eq("user_id", user.getId());
-                userRoleService.remove(userRoleQueryWrapper);
-                // 插入新的角色
-                this.insertUserRole(user.getId(), roleIds);
-            }
-            // 清除缓存
-            this.deleteUserMenuCache(result, user.getId());
+
+            // 本系统中：更新用户信息，不涉及到角色分配！
+            // 如果也可以在【用户编辑】页面修改用户的权限，则执行如下操作：
+//            // 先把该用户已有的角色关联信息删除
+//            QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
+//            userRoleQueryWrapper.eq("user_id", user.getId());
+//            userRoleService.remove(userRoleQueryWrapper);
+//            // 如果角色为空，表示取消用户的全部权限
+//            // 如果当前新用户分配的角色ID不为空，则为该用户修改角色
+//            if (null != roleIds && roleIds.length == 0) {
+//                this.insertUserRole(user.getId(), roleIds);
+//            }
+//            // 清除缓存
+//            AuthUtils.clearUserMenuListCacheById(result != 0, user.getId());
+
         }
         return result;
     }
@@ -186,7 +191,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 if (userMapper.update(user, wrapper) > 0) {
                     result[0]++;
                     // 清除该用户的权限缓存
-                    this.deleteUserMenuCache(1, userId);
+                    AuthUtils.clearUserMenuListCacheById(true, userId);
                 } else result[1]++;
             }
             // 返回结果
@@ -214,17 +219,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         boolean result;
         // 如果角色列表为null，或长度为 0，则表示清除该用户的全部角色，也就没必要插入了
         if (null == roleIds || roleIds.length == 0) {
-            this.deleteUserMenuCache(1, userId);
             result = true;
         }
-        // 不为空，执行授权
+        // 不为空，执行授权，插入，并返回结果
         else {
-            // 执行插入，并返回结果
             result = this.insertUserRole(userId, roleIds);
         }
-        // 如果角色分配成功，则清缓存
-        if (result)
-            this.deleteUserMenuCache(1, userId);
+        // 清理缓存
+        AuthUtils.clearUserMenuListCacheById(result, userId);
         return result;
     }
 
@@ -241,25 +243,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             throw new SecurityException("用户ID不能为空！");
         }
         int[] result = new int[2];
+        // 遍历用户
         for (int userId : userIds) {
             // TMD 不能删除自己！！！
-            if (userId == StpUtil.getLoginIdAsInt()) {
-                continue;
-            }
-            // 如果用户删除成功
-            QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
-            wrapper.eq("id", userId).ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
-            if (userMapper.delete(wrapper) > 0) {
-                // 从 用户-角色关联表 中，删除包含该用户的关联信息
-                QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
-                userRoleQueryWrapper.eq("user_id", userId);
-                userRoleService.remove(userRoleQueryWrapper);
-                // 删除结果自增
-                result[0]++;
-                // 清除缓存
-                this.deleteUserMenuCache(1, userId);
-            } else
+            if (userId != StpUtil.getLoginIdAsInt()) {
+                QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+                wrapper.eq("id", userId).ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
+                // 如果用户删除成功
+                if (userMapper.delete(wrapper) > 0) {
+                    // 从 用户-角色关联表 中，删除包含该用户的关联信息
+                    QueryWrapper<SysUserRole> userRoleQueryWrapper = new QueryWrapper<>();
+                    userRoleQueryWrapper.eq("user_id", userId);
+                    userRoleService.remove(userRoleQueryWrapper);
+                    // 删除成功结果自增
+                    result[0]++;
+                    // 清除缓存
+                    AuthUtils.clearUserMenuListCacheById(true, userId);
+                } else {
+                    result[1]++;
+                }
+            } else {
                 result[1]++;
+            }
         }
         return result;
     }
@@ -317,15 +322,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         } else return false;
     }
 
-    /**
-     * 删除指定用户的缓存权限信息
-     *
-     * @param result 条件
-     * @param userId 用户ID
-     */
-    private void deleteUserMenuCache(int result, int userId) {
-        if (result > 0 && exciteConfig.getAllowRedis()) {
-            redisService.remove("menu:userMenuList:" + userId);
-        }
-    }
+//    /**
+//     * 删除指定用户的缓存权限信息
+//     *
+//     * @param result 条件：>0 才执行
+//     * @param userId 用户ID
+//     */
+//    private void deleteUserMenuCache(int result, int userId) {
+//        if (result > 0 && exciteConfig.getAllowRedis()) {
+//            redisService.remove("menu:userMenuList:" + userId);
+//        }
+//    }
 }

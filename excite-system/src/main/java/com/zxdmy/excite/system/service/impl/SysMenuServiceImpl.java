@@ -1,5 +1,6 @@
 package com.zxdmy.excite.system.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
@@ -14,6 +15,7 @@ import com.zxdmy.excite.system.mapper.SysMenuMapper;
 import com.zxdmy.excite.system.mapper.SysRoleMenuMapper;
 import com.zxdmy.excite.system.service.ISysMenuService;
 
+import com.zxdmy.excite.system.utils.AuthUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -110,6 +112,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 menu.setRemovable(SystemCode.REMOVABLE_Y.getCode());
             }
             result = menuMapper.insert(menu);
+            // 清除缓存
+            AuthUtils.clearSystemMenuListCache(result != 0);
         }
         // 修改
         else {
@@ -119,9 +123,10 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                     .eq("editable", SystemCode.EDITABLE_Y.getCode())
                     .ne("status", SystemCode.STATUS_N.getCode());
             result = menuMapper.update(menu, wrapper);
+            // 清除缓存
+            AuthUtils.clearSystemMenuListCache(result != 0);
+            AuthUtils.clearUserMenuListCache(result != 0);
         }
-        // 执行一下缓存方法（方法内自动判断是否开启Redis）
-        this.saveAllMenu2Redis(result);
         return result;
     }
 
@@ -145,7 +150,8 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
                 result[0]++;
             else result[1]++;
         }
-        this.saveAllMenu2Redis(result[0]);
+        // 清除缓存
+        AuthUtils.clearUserMenuListCache(result[0] != 0);
         return result;
     }
 
@@ -194,10 +200,18 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             wrapper1.eq("menu_id", id);
             roleMenuMapper.delete(wrapper1);
         }
-        this.saveAllMenu2Redis(result);
+        // 清除缓存
+        AuthUtils.clearSystemMenuListCache(result != 0);
+        AuthUtils.clearUserMenuListCache(result != 0);
         return result;
     }
 
+    /**
+     * 外部接口：通过角色ID查询菜单
+     *
+     * @param roleId 角色ID。若为0，表示不指定角色ID。
+     * @return 菜单列表
+     */
     @Override
     public List<SysMenu> getMenuListForRole(int roleId) {
         // 获取全部的菜单
@@ -223,29 +237,9 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
         }
     }
 
-    /**
-     * 获取所有的菜单/权限列表，为权限认证框架使用
-     *
-     * @return 菜单实体列表
-     */
-    @Override
-    public List<SysMenu> getMenuListForSaToken() {
-        // 从缓存中读取数据
-        List<SysMenu> menuList = this.getAllMenu4Redis();
-        // 如果命中缓存：从缓存读取
-        if (null != menuList) {
-            return menuList;
-        }
-        // 未命中缓存：从数据库查询
-        else {
-            QueryWrapper<SysMenu> wrapper = new QueryWrapper<>();
-            wrapper.orderByDesc("sort");
-            return menuMapper.selectList(wrapper);
-        }
-    }
 
     /**
-     * 接口实现：通过用户ID查询该用户所拥有的菜单（含按钮，控制权限使用）
+     * 接口实现：通过用户ID查询该用户所拥有的菜单（不含角色、菜单被禁用的菜单权限）
      *
      * @param userId     用户ID
      * @param isOnlyMenu 是否只获取菜单（不含按钮）
@@ -253,24 +247,18 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
      */
     @Override
     public List<SysMenu> getMenuListByUserId(Integer userId, boolean isOnlyMenu) {
-        // 如果只获取菜单列表，则从数据库查询返回
+        // 只获取菜单列表
         if (isOnlyMenu) {
             return menuMapper.selectMenusByUserId(userId, 1);
-        } else {
-            // 先尝试从redis中读取 该用户的权限列表
-            List<SysMenu> menuList = this.getUserMenu4Redis(userId);
-            // 从redis读的不为空，则直接返回
-            if (null != menuList) {
-                return menuList;
-            } else {
-                // 则尝试从数据库读
-                return menuMapper.selectMenusByUserId(userId, 0);
-            }
+        }
+        // 获取菜单+权限列表
+        else {
+            return menuMapper.selectMenusByUserId(userId, 0);
         }
     }
 
     /**
-     * 接口实现：通过角色的ID查询该角色拥有的菜单/权限
+     * 接口实现：通过角色的ID查询该角色拥有的菜单/权限（不含菜单被禁用的菜单权限）
      *
      * @param roleId 角色ID
      * @return 菜单/权限列表
@@ -281,83 +269,121 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     }
 
     /**
-     * 将最新的全部菜单列表保存至Redis数据库
-     * 因为：对菜单基础信息进行增、改、删等操作后，如果开启Redis缓存，需要将Redis中的数据进行更新
+     * 内部调用：获取所有的菜单/权限列表，为权限认证框架使用
      *
-     * @param result 执行增改删的结果
+     * @return 菜单实体列表
      */
-    private List<SysMenu> saveAllMenu2Redis(int result) {
-        // 如果开启Redis，并且Redis服务正常
-        if (result > 0 && exciteConfig.getAllowRedis()) {
-            QueryWrapper<SysMenu> wrapper = new QueryWrapper<>();
-            // 查询全部菜单（无论禁用与否）
-            wrapper.orderByDesc("sort");
-            List<SysMenu> menuList = menuMapper.selectList(wrapper);
-            if (null != menuList) {
-                redisService.set("menu:allMenuList", (Serializable) menuList);
-            }
-            // 同时删除全部Redis中保存的用户
-            Set<Integer> userSet = (Set<Integer>) redisService.get("menu:userList");
-            if (userSet != null) {
-                for (Integer userId : userSet) {
-                    redisService.remove("menu:userMenuList:" + userId);
-                }
-                redisService.remove("menu:userList");
-            }
-            return menuList;
+    @Override
+    public List<SysMenu> getMenuListForSaToken() {
+        // 首先尝试从缓存中读取数据
+        List<SysMenu> menuList = AuthUtils.getSystemMenuListCache(true);
+        // 如果未命中缓存：从缓存读取
+        if (null == menuList) {
+            menuList = menuMapper.selectList(null);
+            // 同时尝试写入缓存
+            AuthUtils.setSystemMenuListCache(null != menuList, menuList);
         }
-        return null;
+        return menuList;
     }
 
-    /**
-     * 从Redis数据库中读取全部的菜单信息
-     *
-     * @return 菜单列表
-     */
-    private List<SysMenu> getAllMenu4Redis() {
-        // 如果开启Redis，则从redis中读取
-        if (exciteConfig.getAllowRedis()) {
-            // redis中没有：存入并返回
-            if (!redisService.hasKey("menu:allMenuList")) {
-                return this.saveAllMenu2Redis(1);
-            }
-            // redis中有：返回
-            return (List<SysMenu>) redisService.get("menu:allMenuList");
-        }
-        // 未开启redis，返回
-        return null;
-    }
 
     /**
-     * 私有方法：从redis中读取 保存当前用户的权限菜单列表至redis
-     * 同时将已经保存至redis的用户集合更新
+     * 内部调用：获取指定用户的菜单/权限列表，为权限认证框架使用
      *
      * @param userId 用户ID
-     * @return 当前用户的权限列表
+     * @return 菜单权限列表
      */
-    private List<SysMenu> getUserMenu4Redis(Integer userId) {
-        // 如果开启Redis，则从redis中读取
-        if (exciteConfig.getAllowRedis()) {
-            // redis中没有：
-            if (!redisService.hasKey("menu:userMenuList:" + userId)) {
-                // 存入并返回
-                List<SysMenu> menuList = menuMapper.selectMenusByUserId(userId, 0);
-                if (null != menuList) {
-                    redisService.set("menu:userMenuList:" + userId, (Serializable) menuList);
-                    Set<Integer> userSet = new HashSet<>();
-                    // 同时把该用户的ID存入Redis
-                    if (redisService.hasKey("menu:userList")) {
-                        userSet = (Set<Integer>) redisService.get("menu:userList");
-                    }
-                    userSet.add(userId);
-                    redisService.set("menu:userList", (Serializable) userSet);
-                }
-                return menuList;
-            }
-            // redis中有：返回
-            return (List<SysMenu>) redisService.get("menu:userMenuList:" + userId);
+    @Override
+    public List<SysMenu> getMenuListByUserIdForSaToken(Integer userId) {
+        // 先尝试从缓存读取
+        List<SysMenu> menuList = AuthUtils.getUserMenuListCache(true, userId);
+        // 如果为空，则从数据库读取
+        if (null == menuList) {
+            menuList = this.getMenuListByUserId(userId, false);
+            // 同时尝试写入缓存
+            AuthUtils.setUserMenuListCache(null != menuList, userId, menuList);
         }
-        // 未开启redis，返回空
-        return null;
+        return menuList;
     }
+
+//    /**
+//     * 将最新的全部菜单列表保存至Redis数据库
+//     * 因为：对菜单基础信息进行增、改、删等操作后，如果开启Redis缓存，需要将Redis中的数据进行更新
+//     *
+//     * @param result 执行增改删的结果
+//     */
+//    private List<SysMenu> saveAllMenu2Redis(int result) {
+//        // 如果开启Redis，并且Redis服务正常
+//        if (result > 0 && exciteConfig.getAllowRedis()) {
+//            QueryWrapper<SysMenu> wrapper = new QueryWrapper<>();
+//            // 查询全部菜单（无论禁用与否）
+//            wrapper.orderByDesc("sort");
+//            List<SysMenu> menuList = menuMapper.selectList(wrapper);
+//            if (null != menuList) {
+//                redisService.set("menu:allMenuList", (Serializable) menuList);
+//            }
+//            // 同时删除全部Redis中保存的用户
+//            Set<Integer> userSet = (Set<Integer>) redisService.get("menu:userList");
+//            if (userSet != null) {
+//                for (Integer userId : userSet) {
+//                    redisService.remove("menu:userMenuList:" + userId);
+//                }
+//                redisService.remove("menu:userList");
+//            }
+//            return menuList;
+//        }
+//        return null;
+//    }
+//
+//    /**
+//     * 从Redis数据库中读取全部的菜单信息
+//     *
+//     * @return 菜单列表
+//     */
+//    private List<SysMenu> getAllMenu4Redis() {
+//        // 如果开启Redis，则从redis中读取
+//        if (exciteConfig.getAllowRedis()) {
+//            // redis中没有：存入并返回
+//            if (!redisService.hasKey("menu:allMenuList")) {
+//                return this.saveAllMenu2Redis(1);
+//            }
+//            // redis中有：返回
+//            return (List<SysMenu>) redisService.get("menu:allMenuList");
+//        }
+//        // 未开启redis，返回
+//        return null;
+//    }
+//
+//    /**
+//     * 私有方法：从redis中读取 保存当前用户的权限菜单列表至redis
+//     * 同时将已经保存至redis的用户集合更新
+//     *
+//     * @param userId 用户ID
+//     * @return 当前用户的权限列表
+//     */
+//    private List<SysMenu> getUserMenu4Redis(Integer userId) {
+//        // 如果开启Redis，则从redis中读取
+//        if (exciteConfig.getAllowRedis()) {
+//            // redis中没有：
+//            if (!redisService.hasKey("menu:userMenuList:" + userId)) {
+//                // 存入并返回
+//                List<SysMenu> menuList = menuMapper.selectMenusByUserId(userId, 0);
+//                if (null != menuList) {
+//                    redisService.set("menu:userMenuList:" + userId, (Serializable) menuList);
+//                    Set<Integer> userSet = new HashSet<>();
+//                    // 同时把该用户的ID存入Redis
+//                    if (redisService.hasKey("menu:userList")) {
+//                        userSet = (Set<Integer>) redisService.get("menu:userList");
+//                    }
+//                    userSet.add(userId);
+//                    redisService.set("menu:userList", (Serializable) userSet);
+//                }
+//                return menuList;
+//            }
+//            // redis中有：返回
+//            return (List<SysMenu>) redisService.get("menu:userMenuList:" + userId);
+//        }
+//        // 未开启redis，返回空
+//        return null;
+//    }
 }

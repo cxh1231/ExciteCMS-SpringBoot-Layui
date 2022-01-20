@@ -48,7 +48,13 @@ public enum SystemCode {
      * 记录禁止删除：0
      */
     REMOVABLE_N(0, "记录禁止删除"),
+    /**
+     * 是否删除：是 - 0
+     */
     DELETE_Y(1, "已删除"),
+    /**
+     * 是否删除：否 - 0
+     */
     DELETE_N(0, "未删除");
 
 

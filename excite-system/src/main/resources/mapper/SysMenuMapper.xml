@@ -47,13 +47,16 @@
         LEFT JOIN sys_role_menu rm ON ur.role_id = rm.role_id
         LEFT JOIN sys_menu m ON rm.menu_id = m.id
         WHERE ur.user_id = #{userId}
-        <if test="isOnlyMenu == 1">
-            AND m.type != 'B'
-        </if>
         AND u.status != 0
+        AND u.is_delete = 0
         AND r.status != 0
+        AND r.is_delete = 0
         AND m.status != 0
         AND rm.role_id IS NOT NULL
+        <if test="isOnlyMenu == 1">
+            AND m.type != 'B'
+            ORDER BY m.sort DESC
+        </if>
     </select>
 
 

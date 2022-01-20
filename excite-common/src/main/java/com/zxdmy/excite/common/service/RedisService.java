@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -134,7 +135,7 @@ public class RedisService {
      * @return 过期时间（秒），-1表示永久有效，-2表示不存在
      */
     public Long getExpire(String key) {
-        return redisTemplate.getExpire(redisConfig.getAllowPrefix() ? redisConfig.getPrefix() + key: key, TimeUnit.SECONDS);
+        return redisTemplate.getExpire(redisConfig.getAllowPrefix() ? redisConfig.getPrefix() + key : key, TimeUnit.SECONDS);
     }
 
     /**
@@ -147,6 +148,19 @@ public class RedisService {
             redisTemplate.delete(redisConfig.getAllowPrefix() ? redisConfig.getPrefix() + key : key);
         }
     }
+
+    /**
+     * 删除包含指定前缀的值
+     *
+     * @param prefix 键
+     */
+    public void removeByPrefix(String prefix) {
+        Set<String> keys = redisTemplate.keys((redisConfig.getAllowPrefix() ? redisConfig.getPrefix() + prefix : prefix) + "*");
+        if (null != keys && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+    }
+
 
     /**
      * 通过键移出某些值

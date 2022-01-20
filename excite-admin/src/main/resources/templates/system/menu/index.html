@@ -86,12 +86,12 @@
             height: 'full-52', //高度最大化减去差值
             cols: [
                 [
-                    {type: "checkbox", width: 50,},
+                    {type: "checkbox", width: 50},
                     {field: 'id', title: 'ID', width: 50, align: 'center'},
                     {field: 'sort', title: '排序', width: 50, align: 'center'},
-                    {field: 'title', title: '菜单名称', minWidth: 250,},
-                    {field: 'href', title: '菜单链接', minWidth: 150,},
-                    {field: 'permission', title: '权限标识', minWidth: 150,},
+                    {field: 'title', title: '菜单名称', minWidth: 250},
+                    {field: 'href', title: '菜单链接', minWidth: 150},
+                    {field: 'permission', title: '权限标识', minWidth: 150},
                     {
                         field: 'type', title: '类型', width: 100, align: 'center', templet: function (d) {
                             if (d.type === "N") {
@@ -138,7 +138,7 @@
                 ]
             ],
             done: function () {
-                table_menu.expandAll();  // 加载完成后，默认选择全部展开
+                table_menu.expandAll()  // 加载完成后，默认选择全部展开
                 // 然后把菜单折叠起来
                 // for (let i = 0; i < menus.length; i++) {
                 //     table_menu.fold(menus[i]);

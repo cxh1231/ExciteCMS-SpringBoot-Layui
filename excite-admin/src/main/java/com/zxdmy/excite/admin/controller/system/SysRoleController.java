@@ -216,20 +216,29 @@ public class SysRoleController extends BaseController {
     /**
      * 接口功能：删除指定角色，包含该角色的权限信息，以及撤销分配给某些用户的角色
      *
-     * @param id 角色ID
+     * @param roleIds 要删除的角色ID列表
      * @return 结果
      */
-    @PostMapping("/remove/{id}")
+    @PostMapping("/delete")
     @ResponseBody
     @AnnotationSaveReLog
-    public BaseResult removeRole(@PathVariable String id) {
+    public BaseResult removeRole(Integer[] roleIds) {
         try {
-            if (roleService.deleteRoleById(Integer.parseInt(id)) > 0) {
-                return success("角色删除成功");
+            int[] result = roleService.deleteRoleById(roleIds);
+            // 没有失败的
+            if (result[1] == 0 && result[2] == 0) {
+                return success(200, "删除成功！");
             }
-            return error(400, "角色删除失败，请重试");
+            // 没有成功的
+            else if (result[0] == 0) {
+                return error(result[1] + "个角色删除失败！" + result[2] + "个角色因已授权用户，请取消授权后再删除！");
+            }
+            // 有成功有失败的
+            else {
+                return success(200, result[0] + "个角色删除成功！" + result[1] + "个角色删除失败！" + result[2] + "个角色已授权用户，请取消授权后再删除！");
+            }
         } catch (Exception e) {
-            return error(400, "error:" + e.getMessage());
+            return error("发生错误:" + e.getMessage());
         }
     }
 

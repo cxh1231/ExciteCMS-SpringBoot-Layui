@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>角色管理</title>
@@ -14,38 +14,35 @@
         <fieldset class="table-search-fieldset">
             <legend>搜索</legend>
             <div class="layui-form layui-form-pane">
-                <!--            <div class="layui-form layui-form-pane" style="margin: 5px 5px 5px 5px">-->
                 <div class="layui-form-item">
-                    <!-- 搜索【角色名】-->
+                    <!-- 搜索【角色名】和【权限字符】-->
                     <div class="layui-inline">
                         <label class="layui-form-label">角色名</label>
                         <div class="layui-input-inline">
-                            <input type="text" id="inputRoleName" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputRoleName" autocomplete="off" class="layui-input" placeholder="请输入角色名"/>
                         </div>
                         <label class="layui-form-label">权限字符</label>
                         <div class="layui-input-inline">
-                            <input type="text" id="inputRolePermission" autocomplete="off" class="layui-input"/>
+                            <input type="text" id="inputRolePermission" autocomplete="off" class="layui-input" placeholder="请输入权限字符"/>
                         </div>
                     </div>
                     <!-- 搜索按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-role-search" data-type="reload">
-                            <i class="layui-icon"></i> 搜 索
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-role-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
                         </button>
-                        <!--                        <button type="button" class="layui-btn layui-btn-primary layui-border-box" id="btn-role-refresh" data-type="refresh">-->
-                        <!--                            <i class="layui-icon"></i> 清 空-->
-                        <!--                        </button>-->
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-box btn-role-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 空
+                        </button>
                     </div>
                 </div>
             </div>
         </fieldset>
-
         <!-- 表格 -->
         <table class="layui-hide" id="table-system-role" lay-filter="table-system-role"></table>
-
     </div>
 </div>
-<!--表格头部工具类（左上）-->
+<!-- 【左上按钮】表格头部工具类（左上）-->
 <script type="text/html" id="toolbar-table-role">
     <div class="layui-btn-container">
         <!-- 【刷新】-->
@@ -62,7 +59,7 @@
         </div>
     </div>
 </script>
-<!--表格每行末尾的操作按钮-->
+<!-- 【行内按钮】表格每行末尾的操作按钮-->
 <script type="text/html" id="tool-table-role">
     <a class="layui-btn layui-btn-xs" lay-event="role-edit">编辑</a>
     <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="role-showUser">授权用户</a>
@@ -78,17 +75,16 @@
             dropdown = layui.dropdown,
             table = layui.table;
 
+        let currPage = 1                    // 定义全局变量：记录当前页码
         // 表格
         let table_role = table.render({
             elem: '#table-system-role',
             url: '/system/role/list',
-            response: {
-                statusCode: 200
-            },
-            toolbar: '#toolbar-table-role', //开启头部工具栏，并为其绑定左侧模板
+            response: {statusCode: 200},
+            toolbar: '#toolbar-table-role',
             defaultToolbar: ['filter', 'exports'],
             title: '用户角色表',
-            height: 'full-158', //高度最大化减去差值
+            height: 'full-158',
             cols: [
                 [
                     {type: "checkbox", width: 50, fixed: 'left'},
@@ -112,52 +108,56 @@
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-role', width: 200}
                 ]
             ],
-            page: true
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_role.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
         });
 
+        // 表格的搜索加载与刷新，几个参数的定义，详见如下注释！
         let active = {
-            // 表格重载
-            reload: function () {
-                // 几个搜索框
-                let roleName = $('#inputRoleName');
-                let rolePermission = $('#inputRolePermission');
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
                 //执行重载
-                table.reload('table-system-role', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: roleName.val(),
-                        permission: rolePermission.val()
+                table_role.reload({
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
+                        name: $('#inputRoleName').val(),
+                        permission: $('#inputRolePermission').val()
                     }
                 });
             },
-            // 表格刷新
+            // 刷新：从第一页开始，检索数据清空
             refresh: function () {
-                //执行重载
-                table.reload('table-system-role', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: "",
-                        permission: ""
-                    }
+                //执行刷新
+                table_role.reload({
+                    page: {curr: 1},                    // 页码
+                    where: {name: "", permission: ""}  // 检索数据清空
                 });
-            },
-
+                $('#inputRoleName').val('')             // 检索栏输入的数据清空
+                $('#inputRolePermission').val('')
+            }
         };
-        $('#btn-role-search').on('click', function () {
+        $('.btn-role-action').on('click', function () {
             let type = $(this).data('type');
             active[type] ? active[type].call(this) : '';
         });
-
 
         // 【头部按钮】监听头部按钮
         table.on('toolbar(table-system-role)', function (obj) {
             let that = this;
             switch (obj.event) {
+                // 【刷新】按钮
+                case "btn-role-refresh":
+                    table_role.reload()
+                    break;
                 // 【添加】角色按钮
                 case "btn-role-add":
-                    let role_add_index = layer.open({
+                    layer.open({
                         title: '添加角色',
                         type: 2,
                         shade: 0.2,
@@ -169,32 +169,18 @@
                             table_role.reload();
                         }
                     });
-                    parent.layer.iframeAuto(role_add_index);
-                    break;
-                // 【刷新】按钮
-                case "btn-role-refresh":
-                    //执行重载
-                    table.reload('table-system-role', {
-                        page: {
-                            curr: 1
-                        }, where: {
-                            name: "",
-                            permission: ""
-                        }
-                    });
                     break;
                 // 【修改状态】下拉菜单，控制状态用
                 case "btn-role-changeStatus":
                     dropdown.render({
                         elem: that,
-                        // elem: '#btn-down-roleStatus',
-                        data: [{
-                            title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'
-                        }, {
-                            title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'
-                        }],
+                        show: true,         // 外部事件触发即显示
+                        data: [
+                            {title: '开启', id: 1, templet: '开启 <i class="fa fa-check"> </i>'},
+                            {title: '禁用', id: 0, templet: '禁用 <i class="fa fa-close"> </i>'}
+                        ],
                         click: function (obj) {
-                            // 选中菜单的ID即为新的status
+                            // 选中的 菜单ID 为新的status
                             let newStatus = obj.id;
                             // 读取所有选中的按钮
                             let roleIds = "";
@@ -203,7 +189,6 @@
                                 roleIds += (checkRoleList[i].id + ",")
                             }
                             roleIds = roleIds.substring(0, roleIds.lastIndexOf(',')); // 去掉末尾的逗号
-                            // console.log(roleIds)
                             // 选中才响应
                             if (roleIds.length > 0) {
                                 let actionText = newStatus === 1 ? "开启" : "禁用"
@@ -211,11 +196,10 @@
                                 layer.confirm('确认要 ' + actionText + ' 选中的菜单吗？', {
                                     title: false,
                                     btn: ['确定', '取消'],
-                                    // 按钮【按钮1】的回调
+                                    // 按钮【确定】的回调
                                     btn1: function (index) {
-                                        // 执行ajax请求
+                                        // 发起 修改角色状态 请求
                                         $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleIds}, function (data) {
-                                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                             if (data.code === 200) {
                                                 layer.msg(data.msg, {time: 3000, icon: 1});
                                                 table_role.reload();
@@ -226,22 +210,52 @@
                                     },
                                 });
                             } else {
-                                layer.msg('请先选择菜单', {time: 2000, icon: 7});
+                                layer.msg('请先选择要修改状态的角色！', {time: 2000, icon: 7});
                             }
                         }
                     });
                     break;
+                // 【删除】按钮（批量删除）
+                case "btn-role-delete":
+                    // 获取选中的数据
+                    let checkRoleList = table.checkStatus('table-system-role').data
+                    if (checkRoleList.length > 0) {
+                        let roleIds = "";
+                        for (let i = 0; i < checkRoleList.length; i++) {
+                            roleIds += (checkRoleList[i].id + ",")
+                        }
+                        roleIds = roleIds.substring(0, roleIds.lastIndexOf(','));
+                        layer.confirm('确认要删除选中的 ' + checkRoleList.length + ' 个角色吗？', {
+                            title: false,
+                            btn: ['确定', '取消'],
+                            closeBtn: 0,        // 不显示右上角的关闭按钮
+                            // 按钮【确定】的回调
+                            btn1: function (index) {
+                                $.post("/system/role/delete", {roleIds: roleIds}, function (data2) {
+                                    if (data2.code === 200) {
+                                        table_role.reload()
+                                        layer.msg(data2.msg, {time: 3000, icon: 1});
+                                    } else {
+                                        layer.msg(data2.msg, {time: 3000, icon: 2});
+                                    }
+                                });
+                            },
+                        });
+                    } else {
+                        layer.msg('请先勾选要删除的角色！', {time: 2000, icon: 7});
+                    }
+                    break;
             }
         });
 
-        // 【行末操作】监听表格行末按钮
+        // 【行操作】监听表格行末按钮
         table.on('tool(table-system-role)', function (obj) {
             let data = obj.data;
             let layEvent = obj.event;
             switch (layEvent) {
-                // 【编辑】按钮
+                // 【编辑】按钮响应事件
                 case "role-edit":
-                    let role_edit_index = layer.open({
+                    layer.open({
                         title: '编辑角色',
                         type: 2,
                         shade: 0.2,
@@ -253,8 +267,8 @@
                             table_role.reload();
                         }
                     });
-                    parent.layer.iframeAuto(role_edit_index);
                     break;
+                // 【授权用户】按钮响应事件
                 case "role-showUser":
                     let user_list_index = layer.open({
                         title: '角色已授权用户列表',
@@ -266,31 +280,43 @@
                         content: '/system/role/goShowUser/' + data.id
                     });
                     layer.full(user_list_index);
-                    parent.layer.iframeAuto(user_list_index);
                     break;
-                // 【删除】按钮
+                // 【删除】按钮响应事件
                 case "role-delete":
-                    // TODO 执行删除的POST操作
-                    layer.msg('删除接口未对接...删除角色：' + data.name)
+                    layer.confirm('确认要删除角色 <b>' + data.name + ' </b>吗？', {
+                        title: false,
+                        btn: ['确定', '取消'],
+                        closeBtn: 0,        // 不显示右上角的关闭按钮
+                        // 按钮【确定】的回调
+                        btn1: function (index) {
+                            $.post("/system/role/delete", {roleIds: data.id}, function (data2) {
+                                if (data2.code === 200) {
+                                    table_role.reload()
+                                    layer.msg(data2.msg, {time: 3000, icon: 1});
+                                } else {
+                                    layer.msg(data2.msg, {time: 3000, icon: 2});
+                                }
+                            });
+                        },
+                    });
                     break;
-
             }
         });
 
-        // 【修改状态】监听switch开关切换事件
+        // 【行操作】修改某行的状态：监听switch开关切换事件
         form.on('switch(check-role-status)', function (data) {
             // 该值是操作之后的值
             let isChecked = data.elem.checked;
             let actionText = isChecked ? "开启" : "禁用"
             let newStatus = isChecked ? "1" : "0"
             let roleId = data.value;
-            layer.confirm('确认要 ' + actionText + ' 此角色？', {
+            layer.confirm('确认要 <b>' + actionText + '</b> 此角色？', {
                 title: false,
                 btn: ['确定', '取消'],
-                // 按钮【按钮1】的回调
+                closeBtn: 0,        // 不显示右上角的关闭按钮
+                // 按钮【确定】的回调
                 btn1: function (index) {
                     $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleId}, function (data2) {
-                        // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                         if (data2.code === 200) {
                             layer.msg(data2.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;
@@ -302,14 +328,8 @@
                         }
                     });
                 },
-                // 按钮【按钮二】的回调
+                // 按钮【取消】的回调
                 btn2: function (index) {
-                    data.elem.checked = !isChecked;
-                    form.render();
-                    layer.close(index);
-                },
-                // 按钮【X】的回调
-                cancel: function (index) {
                     data.elem.checked = !isChecked;
                     form.render();
                     layer.close(index);
