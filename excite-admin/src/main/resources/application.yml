@@ -35,6 +35,28 @@ spring:
       # MySQL 8.x: com.mysql.cj.jdbc.Driver
       # MySQL 5.x: com.mysql.jdbc.Driver
       # driver-class-name: com.mysql.cj.jdbc.Driver
+      # 以下是开启监控相关配置
+      webStatFilter:
+        enabled: true
+      statViewServlet:
+        enabled: true
+        # 设置白名单，不填则允许所有访问
+        allow:
+        url-pattern: /druid/*
+        # 控制台管理用户名和密码
+        login-username: admin
+        login-password: 123456
+      filter:
+        stat:
+          enabled: true
+          # 慢SQL记录
+          log-slow-sql: true
+          slow-sql-millis: 1000
+          merge-sql: true
+        wall:
+          config:
+            multi-statement-allow: true
+
   redis:
     # Redis服务器地址
     host: localhost

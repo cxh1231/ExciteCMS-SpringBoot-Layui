@@ -1,4 +1,4 @@
-package com.zxdmy.excite.admin.controller.develop;
+package com.zxdmy.excite.admin.controller.advanced;
 
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.annotation.IdType;

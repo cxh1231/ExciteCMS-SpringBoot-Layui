@@ -11,6 +11,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -148,5 +150,23 @@ public class HttpServletRequestUtil {
             parametersList.add(name + "=" + value);
         });
         return parametersList;
+    }
+
+    public static String getHostName() {
+        try {
+            return InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            System.out.println(e.getMessage());
+        }
+        return "未知";
+    }
+
+    public static String getHostIp() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            System.out.println(e.getMessage());
+        }
+        return "127.0.0.1";
     }
 }

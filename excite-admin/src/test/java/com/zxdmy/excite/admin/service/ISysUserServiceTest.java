@@ -12,6 +12,7 @@ import cn.hutool.crypto.asymmetric.KeyType;
 import cn.hutool.crypto.asymmetric.RSA;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.power.common.util.RSAUtil;
+import com.zxdmy.excite.framework.oshi.Server;
 import com.zxdmy.excite.system.entity.SysUser;
 import com.zxdmy.excite.system.mapper.SysUserMapper;
 import com.zxdmy.excite.system.service.ISysUserService;
@@ -43,6 +44,13 @@ class ISysUserServiceTest {
     @Autowired
     private ISysUserService userService;
 
+
+    @Test
+    void ServerTest() throws Exception {
+        Server server = new Server();
+        server.copyTo();
+        System.out.println(server);
+    }
 
     /**
      * 生成密钥对
