@@ -17,19 +17,29 @@ public class Jvm implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 当前JVM占用的内存总数(M)
+     * 当前JVM占用的内存总数
      */
-    private double total;
+    private String total;
 
     /**
-     * JVM最大可用内存总数(M)
+     * JVM最大可用内存总数
      */
-    private double max;
+    private String max;
+
+    /**
+     * JVM已用内存数目
+     */
+    private String used;
 
     /**
      * JVM空闲内存(M)
      */
-    private double free;
+    private String free;
+
+    /**
+     * JVM内存使用率
+     */
+    private String usage;
 
     /**
      * JDK版本
@@ -41,87 +51,80 @@ public class Jvm implements Serializable {
      */
     private String home;
 
-    public double getTotal()
-    {
-        return ArithUtils.div(total, (1024 * 1024), 2);
+    public String getTotal() {
+        return total;
     }
 
-    public void setTotal(double total)
-    {
+    public void setTotal(String total) {
         this.total = total;
     }
 
-    public double getMax()
-    {
-        return ArithUtils.div(max, (1024 * 1024), 2);
+    public String getMax() {
+        return max;
     }
 
-    public void setMax(double max)
-    {
+    public void setMax(String max) {
         this.max = max;
     }
 
-    public double getFree()
-    {
-        return ArithUtils.div(free, (1024 * 1024), 2);
+    public String getFree() {
+        return free;
     }
 
-    public void setFree(double free)
-    {
+    public void setFree(String free) {
         this.free = free;
     }
 
-    public double getUsed()
-    {
-        return ArithUtils.div(total - free, (1024 * 1024), 2);
+    public String getUsed() {
+        return used;
     }
 
-    public double getUsage()
-    {
-        return ArithUtils.mul(ArithUtils.div(total - free, total, 4), 100);
+    public void setUsed(String used) {
+        this.used = used;
+    }
+
+    public void setUsage(String usage) {
+        this.usage = usage;
+    }
+
+    public String getUsage() {
+        return usage;
     }
 
     /**
      * 获取JDK名称
      */
-    public String getName()
-    {
+    public String getName() {
         return ManagementFactory.getRuntimeMXBean().getVmName();
     }
 
-    public String getVersion()
-    {
+    public String getVersion() {
         return version;
     }
 
-    public void setVersion(String version)
-    {
+    public void setVersion(String version) {
         this.version = version;
     }
 
-    public String getHome()
-    {
+    public String getHome() {
         return home;
     }
 
-    public void setHome(String home)
-    {
+    public void setHome(String home) {
         this.home = home;
     }
 
     /**
      * JDK启动时间
      */
-    public String getStartTime()
-    {
+    public String getStartTime() {
         return DateUtils.parseDateToStr(DateUtils.YYYY_MM_DD_HH_MM_SS, DateUtils.getServerStartDate());
     }
 
     /**
      * JDK运行时间
      */
-    public String getRunTime()
-    {
+    public String getRunTime() {
         return DateUtils.getDatePoor(DateUtils.getNowDate(), DateUtils.getServerStartDate());
     }
 }

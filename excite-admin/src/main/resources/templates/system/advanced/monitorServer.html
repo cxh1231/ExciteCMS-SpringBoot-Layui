@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>系统监控 - 服务器监控</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header"><b>服务器信息</b></div>
+            <div class="layui-card-body">
+                <table class="layui-table">
+                    <colgroup>
+                        <col width="25%">
+                        <col width="25%">
+                        <col width="25%">
+                        <col width="25%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>服务器名称</th>
+                        <th>服务器IP</th>
+                        <th>操作系统</th>
+                        <th>系统架构</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="computerName">　</td>
+                        <td id="computerIp">　</td>
+                        <td id="osName">　</td>
+                        <td id="osArch">　</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header"><b>CPU信息</b></div>
+            <div class="layui-card-body">
+                <table class="layui-table">
+                    <colgroup>
+                        <col width="50%">
+                        <col width="50%">
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>属性</th>
+                        <th>值</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>核心数</td>
+                        <td id="cpuNum"></td>
+                    </tr>
+                    <tr>
+                        <td>用户使用率</td>
+                        <td id="cpuUsed"></td>
+                    </tr>
+                    <tr>
+                        <td>系统使用率</td>
+                        <td id="cpuSys"></td>
+                    </tr>
+                    <tr>
+                        <td>当前空闲率</td>
+                        <td id="cpuFree"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md6">
+        <div class="layui-card">
+            <div class="layui-card-header"><b>内存信息</b></div>
+            <div class="layui-card-body">
+                <table class="layui-table">
+                    <colgroup>
+                        <col>
+                        <col width="33%">
+                        <col width="33%">
+                        <col>
+                    </colgroup>
+                    <thead>
+                    <tr>
+                        <th>属性</th>
+                        <th>内存</th>
+                        <th>JVM</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td>总内存</td>
+                        <td id="memTotal"></td>
+                        <td id="jvmTotal"></td>
+                    </tr>
+                    <tr>
+                        <td>已用内存</td>
+                        <td id="memUsed"></td>
+                        <td id="jvmUsed"></td>
+                    </tr>
+                    <tr>
+                        <td>剩余内存</td>
+                        <td id="memFree"></td>
+                        <td id="jvmFree"></td>
+                    </tr>
+                    <tr>
+                        <td>使用率</td>
+                        <td id="memUsage"></td>
+                        <td id="jvmUsage"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header"><b>Java虚拟机信息</b></div>
+            <div class="layui-card-body">
+                <table class="layui-table">
+                    <colgroup>
+                        <col width="20%">
+                        <col width="40%">
+                        <col width="20%">
+                        <col width="20%">
+                    </colgroup>
+                    <tr>
+                        <th>Java名称</th>
+                        <th id="jvmName"></th>
+                        <th>Java版本</th>
+                        <th id="jvmVersion"></th>
+                    </tr>
+                    <tr>
+                        <td>安装路径</td>
+                        <td id="jvmHome"></td>
+                        <td>启动时间</td>
+                        <td id="jvmStartTime"></td>
+                    </tr>
+                    <tr>
+                        <td>项目路径</td>
+                        <td id="sysUserDir"></td>
+                        <td>运行时长</td>
+                        <td id="jvmRunTime"></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md12">
+        <div class="layui-card">
+            <div class="layui-card-header"><b>磁盘信息</b></div>
+            <div class="layui-card-body">
+                <table class="layui-hide" id="table-monitor-server-disk" lay-filter="table-monitor-server-disk"></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS脚本 -->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script>
+    layui.use(['form', 'jquery'], function () {
+        const $ = layui.jquery,
+            form = layui.form,
+            layer = layui.layer,
+            table = layui.table;
+
+        // 打开网页执行
+        $(function () {
+            // 最开始先执行一遍
+            let index = layer.load(1, {shade: [0.5, '#fff']});
+            refreshPage()
+
+            // 后边每隔10秒刷新一次
+            let interval = setInterval(refreshPage, 10000);
+
+            // 刷新网页的方法
+            function refreshPage() {
+                // 执行请求
+                $.post("/system/monitor/server", function (data) {
+                    // 请求成功，正常刷新
+                    if (data.code === 200) {
+                        let d = data.data
+                        // 服务器信息
+                        $("#computerName").html(d.sys.computerName)
+                        $("#computerIp").html(d.sys.computerIp)
+                        $("#osName").html(d.sys.osName)
+                        $("#osArch").html(d.sys.osArch)
+                        // CPU信息
+                        $("#cpuNum").html(d.cpu.cpuNum)
+                        $("#cpuUsed").html(d.cpu.used + ' %')
+                        $("#cpuSys").html(d.cpu.sys + ' %')
+                        $("#cpuFree").html(d.cpu.free + ' %')
+                        // 内存信息 - 内存
+                        $("#memTotal").html(d.mem.total)
+                        $("#memUsed").html(d.mem.used)
+                        $("#memFree").html(d.mem.free)
+                        $("#memUsage").html(d.mem.usage)
+                        // 内存信息 - JVM
+                        $("#jvmTotal").html(d.jvm.total)
+                        $("#jvmUsed").html(d.jvm.used)
+                        $("#jvmFree").html(d.jvm.free)
+                        $("#jvmUsage").html(d.jvm.usage)
+                        // JVM信息
+                        $("#jvmName").html(d.jvm.name)
+                        $("#jvmVersion").html(d.jvm.version)
+                        $("#jvmHome").html(d.jvm.home)
+                        $("#jvmStartTime").html(d.jvm.startTime)
+                        $("#jvmRunTime").html(d.jvm.runTime)
+                        $("#sysUserDir").html(d.sys.userDir)
+                        // 磁盘信息
+                        table.render({
+                            elem: '#table-monitor-server-disk',
+                            cols: [
+                                [
+                                    {field: 'dirName', title: '盘符'},
+                                    {field: 'sysTypeName', title: '文件系统'},
+                                    {field: 'typeName', title: '盘符名称'},
+                                    {field: 'total', title: '总大小'},
+                                    {field: 'free', title: '剩余大小'},
+                                    {field: 'used', title: '已使用'},
+                                    {field: 'usage', title: '已用百分比'}
+                                ]
+                            ],
+                            data: d.sysFiles,
+                            // skin: 'line', //表格风格
+                            even: true
+                        });
+                    }
+                    // 请求失败，弹窗提示，并停止定时器
+                    else {
+                        layer.msg(data.msg, {icon: 2, time: 3000});
+                        clearInterval(interval);
+                    }
+                    layer.close(index)
+                });
+            }
+        })
+
+
+    });
+</script>
+</body>
+</html>

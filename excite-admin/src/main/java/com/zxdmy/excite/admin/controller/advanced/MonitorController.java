@@ -5,6 +5,7 @@ import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.framework.oshi.Server;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -20,11 +21,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/system/monitor")
 public class MonitorController extends BaseController {
 
-    @GetMapping("/server")
+
+    @RequestMapping("server")
+    public String goServerMonitor() {
+        return "system/advanced/monitorServer";
+    }
+
+    @PostMapping("/server")
     @ResponseBody
-    public BaseResult serverMonitor() throws Exception {
+    public BaseResult serverMonitor() {
         Server server = new Server();
-        server.copyTo();
-        return success(server);
+        try {
+            server.copyTo();
+            return success("获取服务器信息成功！", server);
+        } catch (Exception e) {
+            return error("获取服务器信息失败！");
+        }
     }
 }

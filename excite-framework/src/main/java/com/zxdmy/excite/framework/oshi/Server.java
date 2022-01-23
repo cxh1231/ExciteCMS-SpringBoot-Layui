@@ -143,9 +143,12 @@ public class Server implements Serializable {
      * 设置内存信息
      */
     private void setMemInfo(GlobalMemory memory) {
-        mem.setTotal(memory.getTotal());
-        mem.setUsed(memory.getTotal() - memory.getAvailable());
-        mem.setFree(memory.getAvailable());
+        long total = memory.getTotal();
+        long used = memory.getTotal() - memory.getAvailable();
+        mem.setTotal(convertFileSize(total));
+        mem.setUsed(convertFileSize(used));
+        mem.setFree(convertFileSize(memory.getAvailable()));
+        mem.setUsage(ArithUtils.mul(ArithUtils.div(used, total, 4), 100) + " %");
     }
 
     /**
@@ -163,11 +166,22 @@ public class Server implements Serializable {
     /**
      * 设置Java虚拟机
      */
-    private void setJvmInfo() throws UnknownHostException {
+    private void setJvmInfo() {
         Properties props = System.getProperties();
-        jvm.setTotal(Runtime.getRuntime().totalMemory());
-        jvm.setMax(Runtime.getRuntime().maxMemory());
-        jvm.setFree(Runtime.getRuntime().freeMemory());
+        // 总内存
+        long total = Runtime.getRuntime().totalMemory();
+        jvm.setTotal(convertFileSize(total));
+        // 最大内存
+        long max = Runtime.getRuntime().maxMemory();
+        jvm.setMax(convertFileSize(max));
+        // 空闲
+        long free = Runtime.getRuntime().freeMemory();
+        jvm.setFree(convertFileSize(free));
+        // 已用
+        jvm.setUsed(convertFileSize(total - free));
+        // 使用率
+        jvm.setUsage(ArithUtils.mul(ArithUtils.div(total - free, total, 4), 100) + " %");
+        // 版本参数
         jvm.setVersion(props.getProperty("java.version"));
         jvm.setHome(props.getProperty("java.home"));
     }
@@ -189,7 +203,7 @@ public class Server implements Serializable {
             sysFile.setTotal(convertFileSize(total));
             sysFile.setFree(convertFileSize(free));
             sysFile.setUsed(convertFileSize(used));
-            sysFile.setUsage(ArithUtils.mul(ArithUtils.div(used, total, 4), 100));
+            sysFile.setUsage(ArithUtils.mul(ArithUtils.div(used, total, 4), 100) + " %");
             sysFiles.add(sysFile);
         }
     }

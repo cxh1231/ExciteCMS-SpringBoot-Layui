@@ -47,7 +47,7 @@ public class GeneratorController extends BaseController {
      */
     @RequestMapping("generator")
     public String generatorIndex() {
-        return "system/develop/generator";
+        return "system/advanced/generator";
     }
 
     @GetMapping("/generator/list")

@@ -22,12 +22,12 @@ public class SysFile implements Serializable {
     private String dirName;
 
     /**
-     * 盘符类型
+     * 文件系统
      */
     private String sysTypeName;
 
     /**
-     * 文件类型
+     * 盘符名称
      */
     private String typeName;
 
@@ -49,7 +49,7 @@ public class SysFile implements Serializable {
     /**
      * 资源的使用率
      */
-    private double usage;
+    private String usage;
 
     public String getDirName() {
         return dirName;
@@ -99,11 +99,11 @@ public class SysFile implements Serializable {
         this.used = used;
     }
 
-    public double getUsage() {
+    public String getUsage() {
         return usage;
     }
 
-    public void setUsage(double usage) {
+    public void setUsage(String usage) {
         this.usage = usage;
     }
 }
