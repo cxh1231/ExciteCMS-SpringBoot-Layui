@@ -34,9 +34,11 @@
                     </div>
                     <!-- 搜索按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-requestLog-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-requestLog-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
                         </button>
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-requestLog-refresh" data-type="refresh"><i class="layui-icon"></i> 清 除
+                        <button type="button" class="layui-btn layui-btn-primary btn-requestLog-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 除
                         </button>
                     </div>
                 </div>
@@ -53,7 +55,10 @@
     <div class="layui-btn-container">
         <!-- 【刷新】-->
         <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-requestLog-refresh"><i class="fa fa-refresh"></i></button>
+        <!-- 【删除】 -->
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btn-requestLog-delete"><i class="fa fa-trash-o"></i> 删除</button>
     </div>
+
 
 </script>
 <!--表格每行末尾的操作按钮-->
@@ -62,7 +67,6 @@
 </script>
 <!-- 点击行末【详情】后的弹窗内容 -->
 <div id="dom_req_details" style="display: none;">
-    <!--    <div class="layuimini-container">-->
     <div class="layuimini-main">
         <div>
             <div class="layui-form-item">
@@ -110,7 +114,6 @@
 
         </div>
     </div>
-    <!--    </div>-->
 </div>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
@@ -122,14 +125,13 @@
             form = layui.form,
             laydate = layui.laydate,
             table = layui.table;
+        let currPage = 1                    // 定义全局变量：记录当前页码
 
         // 表格
         let table_requestLog = table.render({
             elem: '#table-system-requestLog',
             url: '/system/log/requestList',
-            response: {
-                statusCode: 200
-            },
+            response: {statusCode: 200},
             height: 'full-158', //高度最大化减去差值
             toolbar: '#toolbar-table-requestLog', //开启头部工具栏，并为其绑定左侧模板
             defaultToolbar: ['filter', 'exports'],
@@ -156,39 +158,44 @@
                     {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-requestLog', width: 95}
                 ]
             ],
-            page: true
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_requestLog.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
         });
 
         // 表格重载
         let active = {
-            reload: function () {
-                // 获取几个搜索框的数据
-                let userId = $('#inputUserId');
-                let startDate = $('#inputDateStart');
-                let endDate = $('#inputDateEnd');
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
                 //执行重载
                 table.reload('table-system-requestLog', {
-                    //重新从第 1 页开始
-                    page: {curr: 1},
-                    where: {
-                        userId: userId.val(),
-                        startDate: startDate.val(),
-                        endDate: endDate.val()
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
+                        userId: $('#inputUserId').val(),
+                        startDate: $('#inputDateStart').val(),
+                        endDate: $('#inputDateEnd').val()
                     }
                 });
             },
+            // 刷新：从第一页开始，检索数据清空
             refresh: function () {
-                //执行重载
+                //执行刷新
                 table.reload('table-system-requestLog', {
-                    page: {curr: 1}, where: {}
+                    page: {curr: 1},                                    // 页码
+                    where: {userId: "", startDate: "", endDate: ""}     // 检索数据清空
                 });
-            }
+                $('#inputUserId').val('')
+                $('#inputDateStart').val('')
+                $('#inputDateEnd').val('')
+            },
         };
-        $('#btn-requestLog-search').on('click', function () {
-            let type = $(this).data('type');
-            active[type] ? active[type].call(this) : '';
-        });
-        $('#btn-requestLog-refresh').on('click', function () {
+        // 搜索或清空按钮
+        $('.btn-requestLog-action').on('click', function () {
             let type = $(this).data('type');
             active[type] ? active[type].call(this) : '';
         });
@@ -242,11 +249,45 @@
 
         // 【头部按钮】监听头部按钮
         table.on('toolbar(table-system-requestLog)', function (obj) {
-            console.log(obj.event)
             switch (obj.event) {
                 // 【刷新】按钮
                 case "btn-requestLog-refresh":
-                    active["reload"] ? active["reload"].call(this) : '';
+                    table_requestLog.reload()
+                    break;
+                // 【删除】按钮（批量删除）
+                case "btn-requestLog-delete":
+                    // 获取选中的数据（以下的操作，逻辑基本同 修改状态 部分）
+                    let checkLogList = table.checkStatus('table-system-requestLog').data
+                    let logIds = "";
+                    for (let i = 0; i < checkLogList.length; i++) {
+                        logIds += (checkLogList[i].id + ",")
+                    }
+                    logIds = logIds.substring(0, logIds.lastIndexOf(','));
+                    if (logIds.length > 0) {
+                        // 删除用户 - 第 1 次确认
+                        layer.confirm("<a style='color: red'>确认要 删除 选中的日志吗？</a>", {
+                            icon: 3, title: '删除日志确认【1/2】'
+                        }, function (index) {
+                            layer.close(index);
+                            // 删除用户 - 第 2 次确认
+                            layer.confirm("<a style='color: red'>真的要 删除 选中的日志吗？删除后不可恢复！</a>", {
+                                icon: 3, title: '删除日志确认【2/2】'
+                            }, function (index) {
+                                // 发起 删除用户 请求
+                                $.post("/system/log/request/delete", {logIds: logIds}, function (d) {
+                                    // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                    if (d.code === 200) {
+                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                        table_requestLog.reload()
+                                    } else {
+                                        layer.msg(d.msg, {time: 3000, icon: 2});
+                                    }
+                                });
+                            });
+                        });
+                    } else {
+                        layer.msg('请勾选需要删除的日志记录！', {time: 2000, icon: 7});
+                    }
                     break;
             }
         });
@@ -256,7 +297,7 @@
             let data = obj.data;
             let layEvent = obj.event;
             switch (layEvent) {
-                // 【编辑】按钮
+                // 【详情】按钮
                 case "requestLog-details":
                     layer.open({
                         type: 1,

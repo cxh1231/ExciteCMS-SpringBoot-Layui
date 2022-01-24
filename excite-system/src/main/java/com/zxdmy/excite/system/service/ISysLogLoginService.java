@@ -13,5 +13,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * @since 2021-12-28
  */
 public interface ISysLogLoginService extends IService<SysLogLogin> {
-    Page<SysLogLogin> getPage(Integer current, Integer size);
+
+    Page<SysLogLogin> getPage(Integer current, Integer size,String userId, String ip,String startDate, String endDate);
+
+    int deleteLog(Integer[] logIds);
 }

@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
     <link rel="stylesheet" href="/css/public.css" media="all">
     <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="/lib/highlight/highlight.min.css">
 </head>
 <body>
 <div class="layuimini-container">
@@ -17,9 +18,14 @@
                 <div class="layui-form-item">
                     <div class="layui-inline">
                         <!-- 用户ID-->
-                        <label class="layui-form-label" style="width: 100px">用户ID</label>
+                        <label class="layui-form-label" style="width: 80px">用户ID</label>
                         <div class="layui-input-inline" style="width: 150px">
                             <input type="text" id="inputUserId" autocomplete="off" class="layui-input" placeholder="输入ID"/>
+                        </div>
+                        <!-- 登录IP-->
+                        <label class="layui-form-label" style="width: 50px">IP</label>
+                        <div class="layui-input-inline" style="width: 150px">
+                            <input type="text" id="inputIp" autocomplete="off" class="layui-input" placeholder="输入ID"/>
                         </div>
                         <!-- 时间范围选择 -->
                         <label class="layui-form-label" style="width: 100px">日期范围</label>
@@ -33,7 +39,11 @@
                     </div>
                     <!-- 搜索按钮 -->
                     <div class="layui-inline">
-                        <button type="button" class="layui-btn layui-btn-primary layui-border-green" id="btn-user-search" data-type="reload"><i class="layui-icon"></i> 搜 索
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-loginLog-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary btn-loginLog-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 除
                         </button>
                     </div>
                 </div>
@@ -41,42 +51,80 @@
         </fieldset>
 
         <!-- 表格 -->
-        <table class="layui-hide" id="table-system-requestLog" lay-filter="table-system-requestLog"></table>
+        <table class="layui-hide" id="table-system-loginLog" lay-filter="table-system-loginLog"></table>
 
     </div>
 </div>
 <!--表格头部工具类（左上）-->
-<script type="text/html" id="toolbar-table-requestLog">
+<script type="text/html" id="toolbar-table-loginLog">
     <div class="layui-btn-container">
         <!-- 【刷新】-->
-        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-requestLog-refresh"><i class="fa fa-refresh"></i></button>
+        <button class="layui-btn layui-btn-sm layuimini-btn-primary" lay-event="btn-loginLog-refresh"><i class="fa fa-refresh"></i></button>
+        <!-- 【删除】 -->
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btn-loginLog-delete"><i class="fa fa-trash-o"></i> 删除</button>
     </div>
 
 </script>
 <!--表格每行末尾的操作按钮-->
-<script type="text/html" id="tool-table-requestLog">
-    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="requestLog-details">详情</a>
-    <!--    <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="requestLog-delete">删除</a>-->
+<script type="text/html" id="tool-table-loginLog">
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="loginLog-details">详情</a>
 </script>
+<!-- 点击行末【详情】后的弹窗内容 -->
+<div id="dom_login_details" style="display: none;">
+    <div class="layuimini-main">
+        <div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>登录账号：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserAccount"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>用户ID：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserId"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>请求IP：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogIp"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>用户UA：</b></label>
+                <div class="layui-input-block">
+                    <div class="layui-form-mid" id="reqLogUserAgent"></div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label"><b>登录结果：</b></label>
+                <div class="layui-input-block">
+                    <pre><code class="language-json" id="logResData"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <!--引入JS文件-->
 <script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
 <script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/highlight/highlight.min.js"></script>
 <script>
     layui.use(['table'], function () {
         let $ = layui.jquery,
             form = layui.form,
             laydate = layui.laydate,
             table = layui.table;
+        let currPage = 1                    // 定义全局变量：记录当前页码
 
         // 表格
-        let table_requestLog = table.render({
-            elem: '#table-system-requestLog',
+        let table_loginLog = table.render({
+            elem: '#table-system-loginLog',
             url: '/system/log/loginList',
-            response: {
-                statusCode: 200
-            },
+            response: {statusCode: 200},
             height: 'full-158', //高度最大化减去差值
-            toolbar: '#toolbar-table-requestLog', //开启头部工具栏，并为其绑定左侧模板
+            toolbar: '#toolbar-table-loginLog', //开启头部工具栏，并为其绑定左侧模板
             defaultToolbar: ['filter', 'exports'],
             title: '用户登录日志表',
             cols: [
@@ -98,46 +146,53 @@
                         }
                     },
                     {field: 'createTime', title: '操作时间', align: 'center', width: 200},
-                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-requestLog', width: 95}
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-loginLog', width: 95}
                 ]
             ],
-            page: true
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_loginLog.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
         });
 
         // 表格重载
         let active = {
-            reload: function () {
-                // 几个搜索框
-                let roleName = $('#inputRoleName');
-                let rolePermission = $('#inputRolePermission');
+            // 搜索：从第一页开始，检索数据不变
+            search: function () {
                 //执行重载
-                table.reload('table-system-requestLog', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: roleName.val(),
-                        permission: rolePermission.val()
+                table_loginLog.reload({
+                    page: {curr: 1},            // 页码
+                    where: {                    // 检索数据
+                        userId: $('#inputUserId').val(),
+                        ip: $('#inputIp').val(),
+                        startDate: $('#inputDateStart').val(),
+                        endDate: $('#inputDateEnd').val()
                     }
                 });
             },
+            // 刷新：从第一页开始，检索数据清空
             refresh: function () {
-                //执行重载
-                table.reload('table-system-requestLog', {
-                    page: {
-                        curr: 1         //重新从第 1 页开始
-                    }, where: {
-                        name: "",
-                        permission: ""
-                    }
+                //执行刷新
+                table_loginLog.reload({
+                    page: {curr: 1},                                    // 页码
+                    where: {}     // 检索数据清空
                 });
-            }
+                $('#inputUserId').val('')
+                $('#inputIp').val('')
+                $('#inputDateStart').val('')
+                $('#inputDateEnd').val('')
+            },
         };
-        $('#btn-requestLog-search').on('click', function () {
+        $('.btn-loginLog-action').on('click', function () {
             let type = $(this).data('type');
             active[type] ? active[type].call(this) : '';
         });
 
-//日期范围
+        //日期范围
         let dateStart = laydate.render({
             elem: '#inputDateStart',
             max: 1, // 最大时间为下一天的0点
@@ -172,54 +227,131 @@
         });
 
         // 【头部按钮】监听头部按钮
-        table.on('toolbar(table-system-requestLog)', function (obj) {
-            console.log(obj.event)
+        table.on('toolbar(table-system-loginLog)', function (obj) {
             switch (obj.event) {
                 // 【刷新】按钮
-                case "btn-requestLog-refresh":
+                case "btn-loginLog-refresh":
                     //执行重载
-                    table.reload('table-system-requestLog', {
-                        page: {
-                            curr: 1
-                        }, where: {
-                            name: "",
-                            permission: ""
-                        }
-                    });
+                    table_loginLog.reload();
+                    break;
+                // 【删除】按钮（批量删除）
+                case "btn-loginLog-delete":
+                    // 获取选中的数据（以下的操作，逻辑基本同 修改状态 部分）
+                    let checkLogList = table.checkStatus('table-system-loginLog').data
+                    let logIds = "";
+                    for (let i = 0; i < checkLogList.length; i++) {
+                        logIds += (checkLogList[i].id + ",")
+                    }
+                    logIds = logIds.substring(0, logIds.lastIndexOf(','));
+                    if (logIds.length > 0) {
+                        // 删除用户 - 第 1 次确认
+                        layer.confirm("<a style='color: red'>确认要 删除 选中的日志吗？</a>", {
+                            icon: 3, title: '删除日志确认【1/2】'
+                        }, function (index) {
+                            layer.close(index);
+                            // 删除用户 - 第 2 次确认
+                            layer.confirm("<a style='color: red'>真的要 删除 选中的日志吗？删除后不可恢复！</a>", {
+                                icon: 3, title: '删除日志确认【2/2】'
+                            }, function (index) {
+                                // 发起 删除用户 请求
+                                $.post("/system/log/login/delete", {logIds: logIds}, function (d) {
+                                    // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                                    if (d.code === 200) {
+                                        layer.msg(d.msg, {time: 3000, icon: 1});
+                                        table_loginLog.reload()
+                                    } else {
+                                        layer.msg(d.msg, {time: 3000, icon: 2});
+                                    }
+                                });
+                            });
+                        });
+                    } else {
+                        layer.msg('请勾选需要删除的日志记录！', {time: 2000, icon: 7});
+                    }
                     break;
             }
         });
 
-
         // 【行末操作】监听表格行末按钮
-        table.on('tool(table-system-requestLog)', function (obj) {
+        table.on('tool(table-system-loginLog)', function (obj) {
             let data = obj.data;
             let layEvent = obj.event;
             switch (layEvent) {
-                // 【编辑】按钮
-                case "requestLog-details":
-                    let reqLog_details_index = layer.open({
-                        title: '编辑角色',
-                        type: 2,
+                // 【详情】按钮
+                case "loginLog-details":
+                    layer.open({
+                        type: 1,
                         shade: 0.2,
-                        maxmin: true,
+                        title: '登录日志详情',
+                        skin: 'layui-layer-prompt',
                         shadeClose: true,
-                        area: ['600px', '500px'],
-                        content: '/system/log/login/detail/' + data.id,
-                        end: function () {
-
+                        area: ['600px', '450px'],
+                        content: $("#dom_login_details"),
+                        success: function (layero, index) {
+                            $("#reqLogUserId").html(data.userId)
+                            $("#reqLogUserAccount").html(data.userAccount)
+                            $("#reqLogIp").html(data.ip)
+                            $("#reqLogUserAgent").html(data.userAgent)
+                            // 登录成功
+                            if (1 === data.status) {
+                                $("#logResData").html("登录成功！")
+                            } else {
+                                $("#logResData").html(format(data.resData, false))
+                            }
                         }
                     });
-                    parent.layer.iframeAuto(reqLog_details_index);
-                    break;
-                // 【删除】按钮
-                case "role-delete":
-                    // TODO 执行删除的POST操作
-                    layer.msg('删除接口未对接...删除角色：' + data.name)
                     break;
             }
         });
     });
+
+    hljs.configure({
+        tabReplace: '    ', // 4 spaces
+    });
+    hljs.highlightAll()
+
+    // JSON字符串格式化工具
+    function format(txt, compress/*是否为压缩模式*/) {
+        // 缩进字符
+        let indentChar = '   ';
+        if (/^\s*$/.test(txt)) {
+            // console.log('数据为空,无法格式化! ');
+            return txt;
+        }
+        let data = "";
+        try {
+            data = eval('(' + txt + ')');
+        } catch (e) {
+            // console.log('数据源语法错误,格式化失败! 错误信息: ' + e.description);
+            return txt;
+        }
+        let draw = [], last = false, This = this, line = compress ? '' : '\n', nodeCount = 0, maxDepth = 0;
+
+        let notify = function (name, value, isLast, indent/*缩进*/, formObj) {
+            nodeCount++;/*节点计数*/
+            for (var i = 0, tab = ''; i < indent; i++) tab += indentChar;/* 缩进HTML */
+            tab = compress ? '' : tab;/*压缩模式忽略缩进*/
+            maxDepth = ++indent;/*缩进递增并记录*/
+            if (value && value.constructor === Array) {/*处理数组*/
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + '[' + line);/*缩进'[' 然后换行*/
+                for (var i = 0; i < value.length; i++)
+                    notify(i, value[i], i === value.length - 1, indent, false);
+                draw.push(tab + ']' + (isLast ? line : (',' + line)));/*缩进']'换行,若非尾元素则添加逗号*/
+            } else if (value && typeof value == 'object') {/*处理对象*/
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + '{' + line);/*缩进'{' 然后换行*/
+                var len = 0, i = 0;
+                for (var key in value) len++;
+                for (var key in value) notify(key, value[key], ++i === len, indent, true);
+                draw.push(tab + '}' + (isLast ? line : (',' + line)));/*缩进'}'换行,若非尾元素则添加逗号*/
+            } else {
+                if (typeof value == 'string') value = '"' + value + '"';
+                draw.push(tab + (formObj ? ('"' + name + '":') : '') + value + (isLast ? '' : ',') + line);
+            }
+        };
+        var isLast = true, indent = 0;
+        notify('', data, isLast, indent, false);
+        return draw.join('');
+    }
 </script>
 </body>
 </html>

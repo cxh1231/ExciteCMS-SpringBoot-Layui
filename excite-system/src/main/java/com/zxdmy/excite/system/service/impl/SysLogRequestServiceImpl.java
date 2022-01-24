@@ -10,6 +10,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 /**
  * <p>
  * 服务实现类
@@ -25,11 +27,24 @@ public class SysLogRequestServiceImpl extends ServiceImpl<SysLogRequestMapper, S
     SysLogRequestMapper logRequestMapper;
 
     @Override
-    public Page<SysLogRequest> getPage(Integer current, Integer size) {
+    public Page<SysLogRequest> getPage(Integer current, Integer size, String userId, String startDate, String endDate) {
+        // 页码信息
         current = null == current ? 1 : current;
         size = null == size ? 10 : size;
+        // 检索信息
         QueryWrapper<SysLogRequest> wrapper = new QueryWrapper<>();
-        wrapper.orderByDesc("id");
+        // 检索请求用户
+        wrapper.like(userId != null && !"".equals(userId), "user_id", userId)
+                // 检索起始时间
+                .ge(startDate != null && !"".equals(startDate), "create_time", startDate)
+                // 检索终止时间
+                .le(endDate != null && !"".equals(endDate), "create_time", endDate)
+                .orderByDesc("id");
         return logRequestMapper.selectPage(new Page<>(current, size), wrapper);
+    }
+
+    @Override
+    public int deleteLog(Integer[] logIds) {
+        return logRequestMapper.deleteBatchIds(Arrays.asList(logIds));
     }
 }

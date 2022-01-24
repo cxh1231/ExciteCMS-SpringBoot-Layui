@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ISysLogRequestService extends IService<SysLogRequest> {
 
-    Page<SysLogRequest> getPage(Integer current, Integer size);
+    Page<SysLogRequest> getPage(Integer current, Integer size, String userId, String startDate, String endDate);
 
+    int deleteLog(Integer[] logIds);
 }

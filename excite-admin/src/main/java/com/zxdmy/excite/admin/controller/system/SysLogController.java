@@ -64,7 +64,7 @@ public class SysLogController extends BaseController {
     public BaseResult requestList(Integer page, Integer limit, String userId, String startDate, String endDate) {
         try {
             // TODO 加上根据ID和开始、结束时间的搜索功能
-            Page<SysLogRequest> rolePage = logRequestService.getPage(page, limit);
+            Page<SysLogRequest> rolePage = logRequestService.getPage(page, limit, userId, startDate, endDate);
             return success("获取日志列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
             return error(500, "发生错误:" + e.getMessage());
@@ -83,13 +83,37 @@ public class SysLogController extends BaseController {
      */
     @GetMapping("/loginList")
     @ResponseBody
-    public BaseResult loginList(Integer page, Integer limit, String userId, String startDate, String endDate) {
+    public BaseResult loginList(Integer page, Integer limit, String userId, String ip, String startDate, String endDate) {
         try {
             // TODO 加上搜索功能，详情同上
-            Page<SysLogLogin> rolePage = logLoginService.getPage(page, limit);
+            Page<SysLogLogin> rolePage = logLoginService.getPage(page, limit, userId, ip, startDate, endDate);
             return success("获取日志列表成功", rolePage.getRecords(), (int) rolePage.getTotal());
         } catch (Exception e) {
             return error(500, "发生错误:" + e.getMessage());
         }
+    }
+
+    @PostMapping("/request/delete")
+    @ResponseBody
+    public BaseResult deleteRequestLog(Integer[] logIds) {
+        if (null == logIds || logIds.length == 0) {
+            return error("请求数据为空！");
+        }
+        if (logRequestService.deleteLog(logIds) > 0) {
+            return success("删除成功！");
+        }
+        return error("删除失败！");
+    }
+
+    @PostMapping("/login/delete")
+    @ResponseBody
+    public BaseResult deleteLoginLog(Integer[] logIds) {
+        if (null == logIds || logIds.length == 0) {
+            return error("请求数据为空！");
+        }
+        if (logLoginService.deleteLog(logIds) > 0) {
+            return success("删除成功！");
+        }
+        return error("删除失败！");
     }
 }
