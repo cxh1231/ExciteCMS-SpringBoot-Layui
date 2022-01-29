@@ -131,7 +131,7 @@ public class AliyunSmsService {
     }
 
     /**
-     * 配置并发送短信实现类
+     * 私有方法：配置并发送短信实现类
      *
      * @param aliyunSmsBO   配置信息
      * @param phone         接收手机号

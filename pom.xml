@@ -164,6 +164,12 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
         </dependency>
+        <!-- 如果项目不使用Redis，注释掉上面的，改用下面的 -->
+<!--        <dependency>-->
+<!--            <groupId>cn.dev33</groupId>-->
+<!--            <artifactId>sa-token-spring-boot-starter</artifactId>-->
+<!--            <version>1.28.0</version>-->
+<!--        </dependency>-->
 
         <!-- hutool工具类 -->
         <dependency>

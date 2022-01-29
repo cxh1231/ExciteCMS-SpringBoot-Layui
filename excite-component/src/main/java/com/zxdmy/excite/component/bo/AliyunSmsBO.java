@@ -6,9 +6,7 @@ import lombok.experimental.Accessors;
 import java.io.Serializable;
 
 /**
- * <p>
- * 描述
- * </p>
+ * 阿里云短信服务配置信息
  *
  * @author 拾年之璐
  * @since 2022/1/3 20:28

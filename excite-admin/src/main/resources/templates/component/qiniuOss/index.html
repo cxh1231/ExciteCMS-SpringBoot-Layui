@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>七牛云文件存储服务</title>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+</head>
+<body>
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <!-- 上方搜索栏 -->
+        <fieldset class="table-search-fieldset">
+            <legend>搜索</legend>
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item">
+                    <!-- 搜索【角色名】和【权限字符】-->
+                    <div class="layui-inline">
+                        <label class="layui-form-label">角色名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="inputRoleName" autocomplete="off" class="layui-input" placeholder="请输入角色名"/>
+                        </div>
+                        <label class="layui-form-label">权限字符</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="inputRolePermission" autocomplete="off" class="layui-input" placeholder="请输入权限字符"/>
+                        </div>
+                    </div>
+                    <!-- 搜索按钮 -->
+                    <div class="layui-inline">
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-green btn-role-action" data-type="search">
+                            <i class="layui-icon layui-icon-search"></i> 搜 索
+                        </button>
+                        <button type="button" class="layui-btn layui-btn-primary layui-border-box btn-role-action" data-type="refresh">
+                            <i class="layui-icon layui-icon-refresh"></i> 清 空
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+        <!-- 表格 -->
+        <table class="layui-hide" id="table-file-QiniuOss" lay-filter="table-file-QiniuOss"></table>
+    </div>
+</div>
+<!--表格头部工具类（左上）-->
+<script type="text/html" id="toolbar-table-qiniuOss">
+    <div class="layui-btn-container">
+        <!-- 【配置七牛云OSS】-->
+        <button class="layui-btn layui-btn-sm" lay-event="btn-user-add"><i class="fa fa-gear"></i> 配置七牛云OSS</button>
+        <!-- 【上传文件】-->
+        <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="btn-user-add"><i class="fa fa-cloud-upload"></i> 上传文件</button>
+        <!-- 【同步文件】-->
+        <button class="layui-btn layui-btn-sm layui-btn-warm" lay-event="btn-user-add"><i class="fa fa-refresh"></i> 同步文件</button>
+        <!-- 【删除】 -->
+        <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="btn-user-delete"><i class="fa fa-trash-o"></i> 删除</button>
+    </div>
+</script>
+<!--表格每行末尾的操作按钮-->
+<script type="text/html" id="tool-table-qiniuOss">
+    <a class="layui-btn layui-btn-xs layui-btn-primary layui-border-green" lay-event="user-edit">复制链接</a>
+    <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="user-more">更多操作 <i class="layui-icon layui-icon-down"></i></a>
+</script>
+<!--引入JS文件-->
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script>
+    layui.use(['table'], function () {
+        let $ = layui.jquery,
+            form = layui.form,
+            laydate = layui.laydate,
+            table = layui.table;
+        let currPage = 1                    // 定义全局变量：记录当前页码
+        // 表格
+        let table_role = table.render({
+            elem: '#table-file-QiniuOss',
+            url: '/component/qiniuOss/fileList',
+            response: {statusCode: 200},
+            toolbar: '#toolbar-table-qiniuOss',
+            defaultToolbar: ['filter', 'exports'],
+            title: '七牛云文件列表',
+            height: 'full-158',
+            cols: [
+                [
+                    {type: "checkbox", fixed: 'left'},
+                    // {field: 'id', title: 'ID', align: 'center', sort: true, fixed: 'left'},
+                    {field: 'key', title: '角色名称', align: 'center'},
+                    {field: 'hash', title: '权限字符', align: 'center'},
+                    {field: 'fsize', title: '显示顺序', align: 'center', sort: true},
+                    {field: 'mimeType', title: '备注', align: 'center'},
+                    {field: 'md5', title: '更新时间', align: 'center'},
+                    {fixed: 'right', title: '操作', align: 'center', toolbar: '#tool-table-qiniuOss'}
+                ]
+            ],
+            page: true,
+            done: function (res, curr, count) {
+                // 此处修复bug：删除最后一页数据后，跳转至上一页
+                if (res.data.length === 0 && curr > 1) {
+                    table_role.reload({page: {curr: curr - 1}})
+                }
+                currPage = curr
+            }
+        });
+
+    });
+</script>
+</body>
+</html>
