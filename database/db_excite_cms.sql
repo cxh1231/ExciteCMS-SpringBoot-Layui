@@ -356,20 +356,20 @@ CREATE TABLE `sys_user`  (
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (10000, '张三', NULL, 1, '10000@zxdmy.com', '18811111111', '74786e365597940ef9abcc28cdcd5470', '超级管理员', 1, NULL, NULL, 0, NULL, '2021-12-30 15:18:34', NULL);
+INSERT INTO `sys_user` VALUES (10000, '张三', NULL, 1, '10000@zxdmy.com', '18811111111', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员', 1, NULL, NULL, 0, NULL, '2021-12-30 15:18:34', NULL);
 INSERT INTO `sys_user` VALUES (10006, '李四', NULL, 1, 'demo@zxdmy.com', '18866666666', 'e10adc3949ba59abbe56e057f20f883e', '演示用户', 1, NULL, NULL, 0, NULL, '2022-01-30 15:15:13', NULL);
 INSERT INTO `sys_user` VALUES (10007, '用户2', NULL, 1, '10007@zxdmy.com', '18877777777', 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10008, '用户3', NULL, 1, '10008@zxdmy.com', '18888888888', 'fae0b27c451c728867a567e8c1bb4e53', NULL, 0, NULL, NULL, 0, NULL, '2022-01-30 16:30:59', NULL);
-INSERT INTO `sys_user` VALUES (10009, '用户4', NULL, 1, '10009@zxdmy.com', '18899999999', '550a141f12de6341fba65b0ad0433500', NULL, 0, NULL, NULL, 0, NULL, '2022-01-30 15:23:53', NULL);
-INSERT INTO `sys_user` VALUES (10010, '用户5', NULL, 1, '10010@zxdmy.com', '18810101010', 'db0edd04aaac4506f7edab03ac855d56', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10011, '10000@zxdmy.com', NULL, 0, '10011@qq.com', '18811001100', '310dcbbf4cce62f762a2aaa148d556bd', NULL, 0, NULL, NULL, 0, '2021-12-22 21:53:48', '2022-01-30 16:30:33', NULL);
-INSERT INTO `sys_user` VALUES (10012, '用户1', NULL, NULL, '10012@zxdmy.com', NULL, '7c6a180b36896a0a8c02787eeafb0e4c', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10013, '用户2', NULL, NULL, '10013@zxdmy.com', NULL, '6cb75f652a9b52798eb6cf2201057c73', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10008, '用户3', NULL, 1, '10008@zxdmy.com', '18888888888', 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, '2022-01-30 16:30:59', NULL);
+INSERT INTO `sys_user` VALUES (10009, '用户4', NULL, 1, '10009@zxdmy.com', '18899999999', 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, '2022-01-30 15:23:53', NULL);
+INSERT INTO `sys_user` VALUES (10010, '用户5', NULL, 1, '10010@zxdmy.com', '18810101010', 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10011, '10000@zxdmy.com', NULL, 0, '10011@qq.com', '18811001100', 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, '2021-12-22 21:53:48', '2022-01-30 16:30:33', NULL);
+INSERT INTO `sys_user` VALUES (10012, '用户1', NULL, NULL, '10012@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10013, '用户2', NULL, NULL, '10013@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
 INSERT INTO `sys_user` VALUES (10014, '用户3', NULL, NULL, '10014@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, '2021-12-29 11:04:48', NULL);
-INSERT INTO `sys_user` VALUES (10015, '用户4', NULL, NULL, '10015@zxdmy.com', NULL, '34cc93ece0ba9e3f6f235d4af979b16c', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10016, '用户5', NULL, NULL, '10016@zxdmy.com', NULL, 'db0edd04aaac4506f7edab03ac855d56', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10017, '张三', NULL, NULL, '10017@zxdmy.com', NULL, 'sfdnfjdsfhdsjk', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
-INSERT INTO `sys_user` VALUES (10018, '王二麻子', NULL, 1, 'hahah@zxdmy.com', '18811001122', '7c799788b5efdf1bae6b05d333d500dc', '', 0, NULL, NULL, 0, '2021-12-29 10:09:43', '2021-12-29 11:05:31', NULL);
+INSERT INTO `sys_user` VALUES (10015, '用户4', NULL, NULL, '10015@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10016, '用户5', NULL, NULL, '10016@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10017, '张三', NULL, NULL, '10017@zxdmy.com', NULL, 'e10adc3949ba59abbe56e057f20f883e', NULL, 0, NULL, NULL, 0, NULL, NULL, NULL);
+INSERT INTO `sys_user` VALUES (10018, '王二麻子', NULL, 1, 'hahah@zxdmy.com', '18811001122', 'e10adc3949ba59abbe56e057f20f883e', '', 0, NULL, NULL, 0, '2021-12-29 10:09:43', '2021-12-29 11:05:31', NULL);
 INSERT INTO `sys_user` VALUES (10019, '哈哈哈', NULL, 0, 'hahaaaa@zxdmy.com', '18811001111', 'e10adc3949ba59abbe56e057f20f883e', '', 0, NULL, NULL, 0, '2021-12-29 10:12:55', '2021-12-29 10:36:17', NULL);
 
 -- ----------------------------
