@@ -144,11 +144,17 @@
                                     userIds += (checkUserList[i].id + ",")
                                 }
                                 userIds = userIds.substring(0, userIds.lastIndexOf(','));
+                                // 加载层
+                                let index_loading = layer.load(1, {
+                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                });
                                 // 提交取消授权
                                 $.post("/system/role/authUser/auth", {
                                     roleId: $("#roleId").val(),     // 角色ID，从form里读取
                                     userIds: userIds                // 用户角色列表，字符串格式
                                 }, function (data) {
+                                    // 关闭加载层
+                                    layer.close(index_loading)
                                     if (data.code === 200) {
                                         layer.alert(data.msg, {icon: 1})
                                         table_role_user_unAuth.reload()

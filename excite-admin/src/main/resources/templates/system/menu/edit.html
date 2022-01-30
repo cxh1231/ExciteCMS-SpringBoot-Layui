@@ -236,8 +236,14 @@
 
         //监听提交
         form.on('submit(form-menu-edit)', function (data) {
-            console.log(data.field);
+            // console.log(data.field);
+            // 加载层
+            let index_loading = layer.load(1, {
+                shade: [0.2, '#fff'] //0.1透明度的白色背景
+            });
             $.post("/system/menu/update", data.field, function (data) {
+                // 关闭加载层
+                layer.close(index_loading)
                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                 if (data.code === 200) {
                     layer.alert(data.msg, {offset: 't', icon: 1}, function () {

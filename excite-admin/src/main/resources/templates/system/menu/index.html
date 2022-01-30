@@ -215,8 +215,14 @@
                         btn: ['确定', '取消'],
                         // 按钮【按钮1】的回调
                         btn1: function (index) {
+                            // 加载层
+                            let index_loading = layer.load(1, {
+                                shade: [0.2, '#fff'] //0.1透明度的白色背景
+                            });
                             // 执行ajax请求
                             $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data) {
+                                // 关闭加载层
+                                layer.close(index_loading)
                                 // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                 if (data.code === 200) {
                                     layer.msg(data.msg, {time: 3000, icon: 1});
@@ -246,7 +252,13 @@
                 btn: ['确定', '取消'],
                 // 按钮【按钮1】的回调
                 btn1: function (index) {
+                    // 加载层
+                    let index_loading = layer.load(1, {
+                        shade: [0.2, '#fff'] //0.1透明度的白色背景
+                    });
                     $.post("/system/menu/changeStatus/" + newStatus, {menuIds: menuId}, function (data2) {
+                        // 关闭加载层
+                        layer.close(index_loading)
                         // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                         if (data2.code === 200) {
                             layer.msg(data2.msg, {time: 3000, icon: 1});
@@ -308,8 +320,28 @@
             // 响应【删除】事件
             else if (layEvent === 'del') {
                 if (data.removable === 1) {
-                    // TODO 执行删除的POST操作
-                    layer.msg('删除接口还没写...删除菜单：' + data.name)
+                    // 删除用户 - 确认
+                    layer.confirm("<a style='color: red'>确认要删除菜单 " + data.title + "(ID：" + data.id + ") 吗？</a>", {
+                        icon: 3, title: '删除菜单确认'
+                    }, function (index) {
+                        layer.close(index);
+                        // 加载层
+                        let index_loading = layer.load(1, {
+                            shade: [0.2, '#fff'] //0.1透明度的白色背景
+                        });
+                        // 发起 删除用户 请求
+                        $.post("/system/menu/remove", {id: data.id}, function (d) {
+                            // 关闭加载层
+                            layer.close(index_loading)
+                            // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
+                            if (d.code === 200) {
+                                layer.msg(d.msg, {time: 3000, icon: 1});
+                                table_menu.reload()
+                            } else {
+                                layer.msg(d.msg, {time: 3000, icon: 2});
+                            }
+                        });
+                    });
                 } else {
                     layer.msg('禁止删除')
                 }

@@ -117,7 +117,7 @@ public class SysMenuController extends BaseController {
     @GetMapping("/indexList")
     @ResponseBody
     public BaseResult getMenuListIndex() {
-        List<SysMenu> menus = menuService.getMenuListByUserId(StpUtil.getLoginIdAsInt(),true);
+        List<SysMenu> menus = menuService.getMenuListByUserId(StpUtil.getLoginIdAsInt(), true);
         if (null != menus) {
             // 如果是【tree】，则需要将菜单初始化成树状结构
             menus = this.initMenu(menus);
@@ -206,7 +206,7 @@ public class SysMenuController extends BaseController {
     @ResponseBody
     public BaseResult getMenuListByUserId(@PathVariable String userId) {
         try {
-            List<SysMenu> menus = menuService.getMenuListByUserId(Integer.parseInt(userId),false);
+            List<SysMenu> menus = menuService.getMenuListByUserId(Integer.parseInt(userId), false);
             return success("用户[" + userId + "]拥有的菜单获取成功！", menus, menus.size());
         } catch (Exception e) {
             return error(400, "发生错误：" + e.getMessage());
@@ -259,10 +259,10 @@ public class SysMenuController extends BaseController {
      * @param id 菜单ID
      * @return 删除结果
      */
-    @PostMapping("/remove/{id}")
+    @PostMapping("/remove")
     @ResponseBody
     @AnnotationSaveReLog
-    public BaseResult removeMenu(@PathVariable String id) {
+    public BaseResult removeMenu(String id) {
         try {
             if (menuService.deleteMenu(Integer.parseInt(id)) > 0) {
                 return success("菜单删除成功");

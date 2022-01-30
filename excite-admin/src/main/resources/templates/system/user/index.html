@@ -326,11 +326,17 @@
                                                 newPassword1 = encrypt.encrypt(newPassword1)
                                                 newPassword2 = encrypt.encrypt(newPassword2)
                                                 // 发起 重置密码 请求
-                                                $.post("/system/user/resetPassword/", {
+                                                // 加载层
+                                                let index_loading = layer.load(1, {
+                                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                                });
+                                                $.post("/system/user/resetPassword", {
                                                     userId: obj.data.id,
                                                     newPassword: newPassword1,
                                                     newPassword2: newPassword2
                                                 }, function (d) {
+                                                    // 关闭加载层
+                                                    layer.close(index_loading)
                                                     if (d.code === 200) {
                                                         layer.close(layer_resetPassword)
                                                         layer.msg(d.msg, {time: 3000, icon: 1});
@@ -358,8 +364,14 @@
                                     layer.confirm("<a style='color: red'>真的要删除用户 " + data.username + "(" + data.id + ") 吗？删除后不可恢复，请三思而后行！</a>", {
                                         icon: 3, title: '删除用户确认【2/2】'
                                     }, function (index) {
+                                        // 加载层
+                                        let index_loading = layer.load(1, {
+                                            shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                        });
                                         // 发起 删除用户 请求
                                         $.post("/system/user/delete", {userIds: data.id}, function (d) {
+                                            // 关闭加载层
+                                            layer.close(index_loading)
                                             // 根据返回状态码输出提示信息，200 表示成功，其他表示失败
                                             if (d.code === 200) {
                                                 layer.msg(d.msg, {time: 3000, icon: 1});

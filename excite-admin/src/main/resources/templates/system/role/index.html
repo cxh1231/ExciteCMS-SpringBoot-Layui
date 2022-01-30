@@ -198,8 +198,14 @@
                                     btn: ['确定', '取消'],
                                     // 按钮【确定】的回调
                                     btn1: function (index) {
+                                        // 加载层
+                                        let index_loading = layer.load(1, {
+                                            shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                        });
                                         // 发起 修改角色状态 请求
                                         $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleIds}, function (data) {
+                                            // 关闭加载层
+                                            layer.close(index_loading)
                                             if (data.code === 200) {
                                                 layer.msg(data.msg, {time: 3000, icon: 1});
                                                 table_role.reload();
@@ -231,7 +237,13 @@
                             closeBtn: 0,        // 不显示右上角的关闭按钮
                             // 按钮【确定】的回调
                             btn1: function (index) {
+                                // 加载层
+                                let index_loading = layer.load(1, {
+                                    shade: [0.2, '#fff'] //0.1透明度的白色背景
+                                });
                                 $.post("/system/role/delete", {roleIds: roleIds}, function (data2) {
+                                    // 关闭加载层
+                                    layer.close(index_loading)
                                     if (data2.code === 200) {
                                         table_role.reload()
                                         layer.msg(data2.msg, {time: 3000, icon: 1});
@@ -289,7 +301,13 @@
                         closeBtn: 0,        // 不显示右上角的关闭按钮
                         // 按钮【确定】的回调
                         btn1: function (index) {
+                            // 加载层
+                            let index_loading = layer.load(1, {
+                                shade: [0.2, '#fff'] //0.1透明度的白色背景
+                            });
                             $.post("/system/role/delete", {roleIds: data.id}, function (data2) {
+                                // 关闭加载层
+                                layer.close(index_loading)
                                 if (data2.code === 200) {
                                     table_role.reload()
                                     layer.msg(data2.msg, {time: 3000, icon: 1});
@@ -316,7 +334,13 @@
                 closeBtn: 0,        // 不显示右上角的关闭按钮
                 // 按钮【确定】的回调
                 btn1: function (index) {
+                    // 加载层
+                    let index_loading = layer.load(1, {
+                        shade: [0.2, '#fff'] //0.1透明度的白色背景
+                    });
                     $.post("/system/role/changeStatus/" + newStatus, {roleIds: roleId}, function (data2) {
+                        // 关闭加载层
+                        layer.close(index_loading)
                         if (data2.code === 200) {
                             layer.msg(data2.msg, {time: 3000, icon: 1});
                             data.elem.checked = isChecked;

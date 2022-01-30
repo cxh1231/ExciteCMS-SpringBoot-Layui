@@ -138,9 +138,16 @@
         form.on('submit(form-menu-add)', function (data) {
             // layer.alert(JSON.stringify(data.field));
             console.log(JSON.stringify(data.field))
+            // 加载层
+            let index_loading = layer.load(1, {
+                shade: [0.2, '#fff'] //0.1透明度的白色背景
+            });
             // 提交角色
             $.post("/system/role/add", data.field, function (data) {
+                // 关闭加载层
+                layer.close(index_loading)
                 if (data.code === 200) {
+
                     // 弹窗确认下一步操作
                     layer.open({
                         type: 0,

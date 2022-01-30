@@ -6,24 +6,226 @@
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link rel="stylesheet" href="../lib/layui-v2.6.3/css/layui.css" media="all">
-    <link rel="stylesheet" href="../lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
-    <link rel="stylesheet" href="../css/public.css" media="all">
-    <style>
-
-    </style>
+    <link rel="stylesheet" href="/lib/layui-v2.6.3/css/layui.css" media="all">
+    <link rel="stylesheet" href="/lib/font-awesome-4.7.0/css/font-awesome.min.css" media="all">
+    <link rel="stylesheet" href="/css/public.css" media="all">
+    <link rel="stylesheet" href="/css/welcome.css" media="all">
 </head>
 <body>
 <div class="layuimini-container">
     <div class="layuimini-main">
-        首页
+        <div class="layui-row layui-col-space15">
+            <!-- 左栏：8个宽度 -->
+            <div class="layui-col-md8">
+                <!-- 左栏栅格化为15列 -->
+                <div class="layui-row layui-col-space15">
+                    <!-- 数据统计模块（6列） -->
+                    <div class="layui-col-md6">
+                        <div class="layui-card">
+                            <div class="layui-card-header"><i class="fa fa-warning icon"></i>数据统计</div>
+                            <div class="layui-card-body" style="line-height:28px">
+                                <!-- 高度在这个class中修改 -->
+                                <div class="welcome-module">
+                                    <div class="layui-row layui-col-space10">
+                                        <!-- 用户统计 -->
+                                        <div class="layui-col-xs6">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+                                                        <span class="label pull-right layui-bg-blue">实时</span>
+                                                        <h5>用户统计</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1>29</h1>
+                                                        <small>当前系统用户数</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- 菜单统计 -->
+                                        <div class="layui-col-xs6">
+                                            <div class="panel layui-bg-number">
+                                                <div class="panel-body">
+                                                    <div class="panel-title">
+                                                        <span class="label pull-right layui-bg-green">实时</span>
+                                                        <h5>菜单/权限统计</h5>
+                                                    </div>
+                                                    <div class="panel-content">
+                                                        <h1>66</h1>
+                                                        <small>当前菜单/权限总数</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 快捷入口卡片（6列宽度）-->
+                    <div class="layui-col-md6">
+                        <div class="layui-card">
+                            <div class="layui-card-header"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口</div>
+                            <div class="layui-card-body">
+                                <div class="welcome-module">
+                                    <div class="layui-row layui-col-space10 layuimini-qiuck">
+                                        <div class="layui-col-xs3 layuimini-qiuck-module">
+                                            <a href="javascript:;" layuimini-content-href="/system/menu/index" data-title="系统用户" data-icon="fa fa-user">
+                                                <i class="fa fa-user"></i>
+                                                <cite>系统用户</cite>
+                                            </a>
+                                        </div>
+                                        <div class="layui-col-xs3 layuimini-qiuck-module">
+                                            <a href="javascript:;" layuimini-content-href="/system/role/index" data-title="角色管理" data-icon="fa fa-users">
+                                                <i class="fa fa-users"></i>
+                                                <cite>角色管理</cite>
+                                            </a>
+                                        </div>
+                                        <div class="layui-col-xs3 layuimini-qiuck-module">
+                                            <a href="javascript:;" layuimini-content-href="/system/menu/index" data-title="菜单管理" data-icon="fa fa-th-list">
+                                                <i class="fa fa-th-list"></i>
+                                                <cite>菜单管理</cite>
+                                            </a>
+                                        </div>
+                                        <div class="layui-col-xs3 layuimini-qiuck-module">
+                                            <a href="javascript:;" layuimini-content-href="/system/log/request" data-title="操作日志" data-icon="fa fa-history">
+                                                <i class="fa fa-history"></i>
+                                                <cite>操作日志</cite>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 系统报表（12列宽度）-->
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header"><i class="fa fa-line-chart icon"></i>报表统计</div>
+                            <div class="layui-card-body">
+                                <div id="echarts-records" style="width: 100%;min-height:500px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
+            <!-- 右栏：4个宽度 -->
+            <div class="layui-col-md4">
+                <!-- 系统公告 卡片-->
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa fa-bullhorn icon icon-tip"></i>系统公告</div>
+                    <div class="layui-card-body layui-text">
+                        <!-- 公告列表（可以从数据库中读取，并追加，此处演示，故写静态数据）-->
+                        <div class="layuimini-notice">
+                            <div class="layuimini-notice-title"><span class="layui-badge">新</span> ExciteCMS-Layui开发文档上线</div>
+                            <div class="layuimini-notice-extra">2022-1-30 14:05:21</div>
+                            <div class="layuimini-notice-content layui-hide">
+                                ExciteCMS-Layui开发文档上线！<br>文档地址1：https://excitecms.gitee.io<br>文档地址2：https://excite.zxdmy.com
+                            </div>
+                            <div class="layuimini-notice-page layui-hide">https://excite.zxdmy.com</div>
+                        </div>
+                        <div class="layuimini-notice">
+                            <div class="layuimini-notice-title">ExciteCMS-Layui多模块版项目正式开源</div>
+                            <div class="layuimini-notice-extra">2022-1-15 10:09:35</div>
+                            <div class="layuimini-notice-content layui-hide">
+                                ExciteCMS-Layui系统正式开源，欢迎体验！
+                            </div>
+                            <div class="layuimini-notice-page layui-hide">https://gitee.com/ExciteTeam</div>
+                        </div>
+                        <div class="layuimini-notice">
+                            <div class="layuimini-notice-title">ExciteCMS-Layui多模块版项目立项</div>
+                            <div class="layuimini-notice-extra">2021-12-23 16:16:16</div>
+                            <div class="layuimini-notice-content layui-hide">
+                                ExciteCMS-Layui多模块版项目立项！<br><br>不久后将开源，敬请期待！
+                            </div>
+                            <div class="layuimini-notice-page layui-hide">https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui</div>
+                        </div>
+                        <div class="layuimini-notice">
+                            <div class="layuimini-notice-title">ExciteCMS-Layui单模块版本开发完毕</div>
+                            <div class="layuimini-notice-extra">2021-12-15 14:14:43</div>
+                            <div class="layuimini-notice-content layui-hide">
+                                ExciteCMS-Layui单模块版本开发完毕！<br><br>但是不开源！哈哈哈~~~
+                            </div>
+                            <div class="layuimini-notice-page layui-hide">https://gitee.com/ExciteTeam</div>
+                        </div>
+                        <div class="layuimini-notice">
+                            <div class="layuimini-notice-title">ExciteTeam正式成立</div>
+                            <div class="layuimini-notice-extra">2021-07-28 21:37:00</div>
+                            <div class="layuimini-notice-content layui-hide">
+                                ExciteTeam正式成立！<br><br>学无止境，知行致远！<br><br>分享开源技术，传播开源理念，开发开源项目！<br><br>A group of developers from School of Computer Science and Artificial
+                                Intelligence, Wuhan University of Technology.
+                            </div>
+                            <div class="layuimini-notice-page layui-hide">https://gitee.com/ExciteTeam</div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- 项目信息-->
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa fa-fire icon"></i>项目信息</div>
+                    <div class="layui-card-body layui-text">
+                        <table class="layui-table">
+                            <colgroup>
+                                <col width="100">
+                                <col>
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <td>框架名称</td>
+                                <td>
+                                    ExciteCMS-Layui　v2.0.0
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>技术栈</td>
+                                <td>
+                                    Spring框架：　<a href="https://spring.io/projects/spring-boot/" target="_blank">Spring Boot 2.5.X</a><br>
+                                    持久层框架：　<a href="https://baomidou.com/" target="_blank">MyBatis-Plus</a><br>
+                                    数据库连接池：<a href="https://druid.apache.org/" target="_blank">Druid</a><br>
+                                    权限认证框架：<a href="https://sa-token.dev33.cn/" target="_blank">Sa-Token</a><br>
+                                    前端框架：　　<a href="https://gitee.com/sentsin/layui" target="_blank">Layui</a> + <a href="http://layuimini.99php.cn/"
+                                                                                                                    target="_blank">Layuimini</a><br>
+                                    其他Java库：　Thymeleaf、Lombok、OpenAPI、FastJSON...
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>演示地址</td>
+                                <td>
+                                    链接：<a href="http://demo.excite.zxdmy.com" target="_blank">点击查看</a><br>
+                                    登录：demo@zxdmy.com / 123456
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>主要功能</td>
+                                <td>
+                                    RBAC：用户、角色、菜单管理<br>
+                                    日志：操作日志、登录日志管理<br>
+                                    开发：Swagger3接口文档、代码生成<br>
+                                    监控：服务器监控、数据库监控<br>
+                                    其他：支付宝微信支付、七牛云阿里云OSS、阿里云短信...
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>开源仓库</td>
+                                <td>
+                                    <a href="https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui" target="_blank">GitHub</a> / <a
+                                        href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui" target="_blank">Gitee</a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
 </div>
-<script src="../lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
-<script src="../js/lay-config.js?v=1.0.4" charset="utf-8"></script>
+<script src="/lib/layui-v2.6.3/layui.js" charset="utf-8"></script>
+<script src="/js/lay-config.js?v=1.0.4" charset="utf-8"></script>
 <script>
-    layui.use(['layer', 'miniTab','echarts'], function () {
+    layui.use(['layer', 'miniTab', 'echarts'], function () {
         let $ = layui.jquery,
             layer = layui.layer,
             miniTab = layui.miniTab,
@@ -35,97 +237,98 @@
          * 查看公告信息
          **/
         $('body').on('click', '.layuimini-notice', function () {
-            var title = $(this).children('.layuimini-notice-title').text(),
+            let title = $(this).children('.layuimini-notice-title').text(),
                 noticeTime = $(this).children('.layuimini-notice-extra').text(),
-                content = $(this).children('.layuimini-notice-content').html();
-            var html = '<div style="padding:15px 20px; text-align:justify; line-height: 22px;border-bottom:1px solid #e2e2e2;background-color: #2f4056;color: #ffffff">\n' +
+                content = $(this).children('.layuimini-notice-content').html(),
+                page = $(this).children('.layuimini-notice-page').html();
+            let html = '<div style="padding:15px 20px; text-align:justify; line-height: 22px;border-bottom:1px solid #e2e2e2;background-color: #2f4056;color: #ffffff">\n' +
                 '<div style="text-align: center;margin-bottom: 20px;font-weight: bold;border-bottom:1px solid #718fb5;padding-bottom: 5px"><h4 class="text-danger">' + title + '</h4></div>\n' +
                 '<div style="font-size: 12px">' + content + '</div>\n' +
                 '</div>\n';
             parent.layer.open({
                 type: 1,
-                title: '系统公告'+'<span style="float: right;right: 1px;font-size: 12px;color: #b1b3b9;margin-top: 1px">'+noticeTime+'</span>',
+                title: '系统公告' + '<span style="float: right;right: 1px;font-size: 12px;color: #b1b3b9;margin-top: 1px">' + noticeTime + '</span>',
                 area: '300px;',
                 shade: 0.8,
                 id: 'layuimini-notice',
                 btn: ['查看', '取消'],
                 btnAlign: 'c',
                 moveType: 1,
-                content:html,
+                content: html,
                 success: function (layero) {
-                    var btn = layero.find('.layui-layer-btn');
+                    let btn = layero.find('.layui-layer-btn');
                     btn.find('.layui-layer-btn0').attr({
-                        href: 'https://gitee.com/zhongshaofa/layuimini',
+                        href: page,
                         target: '_blank'
                     });
                 }
             });
         });
 
-        // /**
-        //  * 报表功能
-        //  */
-        // var echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
-        // var optionRecords = {
-        //     tooltip: {
-        //         trigger: 'axis'
-        //     },
-        //     legend: {
-        //         data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
-        //     },
-        //     grid: {
-        //         left: '3%',
-        //         right: '4%',
-        //         bottom: '3%',
-        //         containLabel: true
-        //     },
-        //     toolbox: {
-        //         feature: {
-        //             saveAsImage: {}
-        //         }
-        //     },
-        //     xAxis: {
-        //         type: 'category',
-        //         boundaryGap: false,
-        //         data: ['周一','周二','周三','周四','周五','周六','周日']
-        //     },
-        //     yAxis: {
-        //         type: 'value'
-        //     },
-        //     series: [
-        //         {
-        //             name:'邮件营销',
-        //             type:'line',
-        //             data:[120, 132, 101, 134, 90, 230, 210]
-        //         },
-        //         {
-        //             name:'联盟广告',
-        //             type:'line',
-        //             data:[220, 182, 191, 234, 290, 330, 310]
-        //         },
-        //         {
-        //             name:'视频广告',
-        //             type:'line',
-        //             data:[150, 232, 201, 154, 190, 330, 410]
-        //         },
-        //         {
-        //             name:'直接访问',
-        //             type:'line',
-        //             data:[320, 332, 301, 334, 390, 330, 320]
-        //         },
-        //         {
-        //             name:'搜索引擎',
-        //             type:'line',
-        //             data:[820, 932, 901, 934, 1290, 1330, 1320]
-        //         }
-        //     ]
-        // };
-        // echartsRecords.setOption(optionRecords);
-        //
-        // // echarts 窗口缩放自适应
-        // window.onresize = function(){
-        //     echartsRecords.resize();
-        // }
+        /**
+         * 报表功能
+         */
+        let echartsRecords = echarts.init(document.getElementById('echarts-records'), 'walden');
+        let optionRecords = {
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            toolbox: {
+                feature: {
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [
+                {
+                    name: '邮件营销',
+                    type: 'line',
+                    data: [120, 132, 101, 134, 90, 230, 210]
+                },
+                {
+                    name: '联盟广告',
+                    type: 'line',
+                    data: [220, 182, 191, 234, 290, 330, 310]
+                },
+                {
+                    name: '视频广告',
+                    type: 'line',
+                    data: [150, 232, 201, 154, 190, 330, 410]
+                },
+                {
+                    name: '直接访问',
+                    type: 'line',
+                    data: [320, 332, 301, 334, 390, 330, 320]
+                },
+                {
+                    name: '搜索引擎',
+                    type: 'line',
+                    data: [820, 932, 901, 934, 1290, 1330, 1320]
+                }
+            ]
+        };
+        echartsRecords.setOption(optionRecords);
+
+        // echarts 窗口缩放自适应
+        window.onresize = function () {
+            echartsRecords.resize();
+        }
 
     });
 </script>

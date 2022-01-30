@@ -189,8 +189,14 @@
             let encrypt = new JSEncrypt()
             encrypt.setPublicKey(PUBLIC_KEY)
             data.field.password = encrypt.encrypt(data.field.password)
+            // 加载层
+            let index_loading = layer.load(1, {
+                shade: [0.2, '#fff'] //0.1透明度的白色背景
+            });
             // 发起 添加用户 请求
             $.post("/system/user/add", data.field, function (data) {
+                // 关闭加载层
+                layer.close(index_loading)
                 if (data.code === 200) {
                     // 弹窗确认下一步操作
                     layer.open({
