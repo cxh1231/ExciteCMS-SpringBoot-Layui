@@ -4,7 +4,7 @@
 
 <h1 align="center" >ExciteCMS-Layui</h1>
 
-<center><b>基于Spring Boot 2 + Layui 开发的内容管理系统 / 快速开发脚手架</b></center>
+<p align="center"><b>基于Spring Boot 2 + Layui 开发的内容管理系统 / 快速开发脚手架</b></p>
 
 <p align="center">
 	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
