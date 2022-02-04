@@ -115,7 +115,7 @@
 
 > 以上两个开发文档网址内容一致，区别是部署的仓库不同（Gitee和GitHub）。
 
-## 5、在线体验
+## 6、在线体验
 
 网址：[http://demo.excite.zxdmy.com](http://demo.excite.zxdmy.com)
 
@@ -125,14 +125,14 @@
 
 > 注：① 体验账号只有浏览权限，无增删改的权限。② 由于部分页面设置了固定的长宽，使用电脑浏览器访问体验更佳！
 
-## 6、支持
+## 7、支持
 
 如果你觉得 ExciteCMS 还不错，可以通过点亮仓库右上角的 Star 来支持我们~
 
-## 7、贡献
+## 8、贡献
 
 发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/issues) | [GitHub](https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/issues)
 
-## 8、开源协议
+## 9、开源协议
 
 [Apache License 2.0](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE)
