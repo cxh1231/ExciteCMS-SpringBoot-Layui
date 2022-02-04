@@ -107,7 +107,7 @@
 + Layui
 + miniLayui
 
-## 5、开发文档：
+## 5、开发文档
 
 网址1：[https://excitecms.gitee.io](https://excitecms.gitee.io)
 
