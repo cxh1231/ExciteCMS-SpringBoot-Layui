@@ -1,8 +1,11 @@
 <p align="center">
 	<img alt="logo" src="https://excitecms.gitee.io/static/images/logo.png">
 </p>
+
 <h1 align="center" >ExciteCMS-Layui</h1>
+
 <center><b>基于Spring Boot 2 + Layui 开发的内容管理系统 / 快速开发脚手架</b></center>
+
 <p align="center">
 	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
         <img src="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/badge/star.svg"></a>
@@ -128,7 +131,7 @@
 
 ## 7、贡献
 
-发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/issues) | [GitHub](https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/issues) 
+发现BUG？发现功能错误？欢迎提交**issues**：[Gitee](https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/issues) | [GitHub](https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/issues)
 
 ## 8、开源协议
 
