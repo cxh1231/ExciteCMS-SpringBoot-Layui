@@ -176,10 +176,25 @@ public class QiniuOssService {
         QiniuOssBO qiniuOssBO = this.createUploadToken(confKey, file.getName(), 3600L);
         // 设置区域：如果不为空
         Region region;
-        if (null != qiniuOssBO.getRegion() && !"".equals(qiniuOssBO.getRegion())) {
-            region = new Region.Builder().region(qiniuOssBO.getRegion()).build();
-        } else {
-            region = new Region.Builder().autoRegion("https://uc.qbox.me");
+        // 华东[z0]、华北[z1]、华南[z2]、北美[na0]、东南亚（新加坡）[na1]，
+        switch (qiniuOssBO.getRegion()) {
+            case "z0":
+                region = Region.huadong();
+                break;
+            case "z1":
+                region = Region.huabei();
+                break;
+            case "z2":
+                region = Region.huanan();
+                break;
+            case "na0":
+                region = Region.beimei();
+                break;
+            case "na1":
+                region = Region.xinjiapo();
+                break;
+            default:
+                region = new Region.Builder().autoRegion("https://uc.qbox.me");
         }
         // 配置信息，
         Configuration configuration = new Configuration(region);
