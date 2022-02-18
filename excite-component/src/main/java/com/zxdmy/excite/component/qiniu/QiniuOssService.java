@@ -2,7 +2,6 @@ package com.zxdmy.excite.component.qiniu;
 
 import cn.hutool.core.util.DesensitizedUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qiniu.common.QiniuException;
 import com.qiniu.http.Response;
@@ -45,7 +44,7 @@ public class QiniuOssService {
      * @param qiniuOssBO 七牛云信息实体。如果指定key，则存储的配置信息的key即为所指定
      * @return 结果
      */
-    public boolean saveQiniuConfig(QiniuOssBO qiniuOssBO) throws JsonProcessingException {
+    public boolean saveQiniuConfig(QiniuOssBO qiniuOssBO) {
         // 如果必填信息为空，则返回错误
         if (null == qiniuOssBO.getSecretKey() || null == qiniuOssBO.getAccessKey() || null == qiniuOssBO.getBucket() || null == qiniuOssBO.getDomain()) {
             throw new ServiceException("AK、SK、空间名称或者域名为空，请核实！");
@@ -54,10 +53,14 @@ public class QiniuOssService {
         if (null == qiniuOssBO.getProtocol()) {
             qiniuOssBO.setProtocol("http");
         }
-        if (null == qiniuOssBO.getKey()) {
-            return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuOssBO, false);
+        try {
+            if (null == qiniuOssBO.getKey()) {
+                return configService.save(DEFAULT_SERVICE, DEFAULT_KEY, qiniuOssBO, true);
+            }
+            return configService.save(DEFAULT_SERVICE, qiniuOssBO.getKey(), qiniuOssBO, true);
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
         }
-        return configService.save(DEFAULT_SERVICE, qiniuOssBO.getKey(), qiniuOssBO, false);
     }
 
     /**
@@ -130,7 +133,7 @@ public class QiniuOssService {
      * 生成上传的Token（指定key）
      *
      * @param confKey       配置文件的key，不同的key对应不同的存储空间
-     * @param fileKey       文件的key，又称文件名
+     * @param fileKey       文件的key，又称文件名，可以带路径
      * @param expireSeconds 过期时间
      * @return 结果
      */
@@ -174,30 +177,8 @@ public class QiniuOssService {
         }
         // 生成Token
         QiniuOssBO qiniuOssBO = this.createUploadToken(confKey, file.getName(), 3600L);
-        // 设置区域：如果不为空
-        Region region;
-        // 华东[z0]、华北[z1]、华南[z2]、北美[na0]、东南亚（新加坡）[na1]，
-        switch (qiniuOssBO.getRegion()) {
-            case "z0":
-                region = Region.huadong();
-                break;
-            case "z1":
-                region = Region.huabei();
-                break;
-            case "z2":
-                region = Region.huanan();
-                break;
-            case "na0":
-                region = Region.beimei();
-                break;
-            case "na1":
-                region = Region.xinjiapo();
-                break;
-            default:
-                region = new Region.Builder().autoRegion("https://uc.qbox.me");
-        }
-        // 配置信息，
-        Configuration configuration = new Configuration(region);
+        // 配置信息
+        Configuration configuration = new Configuration(this.createRegion(qiniuOssBO.getRegion()));
         // 构造上传管理类
         UploadManager uploadManager = new UploadManager(configuration);
         // 进行上传
@@ -254,6 +235,16 @@ public class QiniuOssService {
         }
     }
 
+    /**
+     * 抓取网络资源到空间（默认KEY）
+     *
+     * @param fileKey      文件名
+     * @param remoteSrcUrl 远程链接
+     * @return 文件信息
+     */
+    public QiniuFileVO uploadFileFromUrl(String fileKey, String remoteSrcUrl) {
+        return this.uploadFileFromUrl(DEFAULT_KEY, fileKey, remoteSrcUrl);
+    }
 
     /**
      * 获取七牛云空间的全部文件（指定key）
@@ -392,18 +383,46 @@ public class QiniuOssService {
      * @return 空间管理器
      */
     private BucketManager createBucketManager(QiniuOssBO qiniuOssBO) {
-        // 设置区域：如果不为空
-        Region region;
-        if (null != qiniuOssBO.getRegion() && !"".equals(qiniuOssBO.getRegion())) {
-            region = new Region.Builder().region(qiniuOssBO.getRegion()).build();
-        } else {
-            region = new Region.Builder().autoRegion("https://uc.qbox.me");
-        }
         // 生成Auth授权类
         Auth auth = Auth.create(qiniuOssBO.getAccessKey(), qiniuOssBO.getSecretKey());
         // 配置信息，
-        Configuration configuration = new Configuration(region);
+        Configuration configuration = new Configuration(this.createRegion(qiniuOssBO.getRegion()));
         // 返回
         return new BucketManager(auth, configuration);
+    }
+
+    /**
+     * 根据空间地址设置Region
+     * 详情：https://developer.qiniu.com/kodo/1671/region-endpoint-fq
+     *
+     * @param re 空间地域：华东:z0; 华北:z1; 华南:z2; 北美:na0; 东南亚:as0; 华东-浙江2:cn-east-2
+     * @return 地域类
+     */
+    private Region createRegion(String re) {
+        // 设置区域：如果不为空
+        Region region;
+        switch (re) {
+            case "z0":
+                region = Region.huadong();
+                break;
+            case "z1":
+                region = Region.huabei();
+                break;
+            case "z2":
+                region = Region.huanan();
+                break;
+            case "na0":
+                region = Region.beimei();
+                break;
+            case "as0":
+                region = Region.xinjiapo();
+                break;
+            case "cn-east-2":
+                region = Region.huadongZheJiang2();
+                break;
+            default:
+                region = new Region.Builder().autoRegion("https://uc.qbox.me");
+        }
+        return region;
     }
 }
