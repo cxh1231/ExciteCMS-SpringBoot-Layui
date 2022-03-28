@@ -179,20 +179,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             int[] result = new int[2];
             // 遍历用户列表
             for (int userId : userIds) {
-                // 定义用户信息
-                SysUser user = new SysUser();
-                user.setId(userId);
-                user.setStatus(newStatus);
-                // 执行修改（其中锁定，即状态为2的用户禁止修改）
-                QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
-                wrapper.eq("id", userId)
-                        .ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
-                // 修改成功
-                if (userMapper.update(user, wrapper) > 0) {
-                    result[0]++;
-                    // 清除该用户的权限缓存
-                    AuthUtils.clearUserMenuListCacheById(true, userId);
-                } else result[1]++;
+                // 已登录并且修改的用户ID是当前登录用户，禁止操作（跳过）
+                if(StpUtil.isLogin() && (StpUtil.getLoginId().toString().equals(String.valueOf(userId)))){
+                    result[1]++;
+                }else{
+                    // 定义用户信息
+                    SysUser user = new SysUser();
+                    user.setId(userId);
+                    user.setStatus(newStatus);
+                    // 执行修改（其中锁定，即状态为2的用户禁止修改）
+                    QueryWrapper<SysUser> wrapper = new QueryWrapper<>();
+                    wrapper.eq("id", userId)
+                            .ne("status", SystemCode.STATUS_Y_BLOCK.getCode());
+                    // 修改成功
+                    if (userMapper.update(user, wrapper) > 0) {
+                        result[0]++;
+                        // 清除该用户的权限缓存
+                        AuthUtils.clearUserMenuListCacheById(true, userId);
+                    } else result[1]++;
+                }
             }
             // 返回结果
             return result;
