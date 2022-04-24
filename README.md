@@ -7,17 +7,17 @@
 <p align="center"><b>基于Spring Boot 2 + Layui 开发的内容管理系统 / 快速开发脚手架</b></p>
 
 <p align="center">
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
-        <img src="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/badge/star.svg"></a>
-    <a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/members" target="_blank">
-        <img src="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/badge/fork.svg"></a>
+	<a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
+        <img src="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/badge/star.svg"></a>
+    <a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/members" target="_blank">
+        <img src="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/badge/fork.svg"></a>
 	<a href="https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/stargazers" target="_blank">
         <img src="https://img.shields.io/github/stars/cxh1231/ExciteCMS-SpringBoot-Layui?style=flat-square&logo=GitHub"></a>
 	<a href="https://github.com/cxh1231/ExciteCMS-SpringBoot-Layui/network/members" target="_blank">
         <img src="https://img.shields.io/github/forks/cxh1231/ExciteCMS-SpringBoot-Layui?style=flat-square&logo=GitHub"></a>
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui" target="_blank">
+	<a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui" target="_blank">
         <img src="https://img.shields.io/badge/ExciteCMS%20Layui-1.0.0-brightgreen.svg"></a>
-	<a href="https://gitee.com/ExciteTeam/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE" target="_blank">
+	<a href="https://gitee.com/geekrdc/ExciteCMS-SpringBoot-Layui/blob/master/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/cxh1231/ExciteCMS-SpringBoot-Layui.svg?style=flat-square"></a>
 </p>
 
