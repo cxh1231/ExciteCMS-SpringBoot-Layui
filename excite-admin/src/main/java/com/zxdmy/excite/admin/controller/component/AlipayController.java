@@ -6,6 +6,7 @@ import com.zxdmy.excite.common.base.BaseResult;
 import com.zxdmy.excite.component.alipay.AlipayService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -40,6 +41,17 @@ public class AlipayController extends BaseController {
         return success(200, "获取支付二维码成功！")
                 .put("qrcode", qrcode)
                 .put("outTradeNo", outTradeNo);
+    }
+
+    @GetMapping(value = "/page")
+    @ResponseBody
+    public String page(String title, String price,String returnUrl) {
+        String outTradeNo = IdUtil.simpleUUID();
+        String qrcode = alipayService.pay(null, "page", title, outTradeNo, price, returnUrl, null);
+        return qrcode;
+//        return success(200, "获取支付二维码成功！")
+//                .put("qrcode", qrcode)
+//                .put("outTradeNo", outTradeNo);
     }
 
     @PostMapping(value = "/refund")

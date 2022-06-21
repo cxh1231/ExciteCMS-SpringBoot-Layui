@@ -49,7 +49,7 @@
                 <configuration>
                     <!-- 指定Main Class为全局唯一入口 -->
                     <mainClass>com.zxdmy.excite.admin.ExciteAdminApplication</mainClass>
-<!--                    <layout>ZIP</layout>-->
+                    <!-- <layout>ZIP</layout>-->
                 </configuration>
                 <executions>
                     <execution>
